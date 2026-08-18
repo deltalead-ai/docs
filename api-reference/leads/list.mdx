@@ -1,14 +1,14 @@
 ---
-title: "GET /v1/leads — List All Leads"
+title: "List and Filter Leads — DeltaLead REST API Endpoint"
 sidebarTitle: "List Leads"
-description: "GET /v1/leads — retrieve a paginated list of leads. Filter by status, intent, channel, score, and date range."
+description: "Retrieve leads by status, intent, channel, or AI score. Paginate with a cursor to walk through your entire pipeline and sync records with your integration."
 ---
 
 Retrieve all leads captured across your connected channels — WhatsApp, Meta Ads, MercadoLibre, web forms, calls, and email — in a single paginated response. Use the query parameters below to narrow results by qualification status, purchase intent, source channel, AI score range, or creation date, so you can surface exactly the pipeline segment your integration needs.
 
 ## Endpoint
 
-```
+```text
 GET https://api.deltalead.ai/v1/leads
 ```
 

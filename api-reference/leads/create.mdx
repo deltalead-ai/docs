@@ -1,14 +1,14 @@
 ---
-title: "POST /v1/leads — Create a New Lead"
+title: "Create a Lead Programmatically — DeltaLead REST API"
 sidebarTitle: "Create Lead"
-description: "POST /v1/leads — create a lead manually. Useful for importing contacts from external sources or pushing leads from custom intake forms."
+description: "Add a lead to DeltaLead without a channel interaction. Ideal for legacy imports, custom form submissions, or third-party sources not natively connected."
 ---
 
 Create a new lead record in DeltaLead programmatically — without requiring the contact to come through one of the connected channels. This is the right endpoint when you need to import contacts from a legacy database, push submissions from a custom intake form, or forward leads from a third-party source that isn't natively integrated. Once created, the lead appears immediately in your unified inbox and is eligible for AI scoring, assignment workflows, and outbound campaigns.
 
 ## Endpoint
 
-```
+```text
 POST https://api.deltalead.ai/v1/leads
 ```
 

@@ -1,5 +1,5 @@
 ---
-title: "REST API Error Codes and Troubleshooting"
+title: "DeltaLead REST API Error Codes and Troubleshooting"
 sidebarTitle: "Errors"
 description: "DeltaLead API errors follow standard HTTP status codes and return a JSON body with a machine-readable code and a human-readable message."
 ---
@@ -79,7 +79,7 @@ Common `422` causes include:
 
 When you exceed 1,000 requests per minute, the API returns `429 Too Many Requests`. The response includes a `Retry-After` header indicating how many seconds to wait before retrying.
 
-```
+```http
 HTTP/1.1 429 Too Many Requests
 Retry-After: 14
 X-RateLimit-Remaining: 0
@@ -90,7 +90,7 @@ Implement **exponential backoff** for all retried requests: wait for `Retry-Afte
 
 ## Server Errors (500)
 
-`500 Internal Server Error` indicates a transient fault on DeltaLead's infrastructure. These errors are automatically logged and investigated by the on-call team. Retry the request using exponential backoff — the vast majority of transient errors resolve within a few seconds. If a `500` persists for more than a few minutes, check the [DeltaLead status page](https://status.deltalead.ai) or contact support.
+`500 Internal Server Error` indicates a transient fault on DeltaLead's infrastructure. Retry the request using exponential backoff — the vast majority of transient errors resolve within a few seconds. If a `500` persists for more than a few minutes, check the [DeltaLead status page](https://status.deltalead.ai) or contact support.
 
 <Tip>
   Always log the **full error response body**, not just the HTTP status code. The `error.code` field is machine-readable and stable across API versions, making it suitable for alerting rules and automated remediation. For example, you can detect `lead_not_found` and skip the record, or catch `validation_error` and surface `error.details` directly to an operator's dashboard.

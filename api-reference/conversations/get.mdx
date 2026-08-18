@@ -1,14 +1,14 @@
 ---
-title: "GET /v1/conversations/{id} — Retrieve a Conversation"
+title: "Get Conversation Thread — DeltaLead REST API Reference"
 sidebarTitle: "Get Conversation"
-description: "GET /v1/conversations/{id} — fetch a conversation including its full message history and AI-generated summary."
+description: "Get a conversation by ID with its full message history, channel metadata, and AI-generated summary of key signals and advisor action items."
 ---
 
 Fetch a single conversation by its unique identifier to get the complete message thread, channel metadata, and the AI-generated summary that DeltaLead produces after each interaction. Use this endpoint to embed conversation history inside your CRM records, audit AI responses, or display the full context to a sales advisor before they take over from the AI agent.
 
 ## Endpoint
 
-```
+```text
 GET https://api.deltalead.ai/v1/conversations/{id}
 ```
 

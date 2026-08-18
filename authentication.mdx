@@ -1,5 +1,5 @@
 ---
-title: "Authenticate API Requests with Your DeltaLead Key"
+title: "Authenticate DeltaLead API Requests with Your API Key"
 sidebarTitle: "Authentication"
 description: "DeltaLead authenticates all API requests using an API key passed in the X-API-Key header. Learn how to find your key and use it securely."
 ---
@@ -16,7 +16,7 @@ DeltaLead uses API key authentication to protect every endpoint. Every request y
     Click **Generate New Key**. Give the key a descriptive label (for example, `production-crm-sync` or `dev-testing`) so you can identify it later.
   </Step>
   <Step title="Copy and store the key securely">
-    Copy the key immediately after it appears on screen and store it in your secret manager (AWS Secrets Manager, HashiCorp Vault, GitHub Actions secrets, or equivalent). You will not be able to view the full key again after closing this dialog.
+    Copy the key immediately after it appears on screen and store it in a secure secret manager (such as AWS Secrets Manager, HashiCorp Vault, or your platform's equivalent). You will not be able to view the full key again after closing this dialog.
   </Step>
 </Steps>
 

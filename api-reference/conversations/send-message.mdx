@@ -1,14 +1,14 @@
 ---
-title: "POST /v1/conversations/{id}/messages — Send a Message"
+title: "Send a Human Message — DeltaLead Conversations REST API"
 sidebarTitle: "Send Message"
-description: "POST /v1/conversations/{id}/messages — send a message into an active conversation as a human agent, bypassing the AI."
+description: "Post a message as a human advisor in an open conversation, bypassing the AI. Set pause_ai to stop auto-replies while your sales team manages the exchange."
 ---
 
 Use this endpoint to send a message into an active conversation as a human seller, bypassing the AI agent entirely. This is the right call when a sales advisor wants to step in at a critical moment — such as discussing financing, handling a price negotiation, or closing a deal — without waiting for the AI to respond first. You can optionally pause the AI agent for that conversation so it stays out of the way while your team handles the exchange directly.
 
 ## Endpoint
 
-```
+```text
 POST https://api.deltalead.ai/v1/conversations/{id}/messages
 ```
 

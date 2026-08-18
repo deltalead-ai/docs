@@ -1,14 +1,14 @@
 ---
 title: "PATCH /v1/agents/{id} — Update Agent Configuration"
 sidebarTitle: "Update Agent"
-description: "PATCH /v1/agents/{id} — update an AI agent's name, language, status, or configuration settings like tone and follow-up cadence."
+description: "PATCH /v1/agents/{id} partially updates an AI agent's name, language, status, tone, handoff triggers, or follow-up cadence settings."
 ---
 
 Update the configuration of an existing AI agent without replacing the entire record. Send only the fields you want to change — DeltaLead applies a partial update, leaving every unspecified field untouched. Use this endpoint to tune an agent's behavior over time, localize it for a new market, or adjust its follow-up cadence as your sales process evolves.
 
 ## Endpoint
 
-```
+```http
 PATCH https://api.deltalead.ai/v1/agents/{id}
 ```
 

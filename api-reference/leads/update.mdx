@@ -1,14 +1,14 @@
 ---
-title: "PATCH /v1/leads/{id} — Update a Lead"
+title: "Modify Lead Properties — DeltaLead REST API Reference"
 sidebarTitle: "Update Lead"
-description: "PATCH /v1/leads/{id} — update lead fields such as status, assignment, vehicle interest, or notes. Only provided fields are updated."
+description: "Selectively update a lead record. Send only the fields to change — status, advisor, vehicle interest, or notes — and all other properties remain untouched."
 ---
 
 Update one or more fields on an existing lead without overwriting the entire record. Common use cases include advancing a lead through the sales pipeline by changing its status, assigning it to a specific sales advisor, correcting the vehicle of interest, or adding internal notes after a conversation. Because this endpoint uses PATCH semantics, you only need to send the fields you want to change.
 
 ## Endpoint
 
-```
+```text
 PATCH https://api.deltalead.ai/v1/leads/{id}
 ```
 

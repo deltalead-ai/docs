@@ -1,14 +1,14 @@
 ---
-title: "GET /v1/leads/{id} — Retrieve a Lead"
+title: "Fetch One Lead by ID — DeltaLead REST API Endpoint"
 sidebarTitle: "Get Lead"
-description: "GET /v1/leads/{id} — fetch the full profile and scoring details for a single lead by its unique identifier."
+description: "Retrieve all data for one lead by ID — contact details, AI score, purchase intent, vehicle interest, lifecycle status, assignment, and activity timestamps."
 ---
 
 Fetch the complete profile of a single lead — including contact details, AI-assigned score, purchase intent, current status, vehicle interest, and all timestamps — by passing its unique identifier in the URL path. Use this endpoint to display lead details inside your own tooling, sync individual records to an external CRM, or check the latest qualification state before taking an action.
 
 ## Endpoint
 
-```
+```text
 GET https://api.deltalead.ai/v1/leads/{id}
 ```
 

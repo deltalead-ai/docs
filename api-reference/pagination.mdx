@@ -1,7 +1,7 @@
 ---
-title: "Paginating DeltaLead API List Responses"
+title: "DeltaLead API Cursor-Based Pagination for List Endpoints"
 sidebarTitle: "Pagination"
-description: "DeltaLead list endpoints use cursor-based pagination. Pass next_cursor from the response to retrieve the next page of results."
+description: "DeltaLead list endpoints use cursor-based pagination. Supply the cursor and limit parameters to step through leads, conversations, and agent records."
 ---
 
 All DeltaLead list endpoints — `GET /leads`, `GET /conversations`, and `GET /agents` — return paginated results using cursor-based pagination. Rather than page numbers, the API returns an opaque `next_cursor` value that encodes your position in the result set. Pass it back as the `cursor` query parameter to fetch the next page. When `has_more` is `false`, you have retrieved all available records.
