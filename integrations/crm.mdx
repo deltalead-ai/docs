@@ -1,0 +1,65 @@
+---
+title: "Connect DeltaLead to Your CRM, DMS, and Sales Tools"
+sidebarTitle: "CRM & DMS"
+description: "Sync DeltaLead leads, conversations, and scores directly to Salesforce, HubSpot, Pipedrive, Odoo, Dynamics 365, Tecnom, PilotSolution, and more."
+---
+
+When a lead is qualified by DeltaLead's AI agents, everything your team needs — the AI summary, lead score, vehicle interest, full conversation history, and any scheduled appointments — gets pushed automatically into your CRM or DMS. Your salespeople open their existing tool and find a complete, context-rich record ready to act on, with no manual data entry and no switching between platforms.
+
+## Supported CRMs and DMS
+
+| Tool | Type | What syncs |
+|---|---|---|
+| **Salesforce** | CRM | Leads, opportunities, activity |
+| **HubSpot** | CRM | Contacts, deals, activity |
+| **Microsoft Dynamics 365** | CRM | Contacts, accounts, opportunities |
+| **Pipedrive** | CRM | Deals, contacts, activities |
+| **Odoo** | CRM | CRM module leads and activities |
+| **Bitrix** | CRM | Leads, contacts |
+| **Google Sheets** | Spreadsheet | Lead data and reports |
+| **Tecnom** | DMS | Automotive leads |
+| **PilotSolution** | DMS | Automotive leads |
+
+## What gets synced
+
+Every record that DeltaLead pushes to your CRM or DMS includes the full context of the lead's journey — not just a name and phone number. The following data is synced for each qualified lead:
+
+- **AI summary** — a structured recap of the conversation, key details, and next steps
+- **Lead score** — purchase intent, budget, and urgency rating assigned by the AI
+- **Vehicle interest** — model, trim, year, and any specific requirements mentioned
+- **Conversation history** — full chat transcript and, where applicable, call recording and summary
+- **Scheduled appointments** — any visits or callbacks confirmed during the AI conversation
+- **Seller assignment** — the sales rep assigned to follow up, synced as the owner or responsible party
+
+## Setting up a CRM integration
+
+<Steps>
+  <Step title="Open Integrations settings">
+    In DeltaLead, go to **Settings → Integrations** and select your CRM or DMS from the list.
+  </Step>
+  <Step title="Authenticate">
+    Connect your account using OAuth (for Salesforce, HubSpot, and Pipedrive) or by entering your API key (for Odoo, Bitrix, and others). DeltaLead never stores your CRM credentials in plain text.
+  </Step>
+  <Step title="Map your fields">
+    Match DeltaLead lead fields — name, phone, score, vehicle interest, and so on — to the corresponding fields in your CRM. Use the default mapping or customize it to fit your pipeline structure.
+  </Step>
+  <Step title="Enable sync">
+    Toggle sync on. From this point forward, every qualified lead is pushed to your CRM automatically. You can also trigger a one-time historical sync if you have existing leads in DeltaLead you want to backfill.
+  </Step>
+</Steps>
+
+<Note>
+  All CRM and DMS integrations are set up as part of the DeltaLead onboarding process. Your onboarding specialist handles the connection, field mapping, and testing so your team starts receiving leads in their CRM from day one.
+</Note>
+
+## Custom CRM or DMS
+
+If your system isn't in the list above, you still have options:
+
+- **Contact DeltaLead** — if your CRM or DMS is widely used in your market, the team may already be building the connector or can prioritize it for your account.
+- **Enterprise onboarding** — custom integrations to proprietary or less common systems are built during the Enterprise onboarding process by DeltaLead's technical team.
+- **REST API and webhooks** — for any system that accepts incoming data, you can receive qualified leads via webhook or pull data programmatically using the [REST API](/api-reference/introduction).
+
+<Tip>
+  Don't have a dedicated CRM yet? Connect **Google Sheets** as a lightweight alternative. DeltaLead syncs qualified leads and reports directly to a spreadsheet, giving your team a shared, always-up-to-date view of your pipeline — no extra software required. You can migrate to a full CRM later without losing any history.
+</Tip>

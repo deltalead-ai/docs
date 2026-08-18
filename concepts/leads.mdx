@@ -1,0 +1,67 @@
+---
+title: "Leads in DeltaLead: Lifecycle, Fields, and Profiles"
+sidebarTitle: "Leads"
+description: "A lead in DeltaLead is a unified contact profile that aggregates all interactions across channels. Learn how leads are created, tracked, and managed."
+---
+
+A lead in DeltaLead is more than a contact record — it is a living profile that captures every interaction a prospective buyer has with your dealership, regardless of which channel they used to reach you. From the moment someone sends a WhatsApp message about a Hilux to the moment they take delivery, every conversation, call, form submission, and follow-up is attached to a single profile. Your sales team sees the complete picture before they say a word.
+
+## Lead lifecycle stages
+
+Every lead moves through five stages from first contact to close. DeltaLead tracks and displays the current stage in the unified inbox and syncs it to your connected CRM or DMS.
+
+| Stage | What happens |
+|---|---|
+| **Captured** | Lead enters from any channel (WhatsApp, Meta Ads, MercadoLibre, web form, phone, email). A profile is created or merged into an existing one. |
+| **AI Conversation** | The AI agent responds within 9 seconds, answers product questions from live inventory, handles objections, and gathers qualification signals. |
+| **Qualified** | The AI generates a plain-language summary with vehicle interest, budget, financing preference, trade-in status, timeline, and a purchase intent score. |
+| **Assigned to seller** | The lead — with full context — is routed to the right salesperson. No re-introductions, no repeated questions. |
+| **Closed** | The lead is marked as Won, Lost, or Dormant. Follow-up sequences stop automatically. |
+
+## Lead profile fields
+
+Each lead profile consolidates data collected across all channels and conversations. The table below lists the core fields available in the dashboard and via the API.
+
+| Field | Description |
+|---|---|
+| **Name** | Contact's full name, captured from form submissions or extracted by the AI during conversation. |
+| **Phone** | Primary phone number. Used for WhatsApp and voice call matching. |
+| **Email** | Email address, captured from forms or email threads. |
+| **Channel of origin** | The first channel through which the lead contacted your dealership. |
+| **Vehicle of interest** | Model, trim, and year the lead expressed interest in. Updated as the conversation evolves. |
+| **Budget** | Stated or inferred budget range, extracted by the AI during qualification. |
+| **Purchase intent score** | An automatic score based on conversation signals: urgency, budget match, timeline, and responsiveness. |
+| **Conversation history** | Full transcript of every chat message and call (with recording) across all channels, in chronological order. |
+| **Next suggested action** | AI-generated recommendation: call in 2 days, send financing simulation, schedule test drive, etc. |
+
+## Monthly Active Client (MAC) — the billing unit
+
+DeltaLead bills by the number of **Monthly Active Clients (MACs)**: the count of distinct leads you worked with during a calendar month.
+
+A lead counts as one MAC for the month if any activity occurred — a single inbound message, an outbound follow-up, a phone call, or a team member action. The volume of interactions within that month does not change the count: a lead you exchanged 30 messages with counts the same as a lead you sent one follow-up to.
+
+If a lead was active in August, went quiet in September, and received a follow-up in October, it counts as one MAC in August and one MAC in October — not in September. You never pay for your historical base of inactive leads.
+
+<Note>
+  If you exceed your plan's contracted MAC volume, operations continue without interruption. Overage is billed at US$12 per 10 additional MACs on Growth and US$15 per 10 on Advanced.
+</Note>
+
+## Lead deduplication
+
+When the same person contacts your dealership through multiple channels, DeltaLead automatically identifies and merges them into a single profile with one unified history.
+
+For example: a prospect sends a WhatsApp message on Monday, calls on Wednesday, and fills in a web form on Friday. DeltaLead recognizes these as the same person — using phone number, email, and conversation context — and consolidates all three touchpoints under one lead record. Your team sees a single, continuous conversation rather than three separate contacts. The lead also counts as one MAC, not three.
+
+<Note>
+  Deduplication relies on matching identifiers (phone number, email). If a lead uses a different phone number and email on each channel with no overlapping data, DeltaLead creates separate profiles until a match can be confirmed. You can merge profiles manually from the dashboard.
+</Note>
+
+## Data ownership
+
+Your dealership owns all lead data generated in DeltaLead. Leads, conversation transcripts, call recordings, AI summaries, and reporting metrics belong to you. DeltaLead processes this data solely to deliver the service.
+
+You can export your data at any time from the dashboard or via the REST API — no approval or support ticket required. If you end your contract, you receive a full export and migration support before any data is removed.
+
+<Note>
+  Export formats include CSV and JSON for lead records and conversation data, accessible from the dashboard under **Settings → Data Export** or programmatically via `GET /leads` and `GET /conversations` on the DeltaLead API (`https://api.deltalead.ai/v1`). Call recordings are exported as MP3 files.
+</Note>

@@ -1,0 +1,193 @@
+---
+title: "GET /v1/leads — List All Leads"
+sidebarTitle: "List Leads"
+description: "GET /v1/leads — retrieve a paginated list of leads. Filter by status, intent, channel, score, and date range."
+---
+
+Retrieve all leads captured across your connected channels — WhatsApp, Meta Ads, MercadoLibre, web forms, calls, and email — in a single paginated response. Use the query parameters below to narrow results by qualification status, purchase intent, source channel, AI score range, or creation date, so you can surface exactly the pipeline segment your integration needs.
+
+## Endpoint
+
+```
+GET https://api.deltalead.ai/v1/leads
+```
+
+## Query Parameters
+
+<ParamField query="limit" type="integer" default="20">
+  Maximum number of leads to return per page. Accepts values between `1` and `100`.
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Opaque pagination cursor returned in the previous response's `pagination.next_cursor` field. Omit this parameter to start from the first page.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter leads by their current status. Accepted values: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+</ParamField>
+
+<ParamField query="intent" type="string">
+  Filter leads by AI-detected purchase intent. Accepted values: `purchase_30_days`, `purchase_90_days`, `browsing`, `unknown`.
+</ParamField>
+
+<ParamField query="channel" type="string">
+  Filter leads by the channel through which they first entered DeltaLead. Accepted values: `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
+</ParamField>
+
+<ParamField query="score_min" type="integer">
+  Return only leads with a score greater than or equal to this value. Range: `0`–`100`.
+</ParamField>
+
+<ParamField query="score_max" type="integer">
+  Return only leads with a score less than or equal to this value. Range: `0`–`100`.
+</ParamField>
+
+<ParamField query="created_after" type="string">
+  Return only leads created on or after this timestamp. Must be an ISO 8601 date-time string, e.g. `2024-01-15T00:00:00Z`.
+</ParamField>
+
+<ParamField query="created_before" type="string">
+  Return only leads created on or before this timestamp. Must be an ISO 8601 date-time string, e.g. `2024-01-31T23:59:59Z`.
+</ParamField>
+
+## Example Request
+
+```bash cURL
+curl 'https://api.deltalead.ai/v1/leads?status=qualified&intent=purchase_30_days&limit=20' \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+## Response
+
+A successful request returns HTTP `200 OK` with a JSON object containing a `data` array of lead objects and a `pagination` object for cursor-based navigation.
+
+```json Example response
+{
+  "data": [
+    {
+      "id": "lead_abc123",
+      "name": "María García",
+      "phone": "+5491155551234",
+      "email": "maria@example.com",
+      "channel": "whatsapp",
+      "vehicle_interest": "Toyota Hilux SRX 2024",
+      "score": 87,
+      "intent": "purchase_30_days",
+      "status": "qualified",
+      "assigned_to": "user_xyz789",
+      "created_at": "2024-03-10T14:22:00Z",
+      "updated_at": "2024-03-11T09:05:33Z",
+      "last_activity_at": "2024-03-11T09:05:33Z",
+      "organization_id": "org_00112233"
+    },
+    {
+      "id": "lead_def456",
+      "name": "Carlos Méndez",
+      "phone": "+5215512345678",
+      "email": null,
+      "channel": "mercadolibre",
+      "vehicle_interest": "Ford Ranger XLS 2023",
+      "score": 74,
+      "intent": "purchase_30_days",
+      "status": "qualified",
+      "assigned_to": null,
+      "created_at": "2024-03-10T16:48:10Z",
+      "updated_at": "2024-03-10T17:01:55Z",
+      "last_activity_at": "2024-03-10T17:01:55Z",
+      "organization_id": "org_00112233"
+    }
+  ],
+  "pagination": {
+    "total": 148,
+    "limit": 20,
+    "has_more": true,
+    "next_cursor": "cursor_eyJpZCI6ImxlYWRfZGVmNDU2In0"
+  }
+}
+```
+
+### Response Fields
+
+<ResponseField name="data" type="array">
+  Array of lead objects matching the applied filters. See [Get Lead](/api-reference/leads/get) for the full description of each field.
+</ResponseField>
+
+<ResponseField name="data[].id" type="string">
+  Unique identifier for the lead, prefixed with `lead_`.
+</ResponseField>
+
+<ResponseField name="data[].name" type="string">
+  Full name of the lead as captured from the source channel.
+</ResponseField>
+
+<ResponseField name="data[].phone" type="string">
+  Lead's phone number in E.164 format, e.g. `+5491155551234`.
+</ResponseField>
+
+<ResponseField name="data[].email" type="string | null">
+  Lead's email address. `null` if not provided.
+</ResponseField>
+
+<ResponseField name="data[].channel" type="string">
+  The channel through which the lead first contacted your dealership. One of `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
+</ResponseField>
+
+<ResponseField name="data[].vehicle_interest" type="string | null">
+  Vehicle model or description the lead expressed interest in. `null` if not yet identified.
+</ResponseField>
+
+<ResponseField name="data[].score" type="integer">
+  AI-generated lead quality score from `0` (cold) to `100` (highly qualified).
+</ResponseField>
+
+<ResponseField name="data[].intent" type="string">
+  Detected purchase intent. One of `purchase_30_days`, `purchase_90_days`, `browsing`, `unknown`.
+</ResponseField>
+
+<ResponseField name="data[].status" type="string">
+  Current lifecycle status of the lead. One of `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+</ResponseField>
+
+<ResponseField name="data[].assigned_to" type="string | null">
+  User ID of the sales advisor this lead is assigned to. `null` if unassigned.
+</ResponseField>
+
+<ResponseField name="data[].created_at" type="string">
+  ISO 8601 timestamp of when the lead was first captured.
+</ResponseField>
+
+<ResponseField name="data[].updated_at" type="string">
+  ISO 8601 timestamp of the most recent field update.
+</ResponseField>
+
+<ResponseField name="data[].last_activity_at" type="string">
+  ISO 8601 timestamp of the last message, call, or interaction recorded for this lead.
+</ResponseField>
+
+<ResponseField name="data[].organization_id" type="string">
+  Unique identifier of the DeltaLead organization (dealership) that owns this lead.
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Cursor-based pagination metadata.
+</ResponseField>
+
+<ResponseField name="pagination.total" type="integer">
+  Total number of leads matching the applied filters (across all pages).
+</ResponseField>
+
+<ResponseField name="pagination.limit" type="integer">
+  Number of results returned in this page.
+</ResponseField>
+
+<ResponseField name="pagination.has_more" type="boolean">
+  `true` if additional pages of results exist.
+</ResponseField>
+
+<ResponseField name="pagination.next_cursor" type="string | null">
+  Pass this value as the `cursor` query parameter to fetch the next page. `null` when `has_more` is `false`.
+</ResponseField>
+
+<Tip>
+  To build an efficient sync pipeline, combine `created_after` with a stored cursor. Fetch once with `created_after` set to your last sync timestamp, then paginate using `next_cursor` until `has_more` is `false`.
+</Tip>

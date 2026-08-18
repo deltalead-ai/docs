@@ -1,0 +1,81 @@
+---
+title: "POST /v1/leads — Create a New Lead"
+sidebarTitle: "Create Lead"
+description: "POST /v1/leads — create a lead manually. Useful for importing contacts from external sources or pushing leads from custom intake forms."
+---
+
+Create a new lead record in DeltaLead programmatically — without requiring the contact to come through one of the connected channels. This is the right endpoint when you need to import contacts from a legacy database, push submissions from a custom intake form, or forward leads from a third-party source that isn't natively integrated. Once created, the lead appears immediately in your unified inbox and is eligible for AI scoring, assignment workflows, and outbound campaigns.
+
+## Endpoint
+
+```
+POST https://api.deltalead.ai/v1/leads
+```
+
+## Request Body
+
+<ParamField body="name" type="string" required>
+  Full name of the lead. Used to address the contact in AI-generated and human messages.
+</ParamField>
+
+<ParamField body="phone" type="string" required>
+  Lead's phone number in [E.164 format](https://en.wikipedia.org/wiki/E.164), e.g. `+5491155551234`. Must include the country code.
+</ParamField>
+
+<ParamField body="email" type="string">
+  Lead's email address. Optional — omit if not available.
+</ParamField>
+
+<ParamField body="channel" type="string" default="api">
+  Source channel to associate with this lead. Accepted values: `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`. Defaults to `api` when not provided, making it easy to identify programmatically-created records in your reports.
+</ParamField>
+
+<ParamField body="vehicle_interest" type="string">
+  Free-text description of the vehicle the lead is interested in, e.g. `"Toyota Hilux SRX 2024"`. The AI agent uses this field to personalize responses.
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Internal notes about this lead. Visible to your team in the unified inbox but never sent to the lead.
+</ParamField>
+
+## Example Request
+
+```bash cURL
+curl -X POST https://api.deltalead.ai/v1/leads \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "María García",
+    "phone": "+5491155551234",
+    "email": "maria@example.com",
+    "channel": "web_form",
+    "vehicle_interest": "Toyota Hilux SRX 2024"
+  }'
+```
+
+## Response
+
+A successful request returns HTTP `201 Created` with the newly created lead object.
+
+```json 201 Created
+{
+  "id": "lead_abc123",
+  "name": "María García",
+  "phone": "+5491155551234",
+  "email": "maria@example.com",
+  "channel": "web_form",
+  "vehicle_interest": "Toyota Hilux SRX 2024",
+  "score": 0,
+  "intent": "unknown",
+  "status": "new",
+  "assigned_to": null,
+  "created_at": "2024-03-12T10:15:00Z",
+  "updated_at": "2024-03-12T10:15:00Z",
+  "last_activity_at": "2024-03-12T10:15:00Z",
+  "organization_id": "org_00112233"
+}
+```
+
+<Note>
+  Creating a lead via the API does **not** automatically start an AI conversation. The lead's initial `score` is `0` and `intent` is `unknown` until an AI agent interacts with the contact. To trigger an automated outreach sequence — such as a WhatsApp greeting or a follow-up call — configure a **workflow** in your DeltaLead dashboard under **Automations → Workflows** and set the trigger to _"Lead created via API"_.
+</Note>

@@ -1,0 +1,71 @@
+---
+title: "Lead Scoring: Prioritize Leads by Purchase Intent"
+sidebarTitle: "Lead Scoring"
+description: "DeltaLead automatically scores every lead by purchase intent, budget, and urgency so your team focuses on the hottest opportunities first."
+---
+
+DeltaLead assigns each lead an automatic score based on signals gathered during the AI conversation. Rather than treating every inquiry as equal, the platform surfaces the leads most likely to buy — so your sales team spends their time on opportunities with real intent instead of browsing traffic that needs weeks or months of nurturing.
+
+> **78% of leads go to the first responder. DeltaLead responds in under 9 seconds.**
+
+## What the score measures
+
+The lead score is a composite signal built from four dimensions extracted during the AI conversation:
+
+| Dimension | What the AI looks for |
+|---|---|
+| **Purchase intent** | How close the lead is to a buying decision. Signals include specific model requests, questions about availability, requests for financing simulations, and timeline statements like "I want to buy this week." |
+| **Budget match** | Whether the lead's stated or inferred budget aligns with the vehicles they are asking about. A lead whose budget fits the model they want scores higher than one who is browsing out of range. |
+| **Urgency** | How time-sensitive the decision is. Statements like "I need it before the end of the month" or "I'm comparing two dealers right now" raise the urgency component of the score. |
+| **Responsiveness** | How actively the lead is engaging. Leads who reply quickly, ask follow-up questions, and return after a pause score higher than leads who open messages without responding. |
+
+## How scores are used
+
+Once a lead is scored, that score drives how DeltaLead surfaces and sequences work for your team:
+
+- **Sorted dashboard view.** Leads appear in the seller dashboard ranked by score. Your team sees the highest-intent opportunities at the top of their queue without manually sorting or filtering.
+- **Score-tiered follow-up cadences.** You configure different follow-up sequences per score tier. High-intent leads receive more frequent outreach on faster intervals; low-intent leads receive a lighter, longer-term nurturing sequence. Because DeltaLead does not charge per message, the cadence is driven by your commercial strategy, not your budget.
+- **Automatic sequence halting.** Follow-ups stop automatically when a lead responds, schedules a visit, is taken over by a seller, or is marked as lost. No customer who is already sitting with your sales team will receive another automated message.
+
+## AI conversation summaries
+
+After every conversation — whether a multi-day WhatsApp thread, a voice call, or a mix of both — the AI generates a plain-language summary that appears at the top of the lead profile. The summary includes:
+
+<CardGroup cols={2}>
+  <Card title="Vehicle interest" icon="car">
+    The specific model, trim, color, and features the lead asked about, updated as preferences evolve across conversations.
+  </Card>
+  <Card title="Financing preference" icon="credit-card">
+    Whether the lead wants to finance, the preferred term (e.g., 24 or 60 installments), and whether a simulation was sent.
+  </Card>
+  <Card title="Trade-in status" icon="arrows-rotate">
+    Whether the lead indicated they are trading in a used vehicle, and any details they provided about it.
+  </Card>
+  <Card title="Purchase timeline" icon="calendar">
+    The lead's stated or inferred decision window — this week, this month, or still researching.
+  </Card>
+</CardGroup>
+
+The summary also includes a **purchase intent statement** — a single sentence the AI writes after processing the full conversation, for example: *"María is asking about a Hilux 2024, would trade in her used vehicle, requested financing, and wants to schedule a visit this week. High purchase intent."*
+
+Sellers can read this summary in seconds and enter the conversation fully prepared, without reviewing the entire transcript.
+
+## Score-based routing
+
+High-intent leads can trigger immediate notifications to a specific seller, team, or escalation channel. You configure routing rules during onboarding:
+
+<Steps>
+  <Step title="Define your score tiers">
+    Set the thresholds that separate low, medium, and high-intent leads based on your dealership's sales cycle and volume.
+  </Step>
+  <Step title="Assign routing rules per tier">
+    High-intent leads can notify a specific seller by push notification, WhatsApp message, or CRM task. Medium-intent leads enter the standard queue. Low-intent leads remain in automated nurturing.
+  </Step>
+  <Step title="Set escalation conditions">
+    Configure secondary rules — for example, if a high-intent lead has not been contacted by a human within 15 minutes of scoring, escalate to the sales manager.
+  </Step>
+</Steps>
+
+<Note>
+  Lead scores are based entirely on conversation signals — what the lead says, asks, and how they respond. Scoring accuracy improves significantly when the AI agent is configured with your commercial playbook: the more context the agent has about your products, pricing, and typical buyer objections, the more precisely it can interpret intent signals and generate accurate summaries.
+</Note>

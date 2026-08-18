@@ -1,24 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "name": "DeltaLead",
+  "projectType": "saas",
+  "projectName": "DeltaLead",
+  "projectDescription": "DeltaLead is an AI-powered lead management and sales automation platform built for automotive dealerships, enabling teams to capture, qualify, and follow up on leads across all channels 24/7.",
   "theme": "luma",
-  "colors": {
-    "primary": "#5fa5bd",
-    "light": "#ffffff",
-    "dark": "#243c9b"
-  },
-  "logo": {
-    "light": "https://media.brand.dev/650d383e-759b-44b2-b785-e688fa1e3816.svg",
-    "dark": "https://media.brand.dev/650d383e-759b-44b2-b785-e688fa1e3816.svg"
-  },
-  "favicon": "https://media.brand.dev/0bffb82c-daa6-43b8-bba8-21b4b97c8439.svg",
-  "navbar": {
-    "primary": {
-      "type": "button",
-      "label": "Request Demo",
-      "href": "https://www.deltalead.ai/es-ar/contacto?type=home"
-    }
-  },
+  "primaryColor": "#5fa5bd",
+  "lightColor": "#ffffff",
+  "darkColor": "#243c9b",
   "navigation": {
     "tabs": [
       {
@@ -118,9 +105,31 @@
       }
     ]
   },
-  "footer": {
-    "socials": {
-      "website": "https://www.deltalead.ai"
-    }
-  }
+  "keyFeatures": [
+    "AI agents that qualify leads via WhatsApp, calls, email, and web forms 24/7",
+    "Omnichannel unified inbox — all channels merged into a single lead profile",
+    "AI-powered phone calls with natural speech and human handoff",
+    "Lead scoring by purchase intent, budget, and urgency",
+    "Automated follow-up sequences with configurable cadences",
+    "Vehicle lifecycle management with integrated DMS",
+    "Real-time campaign analytics (Meta Ads, Google Ads, organic)",
+    "Outbound WhatsApp campaigns with audience segmentation",
+    "CRM/DMS integrations (Salesforce, HubSpot, Pipedrive, Odoo, Tecnom, PilotSolution, Dynamics 365)",
+    "REST API and webhooks for custom integrations",
+    "Multi-language and regional Spanish variants (AR, MX, CR, CO, PT-BR, EN-US)"
+  ],
+  "publicApiSurface": [
+    "GET /v1/leads — List leads with filters",
+    "GET /v1/leads/{id} — Retrieve a lead",
+    "POST /v1/leads — Create a lead",
+    "PATCH /v1/leads/{id} — Update a lead",
+    "GET /v1/conversations — List conversations",
+    "GET /v1/conversations/{id} — Retrieve a conversation",
+    "POST /v1/conversations/{id}/messages — Send a message",
+    "GET /v1/agents — List AI agents",
+    "GET /v1/agents/{id} — Retrieve an agent",
+    "PATCH /v1/agents/{id} — Update agent configuration",
+    "POST /v1/webhooks — Register a webhook endpoint",
+    "Webhook events: lead.created, lead.qualified, lead.updated, conversation.started, conversation.message.received, appointment.scheduled"
+  ]
 }

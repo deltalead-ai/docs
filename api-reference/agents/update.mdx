@@ -1,0 +1,110 @@
+---
+title: "PATCH /v1/agents/{id} — Update Agent Configuration"
+sidebarTitle: "Update Agent"
+description: "PATCH /v1/agents/{id} — update an AI agent's name, language, status, or configuration settings like tone and follow-up cadence."
+---
+
+Update the configuration of an existing AI agent without replacing the entire record. Send only the fields you want to change — DeltaLead applies a partial update, leaving every unspecified field untouched. Use this endpoint to tune an agent's behavior over time, localize it for a new market, or adjust its follow-up cadence as your sales process evolves.
+
+## Endpoint
+
+```
+PATCH https://api.deltalead.ai/v1/agents/{id}
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the agent to update, e.g. `agent_abc123`.
+</ParamField>
+
+## Request Body
+
+All request body fields are optional. Include only the fields you want to change.
+
+<ParamField body="name" type="string">
+  New display name for the agent.
+</ParamField>
+
+<ParamField body="status" type="string">
+  New status for the agent. Accepted values: `active`, `inactive`.
+</ParamField>
+
+<ParamField body="language" type="string">
+  Language locale for the agent's conversations. Accepted values: `es-AR`, `es-MX`, `es-CR`, `es-CO`, `pt-BR`, `en-US`.
+</ParamField>
+
+<ParamField body="configuration.tone" type="string">
+  Conversational tone the agent uses. Accepted values: `formal`, `friendly`, `professional`.
+</ParamField>
+
+<ParamField body="configuration.handoff_triggers" type="array">
+  Replaces the full list of handoff trigger phrases. The agent transfers the conversation to a human seller whenever one of these topics arises.
+</ParamField>
+
+<ParamField body="configuration.follow_up_cadence.max_follow_ups" type="integer">
+  Maximum number of follow-up messages the agent will send per lead.
+</ParamField>
+
+<ParamField body="configuration.follow_up_cadence.interval_days" type="integer">
+  Number of days to wait between each follow-up message.
+</ParamField>
+
+## Example Request
+
+The following request localizes the agent for Mexico and tightens its follow-up cadence to three messages spaced two days apart.
+
+```bash cURL
+curl -X PATCH https://api.deltalead.ai/v1/agents/agent_abc123 \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "language": "es-MX",
+    "configuration": {
+      "follow_up_cadence": {
+        "max_follow_ups": 3,
+        "interval_days": 2
+      }
+    }
+  }'
+```
+
+## Response
+
+A successful request returns the full updated agent object.
+
+```json 200 OK
+{
+  "id": "agent_abc123",
+  "organization_id": "org_xyz789",
+  "name": "Martín de Ventas",
+  "status": "active",
+  "language": "es-MX",
+  "channels": ["whatsapp", "instagram"],
+  "created_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-11-07T17:45:00Z",
+  "configuration": {
+    "tone": "friendly",
+    "handoff_triggers": [
+      "pricing negotiation",
+      "financing",
+      "trade-in valuation"
+    ],
+    "allowed_topics": [
+      "vehicle availability",
+      "pricing",
+      "test drive scheduling",
+      "financing options"
+    ],
+    "follow_up_cadence": {
+      "max_follow_ups": 3,
+      "interval_days": 2,
+      "channel": "whatsapp"
+    }
+  }
+}
+```
+
+<Warning>
+  Changing the `language` of an **active** agent takes effect on the **next new conversation** the agent starts. Any conversations already in progress continue in the previous language until they are closed or handed off to a human seller.
+</Warning>
