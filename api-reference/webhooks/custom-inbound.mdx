@@ -1,0 +1,122 @@
+---
+title: "POST /webhooks/custom — Inbound Lead Webhook | DeltaLead"
+sidebarTitle: "Inbound Leads"
+description: "POST an inbound lead to DeltaLead with a bearer key. Covers authentication, the v1 lead contract, idempotency, rate limits, and every response code."
+---
+
+The Custom Webhook accepts a lead pushed into DeltaLead from an external system. One route, one purpose, one required header. For dashboard key creation and the difference between key modes, see the [Custom Webhook guide](/integrations/custom-webhook).
+
+## Endpoint
+
+```text
+POST https://integrations.deltalead.ai/webhooks/custom
+```
+
+## Authentication
+
+Send your key as a bearer token:
+
+```text
+Authorization: Bearer dl_{live|sandbox}_{random}
+```
+
+The scheme is matched case-insensitively and the token is trimmed, so `bearer  dl_live_abc ` is accepted. The key identifies both the account and the mode — nothing else in the request selects them.
+
+<Note>
+  A missing header, a malformed header, an unknown key, a revoked key, and an expired key all return the **same** `401 unauthorized` response. The bodies are identical by design: a caller cannot use the error to learn whether a given key exists.
+</Note>
+
+## Request Body
+
+The body is a JSON object with a single `lead` key. Lead contract v1 requires `lead.name`, **plus at least one** of `lead.email` or `lead.phone`. Missing either condition returns `400 missing_required_fields`.
+
+<ParamField body="lead.name" type="string" required>
+  Full name of the lead. DeltaLead splits it into first and last name on the contact record.
+</ParamField>
+
+<ParamField body="lead.email" type="string">
+  Email address. Required unless `lead.phone` is present.
+</ParamField>
+
+<ParamField body="lead.phone" type="string">
+  Phone number. Required unless `lead.email` is present. E.164 format is recommended, e.g. `+5491155551234`.
+</ParamField>
+
+<ParamField body="lead.source" type="string">
+  Free-form origin label for the delivery, e.g. `landing-page`. Surfaced on the lead as `custom:{source}`.
+</ParamField>
+
+<Warning>
+  These four fields are the entire contract. Any other key inside `lead` is accepted — the request still returns `200` — but it is **discarded** and never reaches the lead record. Do not rely on extra keys surviving the request.
+</Warning>
+
+## Idempotency
+
+Send an optional `Idempotency-Key` request header to make retries safe:
+
+```text
+Idempotency-Key: 8f14e45f-ea67-4f6a-b3c1-9c1e2d0b7a52
+```
+
+A delivery carrying a key already seen for your account returns `200 {"status":"duplicate"}` and creates nothing.
+
+Without the header, DeltaLead falls back to a content hash of the payload, so an identical retry is still deduplicated. Sending an explicit key is preferred: it lets you retry a delivery whose payload is genuinely identical to an earlier, unrelated one without losing the second lead.
+
+## Limits
+
+| Limit | Value |
+|---|---|
+| Request body size | 256 KB |
+| Rate, sustained | 5 requests per second |
+| Rate, burst | 10 requests |
+
+Rate limits apply per route.
+
+## Responses
+
+| Status | Body | When |
+|---|---|---|
+| `200` | `{"status":"ok"}` | Delivery accepted for processing |
+| `200` | `{"status":"duplicate"}` | The `Idempotency-Key` has already been seen |
+| `400` | `invalid_body` | The body could not be decoded |
+| `400` | `invalid_json` | The body decoded but is not a JSON object |
+| `400` | `missing_required_fields` | Lead contract v1 is not satisfied |
+| `400` | `payload_too_large` | The body is over 256 KB |
+| `401` | `unauthorized` | Any authentication failure |
+| `500` | `enqueue_failed` | Accepted but could not be queued |
+
+A `200` confirms that DeltaLead has accepted the delivery, not that the lead exists. The lead is created asynchronously a few seconds later.
+
+<Tip>
+  Retry on `500 enqueue_failed` — the delivery was valid and the failure is on our side. Do not retry any `4xx`; the request will fail again unchanged. Retries are always safe when you send an `Idempotency-Key`.
+</Tip>
+
+## Examples
+
+Sandbox — the minimum valid request:
+
+```bash cURL
+curl -X POST https://integrations.deltalead.ai/webhooks/custom \
+  -H "Authorization: Bearer dl_sandbox_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"lead":{"name":"María García","email":"maria@example.com"}}'
+```
+
+Live — the same request with every field:
+
+```bash cURL
+curl -X POST https://integrations.deltalead.ai/webhooks/custom \
+  -H "Authorization: Bearer dl_live_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"lead":{"name":"María García","email":"maria@example.com","phone":"+5491155551234","source":"landing-page"}}'
+```
+
+Live, with an idempotency key — safe to retry:
+
+```bash cURL
+curl -X POST https://integrations.deltalead.ai/webhooks/custom \
+  -H "Authorization: Bearer dl_live_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: 8f14e45f-ea67-4f6a-b3c1-9c1e2d0b7a52" \
+  -d '{"lead":{"name":"María García","phone":"+5491155551234","source":"landing-page"}}'
+```

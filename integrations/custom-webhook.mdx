@@ -1,0 +1,128 @@
+---
+title: "Custom Webhook: Send Inbound Leads to DeltaLead"
+sidebarTitle: "Custom Webhook"
+description: "Push leads into DeltaLead from any external system with one authenticated POST request. Create a key in the dashboard, test with sandbox, then switch to live."
+---
+
+The Custom Webhook is how an external system pushes a lead **into** DeltaLead. Your landing page, your dealer management system, a partner's lead feed, or an internal script sends one authenticated `POST` request, and the lead lands in your account. This is the inbound direction — the opposite of [Webhooks & Zapier](/integrations/webhooks-zapier), which sends events from DeltaLead out to your endpoint.
+
+## How It Works
+
+There is a single route, and it does one thing:
+
+```text
+POST https://integrations.deltalead.ai/webhooks/custom
+```
+
+You authenticate with a key you create in the dashboard, sent as a bearer token:
+
+```text
+Authorization: Bearer dl_sandbox_YOUR_KEY
+```
+
+That key is the whole identity of the request. It tells DeltaLead which account the lead belongs to and whether the delivery is a `live` or `sandbox` one. There is no account ID, organization ID, or endpoint ID anywhere in the URL — the URL is the same for every customer.
+
+## Creating a Key
+
+<Steps>
+  <Step title="Open Custom Webhook settings">
+    In the DeltaLead dashboard, navigate to **Settings → Integrations → Custom Webhook**.
+  </Step>
+  <Step title="Choose live or sandbox">
+    Pick the mode when you create the key. A key's mode is fixed for its lifetime — to switch, you create a second key. Most integrations keep one of each.
+  </Step>
+  <Step title="Add an optional label and expiry">
+    A label helps you tell keys apart later, e.g. `web-form-prod`. An expiry is optional and can be set between 1 and 365 days; without one the key does not expire on its own.
+  </Step>
+  <Step title="Copy the key">
+    The full key is displayed once, on creation. Store it in your application's secret manager before you close the dialog.
+  </Step>
+</Steps>
+
+<Warning>
+  The plaintext key is shown **exactly once**, at the moment you create it. DeltaLead stores only a SHA-256 hash of it and cannot display it again. If you lose a key, rotate it — there is no recovery.
+</Warning>
+
+## Managing Keys
+
+The key list shows every key on your account:
+
+| Column | What it tells you |
+|---|---|
+| `key_prefix` | The first characters of the key, enough to identify which key a system is using without revealing it |
+| Mode | `live` or `sandbox` |
+| Status | Active, revoked, or expired |
+| Created / Expires | When the key was issued and when it stops working |
+| `last_used_at` | The last time a request authenticated with this key |
+
+<Tip>
+  `last_used_at` is the fastest way to confirm an integration is actually wired up. Send a test request; if the timestamp does not move, your client is not reaching DeltaLead with that key.
+</Tip>
+
+Two actions are available on an existing key:
+
+- **Rotate** — issues a new secret while keeping the key's mode and label. Use this when a key may have leaked or when you rotate secrets on a schedule. The old secret stops working immediately, so deploy the new one first.
+- **Revoke** — permanently disables the key. This cannot be undone; a revoked key is never reactivated.
+
+Keys are created and managed in the dashboard. There is no public API for issuing or revoking them.
+
+## Live and Sandbox Keys
+
+`live` and `sandbox` are **key modes, not separate systems**. Both are served by the same host and the same route shown above. When you test with a sandbox key you are calling production — that is intentional, and it means the integration you verify is byte-for-byte the one you ship.
+
+What changes is what happens to the lead after it arrives:
+
+| | `live` | `sandbox` |
+|---|---|---|
+| Lead is stored | Yes, permanently | Yes, in an isolated store |
+| Visible in the unified inbox | Yes | No |
+| Retention | Permanent | Self-purges after about 7 days |
+| Downstream automations (AI summary, scoring, notifications) | Run | Do not run |
+
+<Note>
+  Build and verify your integration with a sandbox key, then swap in a live one. Nothing else about the request changes — same URL, same headers, same body. Sandbox deliveries never reach your sales team, and they clean themselves up.
+</Note>
+
+## Send Your First Lead
+
+<Steps>
+  <Step title="Create a sandbox key">
+    Follow the steps above and copy the plaintext key.
+  </Step>
+  <Step title="Post the minimum valid body">
+    A lead needs a name, plus at least one of email or phone.
+
+    ```bash cURL
+    curl -X POST https://integrations.deltalead.ai/webhooks/custom \
+      -H "Authorization: Bearer dl_sandbox_YOUR_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"lead":{"name":"María García","email":"maria@example.com"}}'
+    ```
+  </Step>
+  <Step title="Read the response">
+    A delivery DeltaLead has accepted returns:
+
+    ```json 200 OK
+    {"status":"ok"}
+    ```
+
+    Any other status means the delivery was not accepted — see the [full response reference](/api-reference/webhooks/custom-inbound#responses).
+  </Step>
+  <Step title="Wait a few seconds">
+    The response is synchronous, but it confirms *acceptance*, not creation. DeltaLead queues the delivery and creates the lead a few seconds later. A `200` therefore does not mean the lead exists yet — it means it will.
+  </Step>
+  <Step title="Repeat with a live key">
+    Send the same request with a live key and open the unified inbox. The lead appears there, is scored, and triggers whatever automations you have configured. Your sandbox lead is not in the inbox, and never will be.
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Endpoint Reference" icon="code" href="/api-reference/webhooks/custom-inbound">
+    The full lead contract, idempotency, rate limits, and every response code.
+  </Card>
+  <Card title="Outbound Webhooks" icon="webhook" href="/integrations/webhooks-zapier">
+    The other direction — get lead events pushed from DeltaLead to your endpoint.
+  </Card>
+</CardGroup>
