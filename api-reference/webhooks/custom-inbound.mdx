@@ -74,16 +74,30 @@ Rate limits apply per route.
 
 ## Responses
 
-| Status | Body | When |
+A successful delivery returns a `status`:
+
+```json 200 OK
+{"status": "ok"}
+```
+
+A failure returns an error envelope, where `detail` identifies the cause:
+
+```json 401 Unauthorized
+{"status": "error", "detail": "unauthorized"}
+```
+
+| Status | `status` / `detail` | When |
 |---|---|---|
-| `200` | `{"status":"ok"}` | Delivery accepted for processing |
-| `200` | `{"status":"duplicate"}` | The `Idempotency-Key` has already been seen |
+| `200` | `ok` | Delivery accepted for processing |
+| `200` | `duplicate` | The `Idempotency-Key` has already been seen |
 | `400` | `invalid_body` | The body could not be decoded |
 | `400` | `invalid_json` | The body decoded but is not a JSON object |
 | `400` | `missing_required_fields` | Lead contract v1 is not satisfied |
 | `400` | `payload_too_large` | The body is over 256 KB |
 | `401` | `unauthorized` | Any authentication failure |
 | `500` | `enqueue_failed` | Accepted but could not be queued |
+
+The route accepts `POST` only. Any other method, or any other path on this host, returns `404 {"message": "Not Found"}` from the gateway before the webhook handler runs.
 
 A `200` confirms that DeltaLead has accepted the delivery, not that the lead exists. The lead is created asynchronously a few seconds later.
 
