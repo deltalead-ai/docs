@@ -9,7 +9,7 @@ Update the configuration of an existing AI agent without replacing the entire re
 ## Endpoint
 
 ```http
-PATCH https://api.deltalead.ai/v1/agents/{id}
+PATCH https://platform-api.deltalead.ai/v1/agents/{id}
 ```
 
 ## Path Parameters
@@ -55,7 +55,7 @@ All request body fields are optional. Include only the fields you want to change
 The following request localizes the agent for Mexico and tightens its follow-up cadence to three messages spaced two days apart.
 
 ```bash cURL
-curl -X PATCH https://api.deltalead.ai/v1/agents/agent_abc123 \
+curl -X PATCH https://platform-api.deltalead.ai/v1/agents/agent_abc123 \
   -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

@@ -9,7 +9,7 @@ Este endpoint envía un mensaje a una conversación activa en nombre de un vende
 ## Endpoint
 
 ```text
-POST https://api.deltalead.ai/v1/conversations/{id}/messages
+POST https://platform-api.deltalead.ai/v1/conversations/{id}/messages
 ```
 
 ## Parámetros de ruta
@@ -35,7 +35,7 @@ POST https://api.deltalead.ai/v1/conversations/{id}/messages
 ## Solicitud de ejemplo
 
 ```bash cURL
-curl -X POST https://api.deltalead.ai/v1/conversations/conv_xyz789/messages \
+curl -X POST https://platform-api.deltalead.ai/v1/conversations/conv_xyz789/messages \
   -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"content": "Hi María, I'\''m your sales advisor. Let me check the financing options for you.", "pause_ai": true}'

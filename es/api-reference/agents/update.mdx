@@ -9,7 +9,7 @@ Permite actualizar la configuración de un agente de IA existente sin reemplazar
 ## Endpoint
 
 ```http
-PATCH https://api.deltalead.ai/v1/agents/{id}
+PATCH https://platform-api.deltalead.ai/v1/agents/{id}
 ```
 
 ## Parámetros de ruta
@@ -55,7 +55,7 @@ Todos los campos del cuerpo de la solicitud son opcionales. Se incluyen solo los
 La siguiente solicitud adapta el agente a México y ajusta su cadencia de seguimiento a tres mensajes separados por dos días.
 
 ```bash cURL
-curl -X PATCH https://api.deltalead.ai/v1/agents/agent_abc123 \
+curl -X PATCH https://platform-api.deltalead.ai/v1/agents/agent_abc123 \
   -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

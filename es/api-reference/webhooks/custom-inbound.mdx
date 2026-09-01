@@ -48,8 +48,20 @@ El cuerpo es un objeto JSON con una única clave `lead`. El contrato de lead v1 
   Etiqueta libre que indica el origen del envío, por ejemplo `landing-page`. Queda registrada en el lead y la usa el procesamiento posterior: aparece en el Resumen de IA del lead. Todo envío por este endpoint se reporta en el lead con el canal `Custom`, sin importar qué se envíe aquí, así que `source` sirve para distinguir cuál de los sistemas propios generó el lead.
 </ParamField>
 
+<ParamField body="lead.vehicle_of_interest" type="string">
+  Descripción libre del vehículo por el que consulta el lead, por ejemplo `Toyota Hilux SRX 2024`. Queda registrada en el lead y la usa el Resumen de IA para buscar coincidencias en el stock del catálogo, así que conviene enviar lo que escribió el comprador y no un código interno de stock.
+</ParamField>
+
+<ParamField body="lead.notes" type="string">
+  Contexto libre del lado del integrador. Se agrega a las **Notas** del lead, atribuido al webhook y visible para el asesor. Se deduplica por envío, de modo que un reintento no agrega la misma nota dos veces.
+</ParamField>
+
+<ParamField body="lead.metadata" type="object">
+  Objeto JSON arbitrario que se guarda en el lead como passthrough y se combina entre envíos en lugar de sobrescribirse. Sirve para identificadores del sistema de origen que no tienen lugar en el contrato. DeltaLead no lo interpreta y nunca se le muestra al agente de IA. Las claves que contienen `.` o `$` se rechazan.
+</ParamField>
+
 <Warning>
-  Estos cuatro campos son todo el contrato. Cualquier otra clave dentro de `lead` se acepta —la solicitud igual devuelve `200`— pero se **descarta** y nunca llega al registro del lead. No hay que contar con que las claves extra sobrevivan a la solicitud.
+  Estos siete campos son todo el contrato. Cualquier otra clave dentro de `lead` se acepta —la solicitud igual devuelve `200`— pero se **descarta** y nunca llega al registro del lead. Todo lo que quede fuera del contrato va en `metadata`, el único campo que acepta una forma arbitraria.
 </Warning>
 
 ## Idempotencia
@@ -142,7 +154,7 @@ Live, la misma solicitud con todos los campos:
 curl -X POST https://integrations.deltalead.ai/webhooks/custom \
   -H "Authorization: Bearer dl_live_YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"lead":{"name":"María García","email":"maria@example.com","phone":"+5491155551234","source":"landing-page"}}'
+  -d '{"lead":{"name":"María García","email":"maria@example.com","phone":"+5491155551234","source":"landing-page","vehicle_of_interest":"Toyota Hilux SRX 2024","notes":"Consultó por financiación a 12 cuotas.","metadata":{"form_id":"web-123","campaign":"verano"}}}'
 ```
 
 Live, con clave de idempotencia, seguro de reintentar:
