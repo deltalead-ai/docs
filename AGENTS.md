@@ -34,10 +34,10 @@
 
 ## Spanish localization (`es`)
 
-The site ships an `es` locale alongside English. English is the default and lives at the repo root;
-Spanish mirrors it under `es/` at the **same relative path with the same filename**, so
-`api-reference/errors.mdx` ↔ `es/api-reference/errors.mdx`. That 1:1 parity is what makes drift
-detectable — keep it.
+**Spanish is the default locale and lives at the repo root.** English mirrors it under `en/` at the
+**same relative path with the same filename**, so `api-reference/errors.mdx` (Spanish) ↔
+`en/api-reference/errors.mdx` (English). That 1:1 parity is what makes drift detectable — keep it.
+Adding a page means adding both halves in the same commit.
 
 Navigation lives in `docs.json` under `navigation.languages`, one entry per locale, each carrying
 its own `tabs` with translated tab and group labels. `.atlas-analysis.json` mirrors that structure
@@ -45,10 +45,15 @@ and must be updated in the same commit, or the two sources silently diverge.
 
 ### Coverage
 
-`es` covers the onboarding path plus the entire `api-reference` tree. The remaining pages
-(`platform/*`, `account/*`, `concepts/*` except `leads`, `integrations/crm|channels|webhooks-zapier`)
-are English-only and are deliberately **absent from the `es` navigation** — Mintlify has no
-language fallback, so a `/es/*` URL with no file behind it returns 404 rather than English.
+Both locales cover all 38 pages. Mintlify has no language fallback — a URL with no file behind it
+returns 404, never the other language — so parity is not optional once a page is in either
+navigation.
+
+The Spanish navigation is generated from the English structure rather than maintained by hand; only
+tab and group labels are translated. Keep it that way, so the two trees cannot drift in shape.
+
+URLs from the previous layout, when English sat at the root and Spanish under `es/`, are covered by
+a wildcard redirect `/es/:slug*` → `/:slug*` in `docs.json`. Do not remove it.
 
 ### Register: impersonal, always
 
@@ -93,6 +98,7 @@ The same applies to inline code spans naming fields, headers, or values.
 
 ### Links
 
-Prefix with `/es` when a Spanish twin exists (`/es/api-reference/errors`). Leave unprefixed when it
-does not — those correctly fall back to the English page. There is no locale-relative resolution,
-so an unprefixed link on a page that *does* have a twin sends the reader out of the locale.
+There is no locale-relative link resolution, so every internal link carries its locale explicitly.
+Spanish pages link bare (`/api-reference/errors`); English pages under `en/` link with the prefix
+(`/en/api-reference/errors`). An unprefixed link inside an English page silently sends the reader
+into the Spanish site.

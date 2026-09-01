@@ -1,14 +1,14 @@
 ---
-title: "DeltaLead REST API Error Codes and Troubleshooting"
-sidebarTitle: "Errors"
-description: "DeltaLead API errors follow standard HTTP status codes and return a JSON body with a machine-readable code and a human-readable message."
+title: "Códigos de error y diagnóstico de la API REST de DeltaLead"
+sidebarTitle: "Errores"
+description: "Los errores de la API de DeltaLead usan códigos de estado HTTP estándar y devuelven un cuerpo JSON con un código legible por máquina y un mensaje descriptivo."
 ---
 
-The DeltaLead API uses standard HTTP status codes to signal the outcome of every request. When a request fails, the response always includes a JSON body with two guaranteed fields: `code` (a stable, machine-readable string) and `message` (a human-readable description of what went wrong). Your error-handling logic should branch on `code` — not on `message`, which may change between API versions.
+La API de DeltaLead usa códigos de estado HTTP estándar para señalar el resultado de cada solicitud. Cuando una solicitud falla, la respuesta siempre incluye un cuerpo JSON con dos campos garantizados: `code` (una cadena estable y legible por máquina) y `message` (una descripción legible de lo que salió mal). La lógica de manejo de errores debe ramificar según `code`, no según `message`, que puede cambiar entre versiones de la API.
 
-## Error Response Format
+## Formato de la respuesta de error
 
-All error responses follow this shape:
+Todas las respuestas de error siguen esta forma:
 
 ```json
 {
@@ -21,35 +21,35 @@ All error responses follow this shape:
 ```
 
 <ResponseField name="error.code" type="string">
-  A stable, machine-readable identifier for the error. Use this field in your error-handling logic.
+  Identificador estable y legible por máquina del error. Este es el campo a usar en la lógica de manejo de errores.
 </ResponseField>
 
 <ResponseField name="error.message" type="string">
-  A human-readable description of the error, intended for logging and debugging. Do not rely on this value programmatically — it may change without notice.
+  Descripción legible del error, pensada para logging y depuración. No conviene depender de este valor de forma programática: puede cambiar sin aviso.
 </ResponseField>
 
 <ResponseField name="error.status" type="integer">
-  The HTTP status code, mirrored inside the body for convenience when the outer status code is unavailable (for example, in some proxy or logging contexts).
+  El código de estado HTTP, replicado dentro del cuerpo por conveniencia cuando el código de estado externo no está disponible (por ejemplo, en algunos contextos de proxy o de logging).
 </ResponseField>
 
-## HTTP Status Codes
+## Códigos de estado HTTP
 
-| Status | Meaning |
+| Estado | Significado |
 |---|---|
-| `200 OK` | Request succeeded |
-| `201 Created` | Resource created successfully |
-| `400 Bad Request` | Invalid parameters — check `error.code` and `error.message` |
-| `401 Unauthorized` | Missing or invalid API key |
-| `403 Forbidden` | Valid key but insufficient permissions or account suspended |
-| `404 Not Found` | Resource does not exist |
-| `409 Conflict` | Resource conflict (e.g., duplicate lead phone number) |
-| `422 Unprocessable Entity` | Validation failed — check `error.details` for field-level errors |
-| `429 Too Many Requests` | Rate limit exceeded — retry after `X-RateLimit-Reset` |
-| `500 Internal Server Error` | DeltaLead server error — retry with exponential backoff |
+| `200 OK` | La solicitud fue exitosa |
+| `201 Created` | Recurso creado correctamente |
+| `400 Bad Request` | Parámetros inválidos: revisar `error.code` y `error.message` |
+| `401 Unauthorized` | Clave de API ausente o inválida |
+| `403 Forbidden` | Clave válida pero permisos insuficientes o cuenta suspendida |
+| `404 Not Found` | El recurso no existe |
+| `409 Conflict` | Conflicto de recurso (por ejemplo, teléfono de lead duplicado) |
+| `422 Unprocessable Entity` | Falló la validación: revisar `error.details` para los errores por campo |
+| `429 Too Many Requests` | Límite de tasa superado: reintentar después de `X-RateLimit-Reset` |
+| `500 Internal Server Error` | Error del servidor de DeltaLead: reintentar con backoff exponencial |
 
-## Validation Errors (422)
+## Errores de validación (422)
 
-When request body validation fails, the API returns a `422` response with an additional `details` array that pinpoints exactly which fields are invalid. Iterate over `details` to surface per-field messages to your users or logs.
+Cuando falla la validación del cuerpo de la solicitud, la API devuelve una respuesta `422` con un arreglo adicional `details` que indica con precisión qué campos son inválidos. Recorrer `details` permite mostrar mensajes por campo a los usuarios o en los logs.
 
 ```json
 {
@@ -65,19 +65,19 @@ When request body validation fails, the API returns a `422` response with an add
 ```
 
 <ResponseField name="error.details" type="array">
-  Present only on `422` responses. Each element contains a `field` key (the request body path that failed) and a `message` key describing the validation rule that was violated.
+  Presente solo en respuestas `422`. Cada elemento contiene una clave `field` (la ruta dentro del cuerpo de la solicitud que falló) y una clave `message` que describe la regla de validación incumplida.
 </ResponseField>
 
-Common `422` causes include:
+Causas habituales de un `422`:
 
-- Phone numbers not in [E.164 format](https://en.wikipedia.org/wiki/E.164) (e.g., `+5491122334455` is valid; `011 2233-4455` is not)
-- Required fields missing from the request body
-- Enum values outside the allowed set (for example, an unrecognized `status` value)
-- Date-time strings not formatted as ISO 8601
+- Números de teléfono que no están en [formato E.164](https://en.wikipedia.org/wiki/E.164) (por ejemplo, `+5491122334455` es válido; `011 2233-4455` no)
+- Campos obligatorios ausentes en el cuerpo de la solicitud
+- Valores de enumeración fuera del conjunto permitido (por ejemplo, un valor de `status` no reconocido)
+- Cadenas de fecha y hora que no siguen el formato ISO 8601
 
-## Rate Limiting (429)
+## Límite de tasa (429)
 
-When you exceed 1,000 requests per minute, the API returns `429 Too Many Requests`. The response includes a `Retry-After` header indicating how many seconds to wait before retrying.
+Al superar las 1.000 solicitudes por minuto, la API devuelve `429 Too Many Requests`. La respuesta incluye una cabecera `Retry-After` que indica cuántos segundos esperar antes de reintentar.
 
 ```http
 HTTP/1.1 429 Too Many Requests
@@ -86,12 +86,12 @@ X-RateLimit-Remaining: 0
 X-RateLimit-Reset: 1718294460
 ```
 
-Implement **exponential backoff** for all retried requests: wait for `Retry-After` seconds on the first retry, then double the wait time on each subsequent attempt (with a maximum cap, such as 60 seconds) until the request succeeds or you exhaust your retry budget.
+Conviene implementar **backoff exponencial** en todas las solicitudes que se reintentan: esperar los segundos indicados en `Retry-After` en el primer reintento y luego duplicar el tiempo de espera en cada intento posterior (con un tope máximo, por ejemplo 60 segundos), hasta que la solicitud tenga éxito o se agote el presupuesto de reintentos.
 
-## Server Errors (500)
+## Errores de servidor (500)
 
-`500 Internal Server Error` indicates a transient fault on DeltaLead's infrastructure. Retry the request using exponential backoff — the vast majority of transient errors resolve within a few seconds. If a `500` persists for more than a few minutes, check the [DeltaLead status page](https://status.deltalead.ai) or contact support.
+Un `500 Internal Server Error` indica una falla transitoria en la infraestructura de DeltaLead. Corresponde reintentar la solicitud con backoff exponencial: la gran mayoría de los errores transitorios se resuelve en pocos segundos. Si un `500` persiste durante más de unos minutos, se puede consultar la [página de estado de DeltaLead](https://status.deltalead.ai) o contactar a soporte.
 
 <Tip>
-  Always log the **full error response body**, not just the HTTP status code. The `error.code` field is machine-readable and stable across API versions, making it suitable for alerting rules and automated remediation. For example, you can detect `lead_not_found` and skip the record, or catch `validation_error` and surface `error.details` directly to an operator's dashboard.
+  Conviene registrar siempre el **cuerpo completo de la respuesta de error**, no solo el código de estado HTTP. El campo `error.code` es legible por máquina y estable entre versiones de la API, lo que lo hace apto para reglas de alerta y remediación automática. Por ejemplo, se puede detectar `lead_not_found` y omitir el registro, o capturar `validation_error` y mostrar `error.details` directamente en el panel de un operador.
 </Tip>

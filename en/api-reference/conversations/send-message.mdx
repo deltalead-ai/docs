@@ -1,0 +1,92 @@
+---
+title: "Send a Human Message — DeltaLead Conversations REST API"
+sidebarTitle: "Send Message"
+description: "Post a message as a human advisor in an open conversation, bypassing the AI. Set pause_ai to stop auto-replies while your sales team manages the exchange."
+---
+
+Use this endpoint to send a message into an active conversation as a human seller, bypassing the AI agent entirely. This is the right call when a sales advisor wants to step in at a critical moment — such as discussing financing, handling a price negotiation, or closing a deal — without waiting for the AI to respond first. You can optionally pause the AI agent for that conversation so it stays out of the way while your team handles the exchange directly.
+
+## Endpoint
+
+```text
+POST https://platform-api.deltalead.ai/v1/conversations/{id}/messages
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the conversation to send the message into, e.g. `conv_xyz789`. The conversation must have a status of `open`.
+</ParamField>
+
+## Request Body
+
+<ParamField body="content" type="string" required>
+  The text body of the message to send. Must be a non-empty string. Markdown formatting is not rendered on the recipient's device — send plain text.
+</ParamField>
+
+<ParamField body="type" type="string" default="text">
+  Media type of the message. Accepted values: `text`, `image`, `document`. For `image` and `document`, `content` must be a publicly accessible URL to the file. Defaults to `text`.
+</ParamField>
+
+<ParamField body="pause_ai" type="boolean" default="false">
+  When `true`, pauses the AI agent for this conversation immediately after sending the message. The AI will not generate any further automatic responses until you resume it from the DeltaLead dashboard or via the Resume AI API endpoint. Defaults to `false`.
+</ParamField>
+
+## Example Request
+
+```bash cURL
+curl -X POST https://platform-api.deltalead.ai/v1/conversations/conv_xyz789/messages \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"content": "Hi María, I'\''m your sales advisor. Let me check the financing options for you.", "pause_ai": true}'
+```
+
+## Response
+
+A successful request returns HTTP `201 Created` with the created message object.
+
+```json 201 Created
+{
+  "id": "msg_005",
+  "conversation_id": "conv_xyz789",
+  "direction": "outbound",
+  "type": "text",
+  "content": "Hi María, I'm your sales advisor. Let me check the financing options for you.",
+  "sent_by": "human",
+  "created_at": "2024-03-11T09:05:33Z"
+}
+```
+
+### Response Fields
+
+<ResponseField name="id" type="string">
+  Unique identifier of the newly created message, prefixed with `msg_`.
+</ResponseField>
+
+<ResponseField name="conversation_id" type="string">
+  ID of the conversation the message was sent into.
+</ResponseField>
+
+<ResponseField name="direction" type="string">
+  Always `outbound` for messages sent via this endpoint.
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Media type of the message as specified in the request. One of `text`, `image`, `document`.
+</ResponseField>
+
+<ResponseField name="content" type="string">
+  The message content as sent — text body or media URL.
+</ResponseField>
+
+<ResponseField name="sent_by" type="string">
+  Always `human` for messages sent via this endpoint, distinguishing them from AI-generated responses in the conversation history.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  ISO 8601 timestamp of when the message was delivered.
+</ResponseField>
+
+<Warning>
+  Sending a message with `pause_ai: true` **immediately stops the AI agent from auto-responding** in this conversation. The lead will not receive any further automated replies until the AI is resumed. To resume the AI agent, use the **Resume AI** toggle in the DeltaLead dashboard (open the conversation and click **Resume AI**) or call the Resume AI endpoint. Leaving the AI paused on a high-volume day can result in missed leads, so always resume the agent once your manual interaction is complete.
+</Warning>

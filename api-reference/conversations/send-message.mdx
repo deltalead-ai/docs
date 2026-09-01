@@ -1,10 +1,10 @@
 ---
-title: "Send a Human Message — DeltaLead Conversations REST API"
-sidebarTitle: "Send Message"
-description: "Post a message as a human advisor in an open conversation, bypassing the AI. Set pause_ai to stop auto-replies while your sales team manages the exchange."
+title: "Enviar un mensaje humano — API REST de conversaciones"
+sidebarTitle: "Enviar mensaje"
+description: "Publicar un mensaje como asesor humano en una conversación abierta, sin pasar por la IA, y usar pause_ai para detener las respuestas automáticas del agente."
 ---
 
-Use this endpoint to send a message into an active conversation as a human seller, bypassing the AI agent entirely. This is the right call when a sales advisor wants to step in at a critical moment — such as discussing financing, handling a price negotiation, or closing a deal — without waiting for the AI to respond first. You can optionally pause the AI agent for that conversation so it stays out of the way while your team handles the exchange directly.
+Este endpoint envía un mensaje a una conversación activa en nombre de un vendedor humano, sin intervención del agente de IA. Es la opción indicada cuando un asesor de ventas necesita entrar en un momento crítico —una charla sobre financiación, una negociación de precio o el cierre de una operación— sin esperar a que la IA responda primero. De forma opcional se puede pausar el agente de IA en esa conversación para que no interfiera mientras el equipo maneja el intercambio de manera directa.
 
 ## Endpoint
 
@@ -12,27 +12,27 @@ Use this endpoint to send a message into an active conversation as a human selle
 POST https://platform-api.deltalead.ai/v1/conversations/{id}/messages
 ```
 
-## Path Parameters
+## Parámetros de ruta
 
 <ParamField path="id" type="string" required>
-  The unique identifier of the conversation to send the message into, e.g. `conv_xyz789`. The conversation must have a status of `open`.
+  Identificador único de la conversación a la que se envía el mensaje, por ejemplo `conv_xyz789`. La conversación debe tener el estado `open`.
 </ParamField>
 
-## Request Body
+## Cuerpo de la solicitud
 
 <ParamField body="content" type="string" required>
-  The text body of the message to send. Must be a non-empty string. Markdown formatting is not rendered on the recipient's device — send plain text.
+  Cuerpo de texto del mensaje que se envía. Debe ser una cadena no vacía. El formato Markdown no se renderiza en el dispositivo del destinatario: conviene enviar texto plano.
 </ParamField>
 
 <ParamField body="type" type="string" default="text">
-  Media type of the message. Accepted values: `text`, `image`, `document`. For `image` and `document`, `content` must be a publicly accessible URL to the file. Defaults to `text`.
+  Tipo de medio del mensaje. Valores aceptados: `text`, `image`, `document`. Para `image` y `document`, `content` debe ser una URL de acceso público al archivo. El valor por defecto es `text`.
 </ParamField>
 
 <ParamField body="pause_ai" type="boolean" default="false">
-  When `true`, pauses the AI agent for this conversation immediately after sending the message. The AI will not generate any further automatic responses until you resume it from the DeltaLead dashboard or via the Resume AI API endpoint. Defaults to `false`.
+  Con `true`, el agente de IA queda pausado en esta conversación inmediatamente después de enviar el mensaje. La IA no genera más respuestas automáticas hasta que se la reanude desde el panel de DeltaLead o mediante el endpoint de reanudación de la API. El valor por defecto es `false`.
 </ParamField>
 
-## Example Request
+## Solicitud de ejemplo
 
 ```bash cURL
 curl -X POST https://platform-api.deltalead.ai/v1/conversations/conv_xyz789/messages \
@@ -41,9 +41,9 @@ curl -X POST https://platform-api.deltalead.ai/v1/conversations/conv_xyz789/mess
   -d '{"content": "Hi María, I'\''m your sales advisor. Let me check the financing options for you.", "pause_ai": true}'
 ```
 
-## Response
+## Respuesta
 
-A successful request returns HTTP `201 Created` with the created message object.
+Una solicitud correcta devuelve `201 Created` con el objeto del mensaje creado.
 
 ```json 201 Created
 {
@@ -57,36 +57,36 @@ A successful request returns HTTP `201 Created` with the created message object.
 }
 ```
 
-### Response Fields
+### Campos de la respuesta
 
 <ResponseField name="id" type="string">
-  Unique identifier of the newly created message, prefixed with `msg_`.
+  Identificador único del mensaje recién creado, con el prefijo `msg_`.
 </ResponseField>
 
 <ResponseField name="conversation_id" type="string">
-  ID of the conversation the message was sent into.
+  ID de la conversación a la que se envió el mensaje.
 </ResponseField>
 
 <ResponseField name="direction" type="string">
-  Always `outbound` for messages sent via this endpoint.
+  Siempre `outbound` para los mensajes enviados por este endpoint.
 </ResponseField>
 
 <ResponseField name="type" type="string">
-  Media type of the message as specified in the request. One of `text`, `image`, `document`.
+  Tipo de medio del mensaje, según lo indicado en la solicitud. Uno de `text`, `image`, `document`.
 </ResponseField>
 
 <ResponseField name="content" type="string">
-  The message content as sent — text body or media URL.
+  El contenido del mensaje tal como se envió: cuerpo de texto o URL del archivo multimedia.
 </ResponseField>
 
 <ResponseField name="sent_by" type="string">
-  Always `human` for messages sent via this endpoint, distinguishing them from AI-generated responses in the conversation history.
+  Siempre `human` para los mensajes enviados por este endpoint, lo que permite distinguirlos de las respuestas generadas por IA dentro del historial de la conversación.
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  ISO 8601 timestamp of when the message was delivered.
+  Marca de tiempo ISO 8601 del momento en que se entregó el mensaje.
 </ResponseField>
 
 <Warning>
-  Sending a message with `pause_ai: true` **immediately stops the AI agent from auto-responding** in this conversation. The lead will not receive any further automated replies until the AI is resumed. To resume the AI agent, use the **Resume AI** toggle in the DeltaLead dashboard (open the conversation and click **Resume AI**) or call the Resume AI endpoint. Leaving the AI paused on a high-volume day can result in missed leads, so always resume the agent once your manual interaction is complete.
+  Enviar un mensaje con `pause_ai: true` **detiene de inmediato las respuestas automáticas del agente de IA** en esta conversación. El lead no recibe ninguna otra respuesta automatizada hasta que la IA se reanude. Para reanudar el agente de IA, se puede usar el control de reanudación del panel de DeltaLead —abrir la conversación y activar la opción para **reanudar la IA**— o llamar al endpoint de reanudación de la API. Dejar la IA pausada en un día de alto volumen puede derivar en leads perdidos, así que conviene reanudar el agente apenas termina la intervención manual.
 </Warning>

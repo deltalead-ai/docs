@@ -1,0 +1,79 @@
+---
+title: "DeltaLead API Authentication: X-API-Key Header Guide"
+sidebarTitle: "Authentication"
+description: "Authenticate DeltaLead API requests by passing your API key in the X-API-Key header. Keys are created and managed in your dashboard settings."
+---
+
+Every request to the DeltaLead API must include a valid API key in the `X-API-Key` request header. Requests that omit the header or supply an invalid key are rejected with a `401 Unauthorized` response before any processing occurs.
+
+## Getting Your API Key
+
+Follow these steps to generate a new API key from your DeltaLead dashboard:
+
+<Steps>
+  <Step title="Open Settings">
+    Log in to your DeltaLead account and navigate to **Settings** in the left sidebar.
+  </Step>
+  <Step title="Go to API Keys">
+    Select the **API Keys** section. You will see a list of any keys you have already created, along with their creation date and last-used timestamp.
+  </Step>
+  <Step title="Generate a New Key">
+    Click **Generate New Key**, optionally give the key a descriptive label (for example, `Production – Zapier` or `Staging – testing`), and confirm. The full key value is displayed **only once** — copy it immediately and store it securely.
+  </Step>
+</Steps>
+
+<Warning>
+  Your API key grants full access to your DeltaLead account. Never commit it to source code, paste it into chat messages, or store it in plain text. Use environment variables or a dedicated secrets manager (such as AWS Secrets Manager, HashiCorp Vault, or Doppler) to inject the key at runtime. If a key is compromised, revoke it immediately from **Settings → API Keys** and generate a replacement.
+</Warning>
+
+## Sending Your API Key
+
+Pass your API key in the `X-API-Key` header on every request. The examples below show the same `GET /leads` call in three common environments.
+
+<CodeGroup>
+
+```bash cURL
+curl https://platform-api.deltalead.ai/v1/leads \
+  -H "X-API-Key: dlk_live_abc123xyz"
+```
+
+```javascript Node.js
+const response = await fetch('https://platform-api.deltalead.ai/v1/leads', {
+  headers: {
+    'X-API-Key': process.env.DELTALEAD_API_KEY
+  }
+});
+const data = await response.json();
+```
+
+```python Python
+import os
+import requests
+
+response = requests.get(
+    'https://platform-api.deltalead.ai/v1/leads',
+    headers={'X-API-Key': os.environ['DELTALEAD_API_KEY']}
+)
+leads = response.json()
+```
+
+</CodeGroup>
+
+## Key Scopes
+
+Keys created through the dashboard have **full access** to all API resources associated with your account — leads, conversations, agents, webhooks, and account configuration. Scope-restricted keys (read-only, webhook-only, etc.) are available on the Enterprise plan. Contact your account manager to enable granular key permissions.
+
+## Authentication Errors
+
+The API returns the following HTTP status codes for authentication failures:
+
+| Status | Cause |
+|---|---|
+| `401 Unauthorized` | The `X-API-Key` header is missing, malformed, or contains an invalid key |
+| `403 Forbidden` | The key is valid but the associated account is suspended, or the requested operation requires a higher-tier plan |
+
+A `403` on a specific endpoint typically means the feature is not included in your current plan (Growth, Advanced, or Enterprise). Review the [plans page](https://www.deltalead.ai/es-ar/precios) or contact support to upgrade.
+
+<Tip>
+  Create separate API keys for your development and production environments — for example, `Staging – integration tests` and `Production – live sync`. This way you can revoke a compromised staging key without disrupting production traffic. Rotate keys periodically as part of your security hygiene, even if they have not been exposed.
+</Tip>

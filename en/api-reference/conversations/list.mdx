@@ -1,0 +1,126 @@
+---
+title: "List Lead Conversations — DeltaLead REST API Endpoint"
+sidebarTitle: "List Conversations"
+description: "Get paginated lead conversations. Filter by lead ID, channel, or status to find open threads, audit AI activity, or pull conversation history for your CRM."
+---
+
+Retrieve all conversations tracked by DeltaLead across every connected channel — WhatsApp, Facebook, Instagram, email, and phone. Each conversation record ties back to a lead and reflects the current state of that exchange: open, closed, or transferred to a human advisor. Filter by lead ID to pull the conversation history for a specific contact, or filter by status to monitor all open threads that need attention.
+
+## Endpoint
+
+```text
+GET https://platform-api.deltalead.ai/v1/conversations
+```
+
+## Query Parameters
+
+<ParamField query="limit" type="integer" default="20">
+  Maximum number of conversations to return per page. Accepts values between `1` and `100`.
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Opaque pagination cursor from the previous response's `pagination.next_cursor` field. Omit to start from the first page.
+</ParamField>
+
+<ParamField query="lead_id" type="string">
+  Filter conversations to a specific lead. Pass a lead ID such as `lead_abc123` to retrieve every conversation thread belonging to that contact.
+</ParamField>
+
+<ParamField query="channel" type="string">
+  Filter by the channel on which the conversation is taking place. Accepted values: `whatsapp`, `facebook`, `instagram`, `email`, `phone`.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by conversation status. Accepted values: `open`, `closed`, `transferred`.
+</ParamField>
+
+## Example Request
+
+```bash cURL
+curl 'https://platform-api.deltalead.ai/v1/conversations?lead_id=lead_abc123&status=open' \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+## Response
+
+A successful request returns HTTP `200 OK` with a `data` array of conversation objects and a `pagination` object.
+
+```json Example response
+{
+  "data": [
+    {
+      "id": "conv_xyz789",
+      "lead_id": "lead_abc123",
+      "channel": "whatsapp",
+      "status": "open",
+      "created_at": "2024-03-10T14:22:05Z",
+      "updated_at": "2024-03-11T09:05:33Z",
+      "last_message_at": "2024-03-11T09:05:33Z"
+    },
+    {
+      "id": "conv_mno321",
+      "lead_id": "lead_abc123",
+      "channel": "phone",
+      "status": "closed",
+      "created_at": "2024-03-09T11:00:00Z",
+      "updated_at": "2024-03-09T11:08:42Z",
+      "last_message_at": "2024-03-09T11:08:42Z"
+    }
+  ],
+  "pagination": {
+    "total": 2,
+    "limit": 20,
+    "has_more": false,
+    "next_cursor": null
+  }
+}
+```
+
+### Response Fields
+
+<ResponseField name="data" type="array">
+  Array of conversation objects matching the applied filters.
+</ResponseField>
+
+<ResponseField name="data[].id" type="string">
+  Unique identifier for the conversation, prefixed with `conv_`.
+</ResponseField>
+
+<ResponseField name="data[].lead_id" type="string">
+  ID of the lead this conversation belongs to.
+</ResponseField>
+
+<ResponseField name="data[].channel" type="string">
+  Channel on which the conversation is taking place. One of `whatsapp`, `facebook`, `instagram`, `email`, `phone`.
+</ResponseField>
+
+<ResponseField name="data[].status" type="string">
+  Current status of the conversation. One of:
+  - `open` — active conversation, AI agent or human is engaged
+  - `closed` — conversation ended, no further messages expected
+  - `transferred` — handed off from AI agent to a human sales advisor
+</ResponseField>
+
+<ResponseField name="data[].created_at" type="string">
+  ISO 8601 timestamp of when the conversation was opened.
+</ResponseField>
+
+<ResponseField name="data[].updated_at" type="string">
+  ISO 8601 timestamp of the most recent change to the conversation record.
+</ResponseField>
+
+<ResponseField name="data[].last_message_at" type="string">
+  ISO 8601 timestamp of the most recent message or event in this conversation.
+</ResponseField>
+
+<ResponseField name="pagination.total" type="integer">
+  Total number of conversations matching the applied filters.
+</ResponseField>
+
+<ResponseField name="pagination.has_more" type="boolean">
+  `true` if additional pages exist.
+</ResponseField>
+
+<ResponseField name="pagination.next_cursor" type="string | null">
+  Pass this value as `cursor` to fetch the next page. `null` when `has_more` is `false`.
+</ResponseField>

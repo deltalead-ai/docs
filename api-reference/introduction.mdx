@@ -1,31 +1,31 @@
 ---
-title: "DeltaLead REST API: Manage Leads and Agents Programmatically"
-sidebarTitle: "Introduction"
-description: "The DeltaLead REST API lets you create and manage leads, conversations, and AI agents. All endpoints accept JSON and return JSON over HTTPS."
+title: "API REST de DeltaLead: gestionar leads y agentes por código"
+sidebarTitle: "Introducción"
+description: "La API REST de DeltaLead permite crear y gestionar leads, conversaciones y agentes de IA mediante endpoints que aceptan y devuelven JSON sobre HTTPS."
 ---
 
-The DeltaLead REST API gives you programmatic access to leads, conversations, AI agents, and webhook configuration. Use it to build custom integrations, automate workflows, or sync with systems not covered by native integrations — such as a proprietary DMS, an internal data warehouse, or a bespoke CRM.
+La API REST de DeltaLead da acceso programático a leads, conversaciones, agentes de IA y configuración de webhooks. Sirve para construir integraciones a medida, automatizar flujos de trabajo o sincronizar con sistemas que las integraciones nativas no cubren: un DMS propietario, un data warehouse interno o un CRM hecho a medida.
 
-## Base URL
+## URL base
 
-All API requests are made over HTTPS to the following base URL:
+Todas las solicitudes a la API se realizan sobre HTTPS contra la siguiente URL base:
 
 ```text
 https://platform-api.deltalead.ai/v1
 ```
 
-## Quick Example
+## Ejemplo rápido
 
-The following request retrieves your most recent leads using `curl`. Replace `YOUR_API_KEY` with the key generated in your dashboard.
+La siguiente solicitud recupera los leads más recientes con `curl`. `YOUR_API_KEY` se reemplaza por la clave generada en el panel.
 
 ```bash
 curl https://platform-api.deltalead.ai/v1/leads \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
-## Request Format
+## Formato de las solicitudes
 
-All request and response bodies use JSON. When sending data in `POST` or `PATCH` requests, include the `Content-Type: application/json` header so the API can parse the request body correctly.
+Todos los cuerpos de solicitud y respuesta usan JSON. Al enviar datos en solicitudes `POST` o `PATCH`, hay que incluir la cabecera `Content-Type: application/json` para que la API pueda interpretar el cuerpo correctamente.
 
 ```bash
 curl -X POST https://platform-api.deltalead.ai/v1/leads \
@@ -34,39 +34,39 @@ curl -X POST https://platform-api.deltalead.ai/v1/leads \
   -d '{"name": "Martín Sosa", "phone": "+5491122334455"}'
 ```
 
-`GET` and `DELETE` requests do not require a `Content-Type` header.
+Las solicitudes `GET` y `DELETE` no requieren la cabecera `Content-Type`.
 
-## Available Resources
+## Recursos disponibles
 
 <CardGroup cols={2}>
   <Card title="Leads" icon="user" href="/api-reference/leads/list">
-    Create, retrieve, update, and delete lead records. Filter by status, channel, score, and more.
+    Crear, consultar, actualizar y eliminar registros de leads. Filtrar por estado, canal, score y más.
   </Card>
-  <Card title="Conversations" icon="comments" href="/api-reference/conversations/list">
-    Access the full message history for any lead across all channels — WhatsApp, email, calls, and web forms.
+  <Card title="Conversaciones" icon="comments" href="/api-reference/conversations/list">
+    Acceder al historial completo de mensajes de cualquier lead en todos los canales: WhatsApp, email, llamadas y formularios web.
   </Card>
-  <Card title="Agents" icon="robot" href="/api-reference/agents/list">
-    List and configure your AI agents, including language, tone, escalation rules, and active channels.
+  <Card title="Agentes" icon="robot" href="/api-reference/agents/list">
+    Listar y configurar los agentes de IA, incluidos idioma, tono, reglas de escalamiento y canales activos.
   </Card>
   <Card title="Webhooks" icon="webhook" href="/api-reference/webhooks/overview">
-    Subscribe to real-time events such as new leads, status changes, and conversation milestones.
+    Suscribirse a eventos en tiempo real como nuevos leads, cambios de estado e hitos de una conversación.
   </Card>
 </CardGroup>
 
-## Rate Limits
+## Límites de tasa
 
-The API allows up to **1,000 requests per minute** per API key. If you exceed this limit, the API returns a `429 Too Many Requests` response.
+La API admite hasta **1.000 solicitudes por minuto** por clave de API. Al superar ese límite, la API devuelve una respuesta `429 Too Many Requests`.
 
-Every response includes two headers to help you track your current usage:
+Cada respuesta incluye dos cabeceras para seguir el consumo actual:
 
-| Header | Description |
+| Cabecera | Descripción |
 |---|---|
-| `X-RateLimit-Remaining` | Number of requests remaining in the current one-minute window |
-| `X-RateLimit-Reset` | Unix timestamp (UTC) at which the rate limit window resets |
+| `X-RateLimit-Remaining` | Cantidad de solicitudes restantes en la ventana de un minuto en curso |
+| `X-RateLimit-Reset` | Marca de tiempo Unix (UTC) en la que se reinicia la ventana del límite de tasa |
 
-When your integration receives a `429` response, wait until `X-RateLimit-Reset` before retrying, or implement exponential backoff. See the [Errors reference](/api-reference/errors) for full details on `429` handling.
+Cuando la integración recibe una respuesta `429`, conviene esperar hasta `X-RateLimit-Reset` antes de reintentar, o aplicar backoff exponencial. La [referencia de errores](/api-reference/errors) detalla el manejo completo de `429`.
 
-## Next Steps
+## Próximos pasos
 
-- [Authentication](/api-reference/authentication) — learn how to generate and send your API key
-- [Errors](/api-reference/errors) — understand status codes, error shapes, and retry strategies
+- [Autenticación](/api-reference/authentication) — cómo generar y enviar la clave de API
+- [Errores](/api-reference/errors) — códigos de estado, forma de los errores y estrategias de reintento

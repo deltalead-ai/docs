@@ -1,10 +1,10 @@
 ---
-title: "Create a Lead Programmatically — DeltaLead REST API"
-sidebarTitle: "Create Lead"
-description: "Add a lead to DeltaLead without a channel interaction. Ideal for legacy imports, custom form submissions, or third-party sources not natively connected."
+title: "Crear un lead por API — referencia de la API REST de DeltaLead"
+sidebarTitle: "Crear lead"
+description: "Agregar un lead a DeltaLead sin interacción por canal: ideal para importar sistemas heredados, formularios propios o fuentes de terceros sin integración nativa."
 ---
 
-Create a new lead record in DeltaLead programmatically — without requiring the contact to come through one of the connected channels. This is the right endpoint when you need to import contacts from a legacy database, push submissions from a custom intake form, or forward leads from a third-party source that isn't natively integrated. Once created, the lead appears immediately in your unified inbox and is eligible for AI scoring, assignment workflows, and outbound campaigns.
+Este endpoint crea un registro de lead nuevo en DeltaLead de forma programática, sin que el contacto tenga que llegar por uno de los canales conectados. Es el endpoint indicado para importar contactos desde una base de datos heredada, enviar los envíos de un formulario de captación propio o derivar leads desde una fuente de terceros sin integración nativa. Una vez creado, el lead aparece de inmediato en el Inbox unificado y queda habilitado para la calificación por IA, los flujos de asignación y las campañas salientes.
 
 ## Endpoint
 
@@ -12,33 +12,33 @@ Create a new lead record in DeltaLead programmatically — without requiring the
 POST https://platform-api.deltalead.ai/v1/leads
 ```
 
-## Request Body
+## Cuerpo de la solicitud
 
 <ParamField body="name" type="string" required>
-  Full name of the lead. Used to address the contact in AI-generated and human messages.
+  Nombre completo del lead. Se usa para dirigirse al contacto en los mensajes generados por IA y en los escritos por personas.
 </ParamField>
 
 <ParamField body="phone" type="string" required>
-  Lead's phone number in [E.164 format](https://en.wikipedia.org/wiki/E.164), e.g. `+5491155551234`. Must include the country code.
+  Número de teléfono del lead en [formato E.164](https://en.wikipedia.org/wiki/E.164), p. ej. `+5491155551234`. Debe incluir el código de país.
 </ParamField>
 
 <ParamField body="email" type="string">
-  Lead's email address. Optional — omit if not available.
+  Dirección de email del lead. Opcional: se omite si no está disponible.
 </ParamField>
 
 <ParamField body="channel" type="string" default="api">
-  Source channel to associate with this lead. Accepted values: `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`. Defaults to `api` when not provided, making it easy to identify programmatically-created records in your reports.
+  Canal de origen a asociar con este lead. Valores aceptados: `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`. Si no se indica, toma el valor `api`, lo que facilita identificar en los reportes los registros creados por código.
 </ParamField>
 
 <ParamField body="vehicle_interest" type="string">
-  Free-text description of the vehicle the lead is interested in, e.g. `"Toyota Hilux SRX 2024"`. The AI agent uses this field to personalize responses.
+  Descripción en texto libre del vehículo que le interesa al lead, p. ej. `"Toyota Hilux SRX 2024"`. El agente de IA usa este campo para personalizar las respuestas.
 </ParamField>
 
 <ParamField body="notes" type="string">
-  Internal notes about this lead. Visible to your team in the unified inbox but never sent to the lead.
+  Notas internas sobre este lead. Son visibles para el equipo en el Inbox unificado, pero nunca se envían al lead.
 </ParamField>
 
-## Example Request
+## Ejemplo de solicitud
 
 ```bash cURL
 curl -X POST https://platform-api.deltalead.ai/v1/leads \
@@ -53,9 +53,9 @@ curl -X POST https://platform-api.deltalead.ai/v1/leads \
   }'
 ```
 
-## Response
+## Respuesta
 
-A successful request returns HTTP `201 Created` with the newly created lead object.
+Una solicitud exitosa devuelve HTTP `201 Created` con el objeto lead recién creado.
 
 ```json 201 Created
 {
@@ -77,5 +77,5 @@ A successful request returns HTTP `201 Created` with the newly created lead obje
 ```
 
 <Note>
-  Creating a lead via the API does **not** automatically start an AI conversation. The lead's initial `score` is `0` and `intent` is `unknown` until an AI agent interacts with the contact. To trigger an automated outreach sequence — such as a WhatsApp greeting or a follow-up call — configure a **workflow** in your DeltaLead dashboard under **Automations → Workflows** and set the trigger to _"Lead created via API"_.
+  Crear un lead por la API **no** inicia automáticamente una conversación con IA. El `score` inicial del lead es `0` y su `intent` es `unknown` hasta que un agente de IA interactúe con el contacto. Para disparar una secuencia de contacto automatizada —como un saludo por WhatsApp o una llamada de seguimiento— hay que configurar un **workflow** en el panel de DeltaLead, en **Automatizaciones → Workflows**, y definir el disparador _"Lead creado por API"_.
 </Note>

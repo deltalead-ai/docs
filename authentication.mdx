@@ -1,41 +1,41 @@
 ---
-title: "Authenticate DeltaLead API Requests with Your API Key"
-sidebarTitle: "Authentication"
-description: "DeltaLead authenticates all API requests using an API key passed in the X-API-Key header. Learn how to find your key and use it securely."
+title: "Autenticar las solicitudes a la API de DeltaLead con la clave"
+sidebarTitle: "Autenticación"
+description: "DeltaLead autentica todas las solicitudes a la API con una clave enviada en el header X-API-Key: dónde encontrarla y cómo usarla de forma segura."
 ---
 
-DeltaLead uses API key authentication to protect every endpoint. Every request you make to `https://platform-api.deltalead.ai/v1` must include your API key in the `X-API-Key` header — without it, the request is rejected immediately before any processing occurs. There are no cookies, sessions, or OAuth flows for server-to-server API access; a valid key in the header is all you need.
+DeltaLead protege todos sus endpoints con autenticación por clave de API. Cada solicitud a `https://platform-api.deltalead.ai/v1` debe incluir la clave de API en el header `X-API-Key`; sin ella, la solicitud se rechaza de inmediato, antes de cualquier procesamiento. No hay cookies, sesiones ni flujos OAuth para el acceso servidor a servidor: una clave válida en el header es todo lo que hace falta.
 
-## Getting your API key
+## Obtener la clave de API
 
 <Steps>
-  <Step title="Open API Keys settings">
-    In the DeltaLead dashboard, click your account name in the top-right corner, then go to **Settings → API Keys**.
+  <Step title="Abrir la configuración de claves de API">
+    En el panel de DeltaLead, hacer clic en el nombre de la cuenta, arriba a la derecha, y luego ir a **Configuración → Claves de API**.
   </Step>
-  <Step title="Generate a new key">
-    Click **Generate New Key**. Give the key a descriptive label (for example, `production-crm-sync` or `dev-testing`) so you can identify it later.
+  <Step title="Generar una clave nueva">
+    Hacer clic en **Generar nueva clave** y asignarle una etiqueta descriptiva (por ejemplo, `production-crm-sync` o `dev-testing`) para poder identificarla más adelante.
   </Step>
-  <Step title="Copy and store the key securely">
-    Copy the key immediately after it appears on screen and store it in a secure secret manager (such as AWS Secrets Manager, HashiCorp Vault, or your platform's equivalent). You will not be able to view the full key again after closing this dialog.
+  <Step title="Copiar y guardar la clave de forma segura">
+    La clave debe copiarse apenas aparece en pantalla y guardarse en un gestor de secretos seguro (AWS Secrets Manager, HashiCorp Vault o el equivalente de la plataforma en uso). Una vez cerrado el diálogo, ya no es posible volver a ver la clave completa.
   </Step>
 </Steps>
 
 <Warning>
-  Your API key is displayed **only once** at the moment of creation. If you navigate away or close the dialog without copying it, you must revoke the key and generate a new one. Never store API keys in source code, `.env` files committed to version control, or plain-text documents.
+  La clave de API se muestra **una sola vez**, en el momento de crearla. Si el diálogo se cierra sin copiarla, hay que revocar esa clave y generar una nueva. Las claves de API nunca deben guardarse en el código fuente, en archivos `.env` versionados ni en documentos de texto plano.
 </Warning>
 
-## Using your API key
+## Uso de la clave de API
 
-Pass your API key in the `X-API-Key` header on every request. The example below retrieves your leads list:
+La clave de API se envía en el header `X-API-Key` en cada solicitud. El siguiente ejemplo obtiene el listado de leads:
 
 ```bash
 curl https://platform-api.deltalead.ai/v1/leads \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
-Replace `YOUR_API_KEY` with the key you copied from the dashboard. The header name is case-insensitive, but `X-API-Key` is the canonical form used throughout this documentation.
+`YOUR_API_KEY` se reemplaza por la clave copiada del panel. El nombre del header no distingue mayúsculas de minúsculas, pero `X-API-Key` es la forma canónica que se usa en toda esta documentación.
 
-Here is the same request using a popular HTTP client library:
+La misma solicitud, escrita con librerías HTTP habituales:
 
 <CodeGroup>
 
@@ -68,16 +68,16 @@ echo $response;
 
 </CodeGroup>
 
-## Error responses
+## Respuestas de error
 
-If authentication fails, the API returns one of two HTTP error codes.
+Si la autenticación falla, la API devuelve uno de dos códigos de error HTTP.
 
-| Status code | Meaning | Common cause |
+| Código de estado | Significado | Causa habitual |
 |---|---|---|
-| `401 Unauthorized` | The request did not include a valid API key. | The `X-API-Key` header is missing, the key value is misspelled, or the key has been revoked. |
-| `403 Forbidden` | The key is valid but does not have permission to perform this action. | The key was created with restricted scopes that exclude the endpoint or method you are calling. |
+| `401 Unauthorized` | La solicitud no incluyó una clave de API válida. | Falta el header `X-API-Key`, el valor de la clave está mal escrito o la clave fue revocada. |
+| `403 Forbidden` | La clave es válida, pero no tiene permiso para realizar esta acción. | La clave se creó con alcances restringidos que excluyen el endpoint o el método invocado. |
 
-A `401` response body looks like this:
+El cuerpo de una respuesta `401` se ve así:
 
 ```json
 {
@@ -86,7 +86,7 @@ A `401` response body looks like this:
 }
 ```
 
-A `403` response body looks like this:
+El cuerpo de una respuesta `403` se ve así:
 
 ```json
 {
@@ -96,9 +96,9 @@ A `403` response body looks like this:
 ```
 
 <Tip>
-  Create a separate API key for each environment (development, staging, production) and for each integration or service that calls the API. This limits the blast radius if a key is ever compromised — you revoke only the affected key without disrupting other services. Rotate keys on a regular schedule by generating a new key, updating your secret manager, confirming traffic flows correctly, and then revoking the old key.
+  Conviene crear una clave de API por entorno (desarrollo, staging, producción) y otra por cada integración o servicio que consuma la API. Eso limita el impacto si alguna clave se ve comprometida: se revoca solo la afectada, sin interrumpir el resto de los servicios. La rotación periódica consiste en generar una clave nueva, actualizar el gestor de secretos, confirmar que el tráfico fluye correctamente y recién entonces revocar la anterior.
 </Tip>
 
-## Next steps
+## Próximos pasos
 
-Now that your API key is set up and working, explore the full set of available endpoints in the [API Reference](/api-reference/introduction) — including leads management, campaign triggers, agent configuration, and webhook subscriptions.
+Con la clave de API configurada y funcionando, el siguiente paso es explorar el conjunto completo de endpoints disponibles en la [referencia de la API](/api-reference/introduction): gestión de leads, disparadores de campañas, configuración de agentes y suscripciones a webhooks.

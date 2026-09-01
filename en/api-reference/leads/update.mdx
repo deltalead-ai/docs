@@ -1,0 +1,77 @@
+---
+title: "Modify Lead Properties — DeltaLead REST API Reference"
+sidebarTitle: "Update Lead"
+description: "Selectively update a lead record. Send only the fields to change — status, advisor, vehicle interest, or notes — and all other properties remain untouched."
+---
+
+Update one or more fields on an existing lead without overwriting the entire record. Common use cases include advancing a lead through the sales pipeline by changing its status, assigning it to a specific sales advisor, correcting the vehicle of interest, or adding internal notes after a conversation. Because this endpoint uses PATCH semantics, you only need to send the fields you want to change.
+
+## Endpoint
+
+```text
+PATCH https://platform-api.deltalead.ai/v1/leads/{id}
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the lead to update, e.g. `lead_abc123`.
+</ParamField>
+
+## Request Body
+
+All fields are optional. Only the fields you include will be modified.
+
+<ParamField body="status" type="string">
+  New lifecycle status for the lead. Accepted values: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+</ParamField>
+
+<ParamField body="assigned_to" type="string">
+  User ID of the sales advisor to assign this lead to. Pass `null` to unassign the lead.
+</ParamField>
+
+<ParamField body="vehicle_interest" type="string">
+  Update the vehicle model or description the lead is interested in, e.g. `"Ford Ranger XLS 4x4 2024"`. The AI agent picks up this change on subsequent interactions.
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Internal notes about this lead. This value **replaces** any existing notes — append manually if you need to preserve prior content.
+</ParamField>
+
+## Example Request
+
+Mark a lead as assigned and set the responsible sales advisor:
+
+```bash cURL
+curl -X PATCH https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "assigned", "assigned_to": "user_xyz789"}'
+```
+
+## Response
+
+A successful request returns HTTP `200 OK` with the complete, updated lead object.
+
+```json 200 OK
+{
+  "id": "lead_abc123",
+  "name": "María García",
+  "phone": "+5491155551234",
+  "email": "maria@example.com",
+  "channel": "whatsapp",
+  "vehicle_interest": "Toyota Hilux SRX 2024",
+  "score": 87,
+  "intent": "purchase_30_days",
+  "status": "assigned",
+  "assigned_to": "user_xyz789",
+  "created_at": "2024-03-10T14:22:00Z",
+  "updated_at": "2024-03-12T11:30:45Z",
+  "last_activity_at": "2024-03-12T11:30:45Z",
+  "organization_id": "org_00112233"
+}
+```
+
+<Note>
+  This endpoint uses **PATCH** semantics — only the fields present in your request body are modified. Fields you omit remain exactly as they were. If you need to clear an optional field such as `assigned_to`, pass it explicitly as `null`.
+</Note>

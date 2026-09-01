@@ -1,100 +1,100 @@
 ---
-title: "Custom Webhook: Send Inbound Leads to DeltaLead"
-sidebarTitle: "Custom Webhook"
-description: "Push leads into DeltaLead from any external system with one authenticated POST request. Create a key in the dashboard, test with sandbox, then switch to live."
+title: "Webhook personalizado: enviar leads entrantes a DeltaLead"
+sidebarTitle: "Webhook personalizado"
+description: "Enviar leads a DeltaLead desde cualquier sistema externo con una sola solicitud POST autenticada: crear una clave, probar en sandbox y pasar a live."
 ---
 
-The Custom Webhook is how an external system pushes a lead **into** DeltaLead. Your landing page, your dealer management system, a partner's lead feed, or an internal script sends one authenticated `POST` request, and the lead lands in your account. This is the inbound direction — the opposite of [Webhooks & Zapier](/integrations/webhooks-zapier), which sends events from DeltaLead out to your endpoint.
+El Webhook personalizado es la vía por la que un sistema externo envía un lead **hacia** DeltaLead. Una landing page, el sistema de gestión del concesionario, el feed de leads de un socio o un script interno hacen una única solicitud `POST` autenticada y el lead queda registrado en la cuenta. Esta es la dirección entrante, lo contrario de [Webhooks y Zapier](/integrations/webhooks-zapier), que envía eventos desde DeltaLead hacia un endpoint externo.
 
-## How It Works
+## Cómo funciona
 
-There is a single route, and it does one thing:
+Hay una sola ruta y hace una sola cosa:
 
 ```text
 POST https://integrations.deltalead.ai/webhooks/custom
 ```
 
-You authenticate with a key you create in the dashboard, sent as a bearer token:
+La autenticación usa una clave creada en el panel, enviada como bearer token:
 
 ```text
 Authorization: Bearer dl_sandbox_YOUR_KEY
 ```
 
-That key is the whole identity of the request. It tells DeltaLead which account the lead belongs to and whether the delivery is a `live` or `sandbox` one. There is no account ID, organization ID, or endpoint ID anywhere in the URL — the URL is the same for every customer.
+Esa clave es toda la identidad de la solicitud: le indica a DeltaLead a qué cuenta pertenece el lead y si la entrega es `live` o `sandbox`. No hay ID de cuenta, ID de organización ni ID de endpoint en ninguna parte de la URL: la URL es la misma para todos los clientes.
 
-## Creating a Key
+## Crear una clave
 
 <Steps>
-  <Step title="Open Custom Webhook settings">
-    In the DeltaLead dashboard, navigate to **Settings → Integrations → Custom Webhook**.
+  <Step title="Abrir la configuración del Webhook personalizado">
+    En el panel de DeltaLead, ir a **Configuración → Integraciones → Custom Webhook**.
   </Step>
-  <Step title="Choose live or sandbox">
-    Pick the mode when you create the key. A key's mode is fixed for its lifetime — to switch, you create a second key. Most integrations keep one of each.
+  <Step title="Elegir live o sandbox">
+    El modo se define al crear la clave y queda fijo durante toda su vida; para cambiarlo hay que crear una segunda clave. La mayoría de las integraciones mantienen una de cada tipo.
   </Step>
-  <Step title="Add an optional label and expiry">
-    A label helps you tell keys apart later, e.g. `web-form-prod`. An expiry is optional and can be set between 1 and 365 days; without one the key does not expire on its own.
+  <Step title="Agregar una etiqueta y un vencimiento opcionales">
+    La etiqueta ayuda a distinguir las claves más adelante, por ejemplo `web-form-prod`. El vencimiento es opcional y puede fijarse entre 1 y 365 días; sin él, la clave no vence por sí sola.
   </Step>
-  <Step title="Copy the key">
-    The full key is displayed once, on creation. Store it in your application's secret manager before you close the dialog.
+  <Step title="Copiar la clave">
+    La clave completa se muestra una sola vez, al crearla. Debe guardarse en el gestor de secretos de la aplicación antes de cerrar el diálogo.
   </Step>
 </Steps>
 
 <Warning>
-  The plaintext key is shown **exactly once**, at the moment you create it. DeltaLead stores only a SHA-256 hash of it and cannot display it again. If you lose a key, rotate it — there is no recovery.
+  La clave en texto plano se muestra **exactamente una vez**, en el momento de crearla. DeltaLead solo almacena un hash SHA-256 y no puede volver a mostrarla. Si una clave se pierde, la única salida es rotarla: no hay recuperación.
 </Warning>
 
-## Managing Keys
+## Gestión de claves
 
-The key list shows every key on your account:
+La lista de claves muestra todas las claves de la cuenta:
 
-| Column | What it tells you |
+| Columna | Qué indica |
 |---|---|
-| `key_prefix` | The first characters of the key, enough to identify which key a system is using without revealing it |
-| Mode | `live` or `sandbox` |
-| Status | Active, revoked, or expired |
-| Created / Expires | When the key was issued and when it stops working |
-| `last_used_at` | The last time a request authenticated with this key |
+| `key_prefix` | Los primeros caracteres de la clave, suficientes para identificar cuál usa cada sistema sin revelarla |
+| Modo | `live` o `sandbox` |
+| Estado | Activa, revocada o vencida |
+| Creada / Vence | Cuándo se emitió la clave y cuándo deja de funcionar |
+| `last_used_at` | La última vez que una solicitud se autenticó con esta clave |
 
 <Tip>
-  `last_used_at` is the fastest way to confirm an integration is actually wired up. Send a test request; if the timestamp does not move, your client is not reaching DeltaLead with that key.
+  `last_used_at` es la forma más rápida de confirmar que una integración está realmente conectada. Al enviar una solicitud de prueba, si la marca de tiempo no se mueve es porque el cliente no está llegando a DeltaLead con esa clave.
 </Tip>
 
-Two actions are available on an existing key:
+Sobre una clave existente hay dos acciones disponibles:
 
-- **Rotate** — issues a new secret while keeping the key's mode and label. Use this when a key may have leaked or when you rotate secrets on a schedule. The old secret stops working immediately, so deploy the new one first.
-- **Revoke** — permanently disables the key. This cannot be undone; a revoked key is never reactivated.
+- **Rotar** — emite un secreto nuevo y conserva el modo y la etiqueta de la clave. Sirve cuando una clave pudo haberse filtrado o cuando la rotación de secretos es periódica. El secreto anterior deja de funcionar de inmediato, así que primero conviene desplegar el nuevo.
+- **Revocar** — deshabilita la clave de forma permanente. No se puede deshacer: una clave revocada nunca se reactiva.
 
-Keys are created and managed in the dashboard. There is no public API for issuing or revoking them.
+Las claves se crean y se gestionan en el panel. No hay una API pública para emitirlas ni revocarlas.
 
-## Live and Sandbox Keys
+## Claves live y sandbox
 
-`live` and `sandbox` are **key modes, not separate systems**. Both are served by the same host and the same route shown above. When you test with a sandbox key you are calling production — that is intentional, and it means the integration you verify is byte-for-byte the one you ship.
+`live` y `sandbox` son **modos de clave, no sistemas separados**. Ambos se sirven desde el mismo host y la misma ruta indicada arriba. Probar con una clave sandbox implica llamar a producción: es intencional, y significa que la integración verificada es exactamente la misma que después se pone en marcha.
 
-What changes is what happens to the lead after it arrives:
+Lo que cambia es qué pasa con el lead una vez que llega:
 
 | | `live` | `sandbox` |
 |---|---|---|
-| Lead is stored | Yes, permanently | Yes, in an isolated store |
-| Visible in the unified inbox | Yes | No |
-| Retention | Permanent | Self-purges after about 7 days |
-| Downstream automations (AI summary, scoring, notifications) | Run | Do not run |
+| El lead se almacena | Sí, de forma permanente | Sí, en un almacén aislado |
+| Visible en el Inbox unificado | Sí | No |
+| Retención | Permanente | Se purga solo, a los 7 días aproximadamente |
+| Automatizaciones posteriores (Resumen de IA, scoring, notificaciones) | Se ejecutan | No se ejecutan |
 
 <Note>
-  Build and verify your integration with a sandbox key, then swap in a live one. Nothing else about the request changes — same URL, same headers, same body. Sandbox deliveries never reach your sales team, and they clean themselves up.
+  Lo recomendable es construir y verificar la integración con una clave sandbox y después cambiarla por una live. Nada más de la solicitud cambia: misma URL, mismos headers, mismo body. Las entregas de sandbox nunca llegan al equipo comercial y se limpian solas.
 </Note>
 
 <Warning>
-  One thing is **not** isolated by mode: `Idempotency-Key` values are tracked per account, not per key mode. A value already sent with a sandbox key is treated as a repeat when it later arrives with a live key, and the live delivery returns `duplicate` without creating a lead. Use distinct values while testing — prefixing them, for example — or generate fresh ones when switching to live.
+  Hay algo que **no** está aislado por modo: los valores de `Idempotency-Key` se registran por cuenta, no por modo de clave. Un valor ya enviado con una clave sandbox se considera repetido cuando después llega con una clave live, y esa entrega live devuelve `duplicate` sin crear el lead. Conviene usar valores distintos durante las pruebas —con un prefijo, por ejemplo— o generar valores nuevos al pasar a live.
 </Warning>
 
-## Send Your First Lead
+## Enviar el primer lead
 
 <Steps>
-  <Step title="Create a sandbox key">
-    Follow the steps above and copy the plaintext key.
+  <Step title="Crear una clave sandbox">
+    Seguir los pasos anteriores y copiar la clave en texto plano.
   </Step>
-  <Step title="Post the minimum valid body">
-    A lead needs a name, plus at least one of email or phone.
+  <Step title="Enviar el body mínimo válido">
+    Un lead necesita un nombre y, además, al menos un email o un teléfono.
 
     ```bash cURL
     curl -X POST https://integrations.deltalead.ai/webhooks/custom \
@@ -103,30 +103,30 @@ What changes is what happens to the lead after it arrives:
       -d '{"lead":{"name":"María García","email":"maria@example.com"}}'
     ```
   </Step>
-  <Step title="Read the response">
-    A delivery DeltaLead has accepted returns:
+  <Step title="Leer la respuesta">
+    Una entrega aceptada por DeltaLead devuelve:
 
     ```json 200 OK
     {"status":"ok"}
     ```
 
-    Any other status means the delivery was not accepted — see the [full response reference](/api-reference/webhooks/custom-inbound#responses).
+    Cualquier otro estado significa que la entrega no fue aceptada; ver la [referencia completa de respuestas](/api-reference/webhooks/custom-inbound#responses).
   </Step>
-  <Step title="Wait a few seconds">
-    The response is synchronous, but it confirms *acceptance*, not creation. DeltaLead queues the delivery and creates the lead a few seconds later. A `200` therefore does not mean the lead exists yet — it means it will.
+  <Step title="Esperar unos segundos">
+    La respuesta es sincrónica, pero confirma la *aceptación*, no la creación. DeltaLead encola la entrega y crea el lead unos segundos después. Por eso un `200` no significa que el lead ya exista: significa que va a existir.
   </Step>
-  <Step title="Repeat with a live key">
-    Send the same request with a live key and open the unified inbox. The lead appears there, is scored, and triggers whatever automations you have configured. Your sandbox lead is not in the inbox, and never will be.
+  <Step title="Repetir con una clave live">
+    Enviar la misma solicitud con una clave live y abrir el Inbox unificado. El lead aparece ahí, recibe un score y dispara las automatizaciones configuradas. El lead de sandbox no está en el Inbox, y nunca va a estarlo.
   </Step>
 </Steps>
 
-## Next Steps
+## Próximos pasos
 
 <CardGroup cols={2}>
-  <Card title="Endpoint Reference" icon="code" href="/api-reference/webhooks/custom-inbound">
-    The full lead contract, idempotency, rate limits, and every response code.
+  <Card title="Referencia del endpoint" icon="code" href="/api-reference/webhooks/custom-inbound">
+    El contrato completo del lead, la idempotencia, los límites de tasa y todos los códigos de respuesta.
   </Card>
-  <Card title="Outbound Webhooks" icon="webhook" href="/integrations/webhooks-zapier">
-    The other direction — get lead events pushed from DeltaLead to your endpoint.
+  <Card title="Webhooks salientes" icon="webhook" href="/integrations/webhooks-zapier">
+    La otra dirección: recibir eventos de leads enviados desde DeltaLead a un endpoint externo.
   </Card>
 </CardGroup>

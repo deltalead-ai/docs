@@ -1,65 +1,65 @@
 ---
-title: "Connect DeltaLead to Your CRM, DMS, and Sales Tools"
-sidebarTitle: "CRM & DMS"
-description: "Sync DeltaLead leads, conversations, and scores directly to Salesforce, HubSpot, Pipedrive, Odoo, Dynamics 365, Tecnom, PilotSolution, and more."
+title: "Conectar DeltaLead con el CRM, el DMS y las herramientas de venta"
+sidebarTitle: "CRM y DMS"
+description: "Sincroniza leads, conversaciones y scores de DeltaLead directamente con Salesforce, HubSpot, Pipedrive, Odoo, Dynamics 365, Tecnom, PilotSolution y más."
 ---
 
-When a lead is qualified by DeltaLead's AI agents, everything your team needs — the AI summary, lead score, vehicle interest, full conversation history, and any scheduled appointments — gets pushed automatically into your CRM or DMS. Your salespeople open their existing tool and find a complete, context-rich record ready to act on, with no manual data entry and no switching between platforms.
+Cuando los agentes de IA de DeltaLead califican un lead, todo lo que el equipo necesita —el Resumen de IA, el score, el carro interesado, el historial completo de la conversación y las citas agendadas— se envía automáticamente al CRM o al DMS. Los vendedores abren la herramienta que ya usan y encuentran un registro completo y lleno de contexto, listo para trabajar, sin carga manual de datos ni saltos entre plataformas.
 
-## Supported CRMs and DMS
+## CRM y DMS soportados
 
-| Tool | Type | What syncs |
+| Herramienta | Tipo | Qué se sincroniza |
 |---|---|---|
-| **Salesforce** | CRM | Leads, opportunities, activity |
-| **HubSpot** | CRM | Contacts, deals, activity |
-| **Microsoft Dynamics 365** | CRM | Contacts, accounts, opportunities |
-| **Pipedrive** | CRM | Deals, contacts, activities |
-| **Odoo** | CRM | CRM module leads and activities |
-| **Bitrix** | CRM | Leads, contacts |
-| **Google Sheets** | Spreadsheet | Lead data and reports |
-| **Tecnom** | DMS | Automotive leads |
-| **PilotSolution** | DMS | Automotive leads |
+| **Salesforce** | CRM | Leads, oportunidades, actividad |
+| **HubSpot** | CRM | Contactos, negocios, actividad |
+| **Microsoft Dynamics 365** | CRM | Contactos, cuentas, oportunidades |
+| **Pipedrive** | CRM | Negocios, contactos, actividades |
+| **Odoo** | CRM | Leads y actividades del módulo CRM |
+| **Bitrix** | CRM | Leads, contactos |
+| **Google Sheets** | Planilla | Datos de leads y reportes |
+| **Tecnom** | DMS | Leads automotrices |
+| **PilotSolution** | DMS | Leads automotrices |
 
-## What gets synced
+## Qué se sincroniza
 
-Every record that DeltaLead pushes to your CRM or DMS includes the full context of the lead's journey — not just a name and phone number. The following data is synced for each qualified lead:
+Cada registro que DeltaLead envía al CRM o al DMS incluye el contexto completo del recorrido del lead, no solo un nombre y un teléfono. Para cada lead calificado se sincronizan estos datos:
 
-- **AI summary** — a structured recap of the conversation, key details, and next steps
-- **Lead score** — purchase intent, budget, and urgency rating assigned by the AI
-- **Vehicle interest** — model, trim, year, and any specific requirements mentioned
-- **Conversation history** — full chat transcript and, where applicable, call recording and summary
-- **Scheduled appointments** — any visits or callbacks confirmed during the AI conversation
-- **Seller assignment** — the sales rep assigned to follow up, synced as the owner or responsible party
+- **Resumen de IA**: una síntesis estructurada de la conversación, los datos clave y los próximos pasos
+- **Score del lead**: la valoración de intención de compra, presupuesto y urgencia asignada por la IA
+- **Carro interesado**: modelo, versión, año y cualquier requisito específico mencionado
+- **Historial de conversación**: transcripción completa del chat y, cuando corresponde, grabación y resumen de la llamada
+- **Citas agendadas**: visitas o llamadas de vuelta confirmadas durante la conversación con IA
+- **Vendedor asignado**: el comercial encargado del seguimiento, sincronizado como propietario o responsable
 
-## Setting up a CRM integration
+## Configurar una integración con el CRM
 
 <Steps>
-  <Step title="Open Integrations settings">
-    In DeltaLead, go to **Settings → Integrations** and select your CRM or DMS from the list.
+  <Step title="Abrir la configuración de integraciones">
+    En DeltaLead, ir a **Configuración → Integraciones** y elegir el CRM o el DMS de la lista.
   </Step>
-  <Step title="Authenticate">
-    Connect your account using OAuth (for Salesforce, HubSpot, and Pipedrive) or by entering your API key (for Odoo, Bitrix, and others). DeltaLead never stores your CRM credentials in plain text.
+  <Step title="Autenticar">
+    Conectar la cuenta por OAuth (en Salesforce, HubSpot y Pipedrive) o cargando la clave de API (en Odoo, Bitrix y otros). DeltaLead nunca almacena las credenciales del CRM en texto plano.
   </Step>
-  <Step title="Map your fields">
-    Match DeltaLead lead fields — name, phone, score, vehicle interest, and so on — to the corresponding fields in your CRM. Use the default mapping or customize it to fit your pipeline structure.
+  <Step title="Mapear los campos">
+    Hacer coincidir los campos de lead de DeltaLead —nombre, teléfono, score, carro interesado, etcétera— con los campos correspondientes del CRM. Se puede usar el mapeo por defecto o personalizarlo según la estructura del pipeline.
   </Step>
-  <Step title="Enable sync">
-    Toggle sync on. From this point forward, every qualified lead is pushed to your CRM automatically. You can also trigger a one-time historical sync if you have existing leads in DeltaLead you want to backfill.
+  <Step title="Activar la sincronización">
+    Encender la sincronización. Desde ese momento, cada lead calificado se envía al CRM automáticamente. También puede lanzarse una sincronización histórica por única vez para migrar los leads que ya existen en DeltaLead.
   </Step>
 </Steps>
 
 <Note>
-  All CRM and DMS integrations are set up as part of the DeltaLead onboarding process. Your onboarding specialist handles the connection, field mapping, and testing so your team starts receiving leads in their CRM from day one.
+  Todas las integraciones con CRM y DMS se configuran como parte del proceso de onboarding de DeltaLead. El especialista de onboarding se encarga de la conexión, el mapeo de campos y las pruebas, para que el equipo empiece a recibir leads en su CRM desde el primer día.
 </Note>
 
-## Custom CRM or DMS
+## CRM o DMS a medida
 
-If your system isn't in the list above, you still have options:
+Si el sistema no aparece en la lista anterior, todavía hay opciones:
 
-- **Contact DeltaLead** — if your CRM or DMS is widely used in your market, the team may already be building the connector or can prioritize it for your account.
-- **Enterprise onboarding** — custom integrations to proprietary or less common systems are built during the Enterprise onboarding process by DeltaLead's technical team.
-- **REST API and webhooks** — for any system that accepts incoming data, you can receive qualified leads via webhook or pull data programmatically using the [REST API](/api-reference/introduction).
+- **Contactar a DeltaLead**: si el CRM o el DMS es de uso extendido en el mercado, es posible que el equipo ya esté construyendo el conector o pueda priorizarlo para la cuenta.
+- **Onboarding Enterprise**: las integraciones a medida con sistemas propietarios o poco habituales las construye el equipo técnico de DeltaLead durante el onboarding del plan Enterprise.
+- **API REST y webhooks**: para cualquier sistema capaz de recibir datos, los leads calificados pueden llegar por webhook o consultarse de forma programática con la [API REST](/api-reference/introduction).
 
 <Tip>
-  Don't have a dedicated CRM yet? Connect **Google Sheets** as a lightweight alternative. DeltaLead syncs qualified leads and reports directly to a spreadsheet, giving your team a shared, always-up-to-date view of your pipeline — no extra software required. You can migrate to a full CRM later without losing any history.
+  ¿Todavía no hay un CRM dedicado? **Google Sheets** funciona como alternativa liviana: DeltaLead sincroniza los leads calificados y los reportes directamente en una planilla y le da al equipo una vista compartida y siempre actualizada del pipeline, sin instalar software adicional. Migrar más adelante a un CRM completo no implica perder historial.
 </Tip>
