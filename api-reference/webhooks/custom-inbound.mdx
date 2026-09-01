@@ -43,7 +43,7 @@ The body is a JSON object with a single `lead` key. Lead contract v1 requires `l
 </ParamField>
 
 <ParamField body="lead.source" type="string">
-  Free-form origin label for the delivery, e.g. `landing-page`. Surfaced on the lead as `custom:{source}`.
+  Free-form origin label for the delivery, e.g. `landing-page`. Recorded on the lead and used by downstream processing — it appears in the lead's AI summary. Every delivery through this endpoint is reported on the lead as the `Custom` channel regardless of what you send here, so use `source` to distinguish which of your systems produced the lead.
 </ParamField>
 
 <Warning>
@@ -66,8 +66,18 @@ A delivery carrying a key already seen for your account returns `200 {"status": 
 
 Generate the key from something stable in your own system, such as the submission ID of the form that produced the lead. Reusing that value on every retry of the same submission is what makes the retry safe.
 
+### Contact matching
+
+Two things deduplicate, at different layers, and they are worth keeping apart.
+
+The `Idempotency-Key` deduplicates **deliveries**. A repeat is rejected before any work happens and reported to you as `{"status": "duplicate"}`.
+
+Contact matching deduplicates **people**. After a delivery is accepted, DeltaLead matches it against your existing contacts on email or phone. A match resolves onto the existing lead and enriches it rather than creating a second one — so a delivery carrying only a phone can attach to a lead created earlier from an email, and the contact ends up holding both.
+
+The practical consequence is that a delivery which matches an existing contact still returns `{"status": "ok"}`, not `duplicate`. The `200` tells you the delivery was accepted; it never tells you whether a new lead was created.
+
 <Note>
-  Deduplication at this endpoint is separate from contact matching further downstream. Two accepted deliveries describing the same person may still resolve to a single lead, because DeltaLead matches contacts on email and phone after the delivery is queued. Do not rely on that as a retry strategy — it is not part of this contract, and only the `Idempotency-Key` gives you a definite answer.
+  Matching is on email **or** phone, not both. Two genuinely different people who share a phone number — a household, or a dealership switchboard — resolve to the same lead. Send the most specific contact details you have.
 </Note>
 
 ## Limits
