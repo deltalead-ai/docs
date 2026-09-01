@@ -1,67 +1,67 @@
 ---
-title: "Leads in DeltaLead: Lifecycle, Fields, and Profiles"
+title: "Leads en DeltaLead: ciclo de vida, campos y perfiles"
 sidebarTitle: "Leads"
-description: "A lead in DeltaLead is a unified contact profile that aggregates all interactions across channels. Learn how leads are created, tracked, and managed."
+description: "Un lead en DeltaLead es un perfil de contacto unificado que reúne todas las interacciones de cada canal: cómo se crean, se siguen y se gestionan."
 ---
 
-A lead in DeltaLead is more than a contact record — it is a living profile that captures every interaction a prospective buyer has with your dealership, regardless of which channel they used to reach you. From the moment someone sends a WhatsApp message about a Hilux to the moment they take delivery, every conversation, call, form submission, and follow-up is attached to a single profile. Your sales team sees the complete picture before they say a word.
+Un lead en DeltaLead es más que un registro de contacto: es un perfil vivo que reúne cada interacción de un comprador con el concesionario, sin importar por qué canal llegó. Desde que alguien manda un mensaje de WhatsApp preguntando por una Hilux hasta que retira la unidad, cada conversación, llamada, envío de formulario y seguimiento queda adjunto a un único perfil. El equipo comercial ve el panorama completo antes de decir una palabra.
 
-## Lead lifecycle stages
+## Etapas del ciclo de vida de un lead
 
-Every lead moves through five stages from first contact to close. DeltaLead tracks and displays the current stage in the unified inbox and syncs it to your connected CRM or DMS.
+Todo lead recorre cinco etapas, del primer contacto al cierre. DeltaLead registra la etapa actual, la muestra en el Inbox unificado y la sincroniza con el CRM o DMS conectado.
 
-| Stage | What happens |
+| Etapa | Qué ocurre |
 |---|---|
-| **Captured** | Lead enters from any channel (WhatsApp, Meta Ads, MercadoLibre, web form, phone, email). A profile is created or merged into an existing one. |
-| **AI Conversation** | The AI agent responds within 9 seconds, answers product questions from live inventory, handles objections, and gathers qualification signals. |
-| **Qualified** | The AI generates a plain-language summary with vehicle interest, budget, financing preference, trade-in status, timeline, and a purchase intent score. |
-| **Assigned to seller** | The lead — with full context — is routed to the right salesperson. No re-introductions, no repeated questions. |
-| **Closed** | The lead is marked as Won, Lost, or Dormant. Follow-up sequences stop automatically. |
+| **Captado** | El lead entra por cualquier canal (WhatsApp, Meta Ads, MercadoLibre, formulario web, teléfono, email). Se crea un perfil o se fusiona con uno existente. |
+| **Conversación con IA** | El agente de IA responde en menos de 9 segundos, contesta preguntas de producto consultando el stock en vivo, maneja objeciones y recoge señales de calificación. |
+| **Calificado** | La IA genera un resumen en lenguaje claro con vehículo de interés, presupuesto, preferencia de financiación, estado del usado a entregar, plazo y un score de intención de compra. |
+| **Asignado a un vendedor** | El lead, con todo el contexto, se deriva al vendedor indicado. Sin repetir presentaciones ni volver a preguntar lo mismo. |
+| **Cerrado** | El lead se marca como Ganado, Perdido o Dormido. Las secuencias de seguimiento se detienen automáticamente. |
 
-## Lead profile fields
+## Campos del perfil de lead
 
-Each lead profile consolidates data collected across all channels and conversations. The table below lists the core fields available in the dashboard and via the API.
+Cada perfil de lead consolida los datos recogidos en todos los canales y conversaciones. La siguiente tabla lista los campos principales, disponibles tanto en el panel como en la API.
 
-| Field | Description |
+| Campo | Descripción |
 |---|---|
-| **Name** | Contact's full name, captured from form submissions or extracted by the AI during conversation. |
-| **Phone** | Primary phone number. Used for WhatsApp and voice call matching. |
-| **Email** | Email address, captured from forms or email threads. |
-| **Channel of origin** | The first channel through which the lead contacted your dealership. |
-| **Vehicle of interest** | Model, trim, and year the lead expressed interest in. Updated as the conversation evolves. |
-| **Budget** | Stated or inferred budget range, extracted by the AI during qualification. |
-| **Purchase intent score** | An automatic score based on conversation signals: urgency, budget match, timeline, and responsiveness. |
-| **Conversation history** | Full transcript of every chat message and call (with recording) across all channels, in chronological order. |
-| **Next suggested action** | AI-generated recommendation: call in 2 days, send financing simulation, schedule test drive, etc. |
+| **Nombre** | Nombre completo del contacto, tomado de un formulario o extraído por la IA durante la conversación. |
+| **Teléfono** | Número de teléfono principal. Se usa para vincular WhatsApp y llamadas de voz. |
+| **Email** | Dirección de correo, tomada de formularios o de hilos de email. |
+| **Canal de origen** | El primer canal por el que el lead contactó al concesionario. |
+| **Carro interesado** | Modelo, versión y año que despertaron el interés del lead. Se actualiza a medida que avanza la conversación. |
+| **Presupuesto** | Rango de presupuesto declarado o inferido, extraído por la IA durante la calificación. |
+| **Score de intención de compra** | Score automático basado en señales de la conversación: urgencia, ajuste al presupuesto, plazo y capacidad de respuesta. |
+| **Flujo de conversación** | Transcripción completa de cada mensaje y llamada (con grabación) en todos los canales, en orden cronológico. |
+| **Próxima acción sugerida** | Recomendación generada por IA: llamar en 2 días, enviar una simulación de financiación, agendar un test drive, etc. |
 
-## Monthly Active Client (MAC) — the billing unit
+## Cliente Activo Mensual (MAC): la unidad de facturación
 
-DeltaLead bills by the number of **Monthly Active Clients (MACs)**: the count of distinct leads you worked with during a calendar month.
+DeltaLead factura según la cantidad de **Clientes Activos Mensuales (MAC)**: el número de leads distintos trabajados durante un mes calendario.
 
-A lead counts as one MAC for the month if any activity occurred — a single inbound message, an outbound follow-up, a phone call, or a team member action. The volume of interactions within that month does not change the count: a lead you exchanged 30 messages with counts the same as a lead you sent one follow-up to.
+Un lead cuenta como un MAC del mes si hubo cualquier actividad: un mensaje entrante, un seguimiento saliente, una llamada telefónica o una acción de alguien del equipo. El volumen de interacciones dentro de ese mes no cambia la cuenta: un lead con el que se intercambiaron 30 mensajes cuenta igual que uno al que se le envió un único seguimiento.
 
-If a lead was active in August, went quiet in September, and received a follow-up in October, it counts as one MAC in August and one MAC in October — not in September. You never pay for your historical base of inactive leads.
+Si un lead tuvo actividad en agosto, quedó en silencio en septiembre y recibió un seguimiento en octubre, cuenta como un MAC en agosto y uno en octubre, no en septiembre. Nunca se paga por la base histórica de leads inactivos.
 
 <Note>
-  If you exceed your plan's contracted MAC volume, operations continue without interruption. Overage is billed at US$12 per 10 additional MACs on Growth and US$15 per 10 on Advanced.
+  Si se supera el volumen de MAC contratado en el plan, la operación continúa sin interrupciones. El excedente se factura a US$12 por cada 10 MAC adicionales en Growth y US$15 por cada 10 en Advanced.
 </Note>
 
-## Lead deduplication
+## Deduplicación de leads
 
-When the same person contacts your dealership through multiple channels, DeltaLead automatically identifies and merges them into a single profile with one unified history.
+Cuando la misma persona contacta al concesionario por varios canales, DeltaLead lo detecta y fusiona todo automáticamente en un único perfil con un historial unificado.
 
-For example: a prospect sends a WhatsApp message on Monday, calls on Wednesday, and fills in a web form on Friday. DeltaLead recognizes these as the same person — using phone number, email, and conversation context — and consolidates all three touchpoints under one lead record. Your team sees a single, continuous conversation rather than three separate contacts. The lead also counts as one MAC, not three.
+Por ejemplo: alguien manda un mensaje de WhatsApp el lunes, llama el miércoles y completa un formulario web el viernes. DeltaLead reconoce que es la misma persona —por número de teléfono, email y contexto de la conversación— y consolida los tres puntos de contacto en un solo lead. El equipo ve una conversación única y continua en lugar de tres contactos separados. Además, el lead cuenta como un MAC y no como tres.
 
 <Note>
-  Deduplication relies on matching identifiers (phone number, email). If a lead uses a different phone number and email on each channel with no overlapping data, DeltaLead creates separate profiles until a match can be confirmed. You can merge profiles manually from the dashboard.
+  La deduplicación se apoya en identificadores coincidentes (número de teléfono, email). Si un lead usa un teléfono y un email distintos en cada canal, sin ningún dato en común, DeltaLead crea perfiles separados hasta poder confirmar la coincidencia. Los perfiles también pueden fusionarse manualmente desde el panel.
 </Note>
 
-## Data ownership
+## Propiedad de los datos
 
-Your dealership owns all lead data generated in DeltaLead. Leads, conversation transcripts, call recordings, AI summaries, and reporting metrics belong to you. DeltaLead processes this data solely to deliver the service.
+Todos los datos de leads generados en DeltaLead son propiedad del concesionario. Los leads, las transcripciones de conversaciones, las grabaciones de llamadas, los resúmenes de IA y las métricas de reportes le pertenecen. DeltaLead procesa esos datos únicamente para prestar el servicio.
 
-You can export your data at any time from the dashboard or via the REST API — no approval or support ticket required. If you end your contract, you receive a full export and migration support before any data is removed.
+Los datos pueden exportarse en cualquier momento desde el panel o mediante la API REST, sin aprobaciones ni tickets de soporte. Al finalizar el contrato se entrega una exportación completa y soporte de migración antes de eliminar cualquier dato.
 
 <Note>
-  Export formats include CSV and JSON for lead records and conversation data, accessible from the dashboard under **Settings → Data Export** or programmatically via `GET /leads` and `GET /conversations` on the DeltaLead API (`https://platform-api.deltalead.ai/v1`). Call recordings are exported as MP3 files.
+  Los formatos de exportación incluyen CSV y JSON para registros de leads y datos de conversaciones, disponibles desde el panel en **Configuración → Exportar datos** o de forma programática con `GET /leads` y `GET /conversations` en la API de DeltaLead (`https://platform-api.deltalead.ai/v1`). Las grabaciones de llamadas se exportan como archivos MP3.
 </Note>

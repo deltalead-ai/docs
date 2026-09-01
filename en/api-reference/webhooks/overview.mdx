@@ -1,0 +1,130 @@
+---
+title: "Webhook Overview: Real-Time Lead Events | DeltaLead"
+sidebarTitle: "Overview"
+description: "DeltaLead webhooks send real-time POST requests to your HTTPS endpoint whenever leads are created, qualified, assigned, or appointments are booked."
+---
+
+DeltaLead webhooks deliver HTTP POST requests to your server the moment something meaningful happens in your account — a new lead arrives, an AI agent qualifies a prospect, or a test drive gets booked. Instead of polling the API on a schedule, your systems receive event data in real time with no extra latency, letting you trigger downstream workflows, update your own database, or alert your sales team the instant a hot lead appears.
+
+## Registering a Webhook Endpoint
+
+<Steps>
+  <Step title="Open Webhook Settings">
+    In the DeltaLead dashboard, navigate to **Settings → Webhooks → Add Endpoint**. Alternatively, call `POST /v1/webhooks` directly from the API.
+  </Step>
+  <Step title="Enter Your Endpoint URL">
+    Provide the full HTTPS URL of the server that will receive events. Plain HTTP endpoints are not accepted — DeltaLead requires a valid TLS certificate.
+  </Step>
+  <Step title="Select Events">
+    Choose the specific event types you want to subscribe to. Subscribing only to the events your integration needs reduces unnecessary traffic to your server. See the [full event reference](/en/api-reference/webhooks/events) for all available event types.
+  </Step>
+  <Step title="Save and Copy the Secret">
+    After saving, DeltaLead generates an HMAC-SHA256 signing secret for your endpoint. Copy it immediately — it is shown only once. Store it securely in your application's environment variables and use it to verify every incoming request.
+  </Step>
+</Steps>
+
+## Payload Structure
+
+Every webhook POST that DeltaLead sends to your endpoint shares the same top-level structure, regardless of event type.
+
+<ResponseField name="event" type="string">
+  The event type that triggered this delivery, e.g. `lead.qualified`.
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  ISO 8601 timestamp of when the event occurred on DeltaLead's platform.
+</ResponseField>
+
+<ResponseField name="organization_id" type="string">
+  The DeltaLead organization ID associated with the event.
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Event-specific payload. The fields inside `data` vary by event type. See the [event reference](/en/api-reference/webhooks/events) for full schemas.
+</ResponseField>
+
+```json lead.qualified event
+{
+  "event": "lead.qualified",
+  "timestamp": "2024-11-07T15:30:00Z",
+  "organization_id": "org_xyz789",
+  "data": {
+    "id": "lead_abc123",
+    "name": "María García",
+    "phone": "+5491155551234",
+    "score": 92,
+    "intent": "purchase_30_days",
+    "vehicle_interest": "Toyota Hilux SRX 2024",
+    "channel": "whatsapp",
+    "status": "qualified"
+  }
+}
+```
+
+## Verifying Webhook Signatures
+
+DeltaLead signs every webhook request to prove the payload originated from our platform. The signature is included in the `X-DeltaLead-Signature` request header as a hex-encoded HMAC-SHA256 digest of the raw request body, computed using your endpoint's signing secret.
+
+Always verify the signature before processing a webhook payload. Skipping this step leaves your endpoint vulnerable to spoofed requests.
+
+<CodeGroup>
+
+```javascript Node.js
+const crypto = require('crypto');
+
+function verifyWebhook(rawBody, signatureHeader, secret) {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody)
+    .digest('hex');
+  return crypto.timingSafeEqual(
+    Buffer.from(expected),
+    Buffer.from(signatureHeader)
+  );
+}
+```
+
+```python Python
+import hmac
+import hashlib
+
+def verify_webhook(raw_body: bytes, signature_header: str, secret: str) -> bool:
+    expected = hmac.new(
+        secret.encode('utf-8'),
+        raw_body,
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature_header)
+```
+
+```php PHP
+function verifyWebhook(string $rawBody, string $signatureHeader, string $secret): bool {
+    $expected = hash_hmac('sha256', $rawBody, $secret);
+    return hash_equals($expected, $signatureHeader);
+}
+```
+
+</CodeGroup>
+
+<Note>
+  Always use a timing-safe comparison (such as `crypto.timingSafeEqual` in Node.js or `hmac.compare_digest` in Python) to prevent timing-based attacks against the signature check.
+</Note>
+
+## Responding to Webhooks
+
+Your endpoint must return an HTTP `2xx` status code within **10 seconds** of receiving a delivery. DeltaLead interprets any non-2xx response — or a request that times out — as a failed delivery.
+
+<CardGroup cols={2}>
+  <Card title="Retry Policy" icon="rotate">
+    DeltaLead retries failed deliveries up to **3 times** using exponential backoff. Retry intervals are approximately 1 minute, 5 minutes, and 30 minutes after the initial failure.
+  </Card>
+  <Card title="Idempotency" icon="shield-check">
+    Because retries can result in duplicate deliveries, design your handler to be idempotent. Use the `data.id` field to deduplicate events you have already processed.
+  </Card>
+</CardGroup>
+
+<Tip>
+  During local development, use a tunneling tool like [ngrok](https://ngrok.com) to expose your localhost server to the internet and receive live DeltaLead webhook events without deploying to a public server.
+</Tip>
+
+For a complete list of event types and their payload schemas, see the [Webhook Event Reference](/en/api-reference/webhooks/events).

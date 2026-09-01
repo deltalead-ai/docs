@@ -1,10 +1,10 @@
 ---
-title: "GET /v1/agents/{id}: Get AI Agent Details | DeltaLead"
-sidebarTitle: "Get Agent"
-description: "GET /v1/agents/{id} — fetch full configuration details for a single AI agent including tone, handoff triggers, and follow-up cadence."
+title: "GET /v1/agents/{id}: detalle de un agente de IA | DeltaLead"
+sidebarTitle: "Obtener agente"
+description: "GET /v1/agents/{id} — obtiene la configuración completa de un agente de IA, incluidos el tono, los disparadores de derivación y la cadencia de seguimiento."
 ---
 
-Use this endpoint to fetch the complete configuration of a single AI agent by its ID. The response includes every setting that governs how the agent communicates — its tone, the topics it is permitted to discuss, the conditions under which it hands off to a human seller, and the cadence it follows when sending automated follow-ups.
+Este endpoint devuelve la configuración completa de un agente de IA a partir de su ID. La respuesta incluye todos los ajustes que gobiernan la forma de comunicarse del agente: su tono, los temas que tiene permitido tratar, las condiciones bajo las cuales deriva la conversación a un vendedor humano y la cadencia que sigue al enviar seguimientos automáticos.
 
 ## Endpoint
 
@@ -12,78 +12,78 @@ Use this endpoint to fetch the complete configuration of a single AI agent by it
 GET https://platform-api.deltalead.ai/v1/agents/{id}
 ```
 
-## Path Parameters
+## Parámetros de ruta
 
 <ParamField path="id" type="string" required>
-  The unique identifier of the agent to retrieve, e.g. `agent_abc123`.
+  Identificador único del agente que se quiere recuperar, por ejemplo `agent_abc123`.
 </ParamField>
 
-## Example Request
+## Solicitud de ejemplo
 
 ```bash cURL
 curl https://platform-api.deltalead.ai/v1/agents/agent_abc123 \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
-## Response
+## Respuesta
 
 <ResponseField name="id" type="string">
-  Unique identifier for the agent.
+  Identificador único del agente.
 </ResponseField>
 
 <ResponseField name="organization_id" type="string">
-  ID of the organization this agent belongs to.
+  ID de la organización a la que pertenece el agente.
 </ResponseField>
 
 <ResponseField name="name" type="string">
-  Display name of the agent.
+  Nombre visible del agente.
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  Current status: `active`, `inactive`, or `draft`.
+  Estado actual: `active`, `inactive` o `draft`.
 </ResponseField>
 
 <ResponseField name="language" type="string">
-  Language locale the agent uses: `es-AR`, `es-MX`, `es-CR`, `es-CO`, `pt-BR`, or `en-US`.
+  Configuración regional de idioma que usa el agente: `es-AR`, `es-MX`, `es-CR`, `es-CO`, `pt-BR` o `en-US`.
 </ResponseField>
 
 <ResponseField name="channels" type="array">
-  Channels the agent is assigned to: `whatsapp`, `facebook`, `instagram`, `web`, `email`, or `phone`.
+  Canales asignados al agente: `whatsapp`, `facebook`, `instagram`, `web`, `email` o `phone`.
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  ISO 8601 timestamp of agent creation.
+  Marca de tiempo ISO 8601 de la creación del agente.
 </ResponseField>
 
 <ResponseField name="updated_at" type="string">
-  ISO 8601 timestamp of the most recent update.
+  Marca de tiempo ISO 8601 de la actualización más reciente.
 </ResponseField>
 
 <ResponseField name="configuration" type="object">
-  Full behavioral configuration for the agent.
+  Configuración de comportamiento completa del agente.
 
-  <Expandable title="Configuration fields">
+  <Expandable title="Campos de configuración">
     <ResponseField name="tone" type="string">
-      Conversational tone used by the agent: `formal`, `friendly`, or `professional`.
+      Tono conversacional que usa el agente: `formal`, `friendly` o `professional`.
     </ResponseField>
     <ResponseField name="handoff_triggers" type="array">
-      List of topics or situations that cause the agent to transfer the conversation to a human seller, e.g. `"pricing negotiation"` or `"financing"`.
+      Lista de temas o situaciones que hacen que el agente transfiera la conversación a un vendedor humano, por ejemplo `"pricing negotiation"` o `"financing"`.
     </ResponseField>
     <ResponseField name="allowed_topics" type="array">
-      List of topics the agent is permitted to discuss, e.g. `"vehicle availability"` or `"test drive scheduling"`.
+      Lista de temas que el agente tiene permitido tratar, por ejemplo `"vehicle availability"` o `"test drive scheduling"`.
     </ResponseField>
     <ResponseField name="follow_up_cadence" type="object">
-      Settings that control automated follow-up messages.
+      Ajustes que controlan los mensajes de seguimiento automáticos.
 
-      <Expandable title="Follow-up cadence fields">
+      <Expandable title="Campos de la cadencia de seguimiento">
         <ResponseField name="max_follow_ups" type="integer">
-          Maximum number of follow-up messages the agent will send per lead.
+          Cantidad máxima de mensajes de seguimiento que el agente envía por lead.
         </ResponseField>
         <ResponseField name="interval_days" type="integer">
-          Number of days to wait between each follow-up message.
+          Cantidad de días de espera entre cada mensaje de seguimiento.
         </ResponseField>
         <ResponseField name="channel" type="string">
-          Channel used to send follow-up messages, e.g. `whatsapp`.
+          Canal usado para enviar los mensajes de seguimiento, por ejemplo `whatsapp`.
         </ResponseField>
       </Expandable>
     </ResponseField>
@@ -122,7 +122,7 @@ curl https://platform-api.deltalead.ai/v1/agents/agent_abc123 \
 }
 ```
 
-## Error Responses
+## Respuestas de error
 
 ```json 404 Not Found
 {

@@ -1,0 +1,97 @@
+---
+title: "DeltaLead REST API Error Codes and Troubleshooting"
+sidebarTitle: "Errors"
+description: "DeltaLead API errors follow standard HTTP status codes and return a JSON body with a machine-readable code and a human-readable message."
+---
+
+The DeltaLead API uses standard HTTP status codes to signal the outcome of every request. When a request fails, the response always includes a JSON body with two guaranteed fields: `code` (a stable, machine-readable string) and `message` (a human-readable description of what went wrong). Your error-handling logic should branch on `code` — not on `message`, which may change between API versions.
+
+## Error Response Format
+
+All error responses follow this shape:
+
+```json
+{
+  "error": {
+    "code": "lead_not_found",
+    "message": "No lead found with the given ID.",
+    "status": 404
+  }
+}
+```
+
+<ResponseField name="error.code" type="string">
+  A stable, machine-readable identifier for the error. Use this field in your error-handling logic.
+</ResponseField>
+
+<ResponseField name="error.message" type="string">
+  A human-readable description of the error, intended for logging and debugging. Do not rely on this value programmatically — it may change without notice.
+</ResponseField>
+
+<ResponseField name="error.status" type="integer">
+  The HTTP status code, mirrored inside the body for convenience when the outer status code is unavailable (for example, in some proxy or logging contexts).
+</ResponseField>
+
+## HTTP Status Codes
+
+| Status | Meaning |
+|---|---|
+| `200 OK` | Request succeeded |
+| `201 Created` | Resource created successfully |
+| `400 Bad Request` | Invalid parameters — check `error.code` and `error.message` |
+| `401 Unauthorized` | Missing or invalid API key |
+| `403 Forbidden` | Valid key but insufficient permissions or account suspended |
+| `404 Not Found` | Resource does not exist |
+| `409 Conflict` | Resource conflict (e.g., duplicate lead phone number) |
+| `422 Unprocessable Entity` | Validation failed — check `error.details` for field-level errors |
+| `429 Too Many Requests` | Rate limit exceeded — retry after `X-RateLimit-Reset` |
+| `500 Internal Server Error` | DeltaLead server error — retry with exponential backoff |
+
+## Validation Errors (422)
+
+When request body validation fails, the API returns a `422` response with an additional `details` array that pinpoints exactly which fields are invalid. Iterate over `details` to surface per-field messages to your users or logs.
+
+```json
+{
+  "error": {
+    "code": "validation_error",
+    "message": "Validation failed.",
+    "status": 422,
+    "details": [
+      { "field": "phone", "message": "Phone number must be in E.164 format." }
+    ]
+  }
+}
+```
+
+<ResponseField name="error.details" type="array">
+  Present only on `422` responses. Each element contains a `field` key (the request body path that failed) and a `message` key describing the validation rule that was violated.
+</ResponseField>
+
+Common `422` causes include:
+
+- Phone numbers not in [E.164 format](https://en.wikipedia.org/wiki/E.164) (e.g., `+5491122334455` is valid; `011 2233-4455` is not)
+- Required fields missing from the request body
+- Enum values outside the allowed set (for example, an unrecognized `status` value)
+- Date-time strings not formatted as ISO 8601
+
+## Rate Limiting (429)
+
+When you exceed 1,000 requests per minute, the API returns `429 Too Many Requests`. The response includes a `Retry-After` header indicating how many seconds to wait before retrying.
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 14
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1718294460
+```
+
+Implement **exponential backoff** for all retried requests: wait for `Retry-After` seconds on the first retry, then double the wait time on each subsequent attempt (with a maximum cap, such as 60 seconds) until the request succeeds or you exhaust your retry budget.
+
+## Server Errors (500)
+
+`500 Internal Server Error` indicates a transient fault on DeltaLead's infrastructure. Retry the request using exponential backoff — the vast majority of transient errors resolve within a few seconds. If a `500` persists for more than a few minutes, check the [DeltaLead status page](https://status.deltalead.ai) or contact support.
+
+<Tip>
+  Always log the **full error response body**, not just the HTTP status code. The `error.code` field is machine-readable and stable across API versions, making it suitable for alerting rules and automated remediation. For example, you can detect `lead_not_found` and skip the record, or catch `validation_error` and surface `error.details` directly to an operator's dashboard.
+</Tip>

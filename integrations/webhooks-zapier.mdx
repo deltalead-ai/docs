@@ -1,29 +1,29 @@
 ---
-title: "Webhooks, Zapier & Make: Extend DeltaLead Automations"
-sidebarTitle: "Webhooks & Zapier"
-description: "Use DeltaLead webhooks, Zapier, and Make integrations to automate workflows, push lead data to any tool, and trigger actions on lead events."
+title: "Webhooks, Zapier y Make: extender las automatizaciones"
+sidebarTitle: "Webhooks y Zapier"
+description: "Usar webhooks, Zapier y Make para automatizar flujos, enviar los datos de leads a cualquier herramienta y disparar acciones ante cada evento de lead."
 ---
 
-DeltaLead's native CRM and channel integrations cover the most common connections out of the box — but your stack is yours to extend. Webhooks let you push lead events to any HTTPS endpoint the moment they happen. Zapier and Make connect DeltaLead to thousands of additional apps without writing code. And when you need full programmatic control, the REST API gives you direct access to every resource in the platform.
+Las integraciones nativas de DeltaLead con CRM y canales cubren las conexiones más habituales sin configuración extra, pero el stack de cada concesionario se puede extender. Los webhooks envían los eventos de lead a cualquier endpoint HTTPS en el momento en que ocurren. Zapier y Make conectan DeltaLead con miles de aplicaciones más, sin escribir código. Y cuando hace falta control programático total, la API REST da acceso directo a todos los recursos de la plataforma.
 
-## Custom webhooks
+## Webhooks personalizados
 
-DeltaLead posts an HTTP `POST` request to your endpoint whenever a lead event occurs. This section covers the **outbound** direction only — to push leads the other way, from your system into DeltaLead, see the [Custom Webhook](/integrations/custom-webhook). You configure which events trigger a webhook, and DeltaLead delivers the payload in real time — typically within a few seconds of the event.
+DeltaLead envía una solicitud HTTP `POST` al endpoint configurado cada vez que ocurre un evento de lead. Esta sección cubre solo la dirección **saliente**; para enviar leads en el sentido contrario, desde un sistema externo hacia DeltaLead, ver [Webhook personalizado](/integrations/custom-webhook). Se define qué eventos disparan un webhook y DeltaLead entrega el payload en tiempo real, normalmente pocos segundos después del evento.
 
-### Supported events
+### Eventos soportados
 
-| Event | Description |
+| Evento | Descripción |
 |---|---|
-| `lead.created` | A new lead profile is created in DeltaLead |
-| `lead.qualified` | The AI agent completes lead qualification and assigns a score |
-| `lead.updated` | A lead's data, score, or status changes |
-| `conversation.started` | A new conversation thread opens with a lead |
-| `conversation.message.received` | A new inbound message arrives from a lead |
-| `appointment.scheduled` | A visit or callback appointment is confirmed |
+| `lead.created` | Se crea un perfil de lead nuevo en DeltaLead |
+| `lead.qualified` | El agente de IA termina la calificación del lead y le asigna un score |
+| `lead.updated` | Cambian los datos, el score o el estado de un lead |
+| `conversation.started` | Se abre un hilo de conversación nuevo con un lead |
+| `conversation.message.received` | Llega un mensaje entrante nuevo de un lead |
+| `appointment.scheduled` | Se confirma una cita de visita o de devolución de llamada |
 
-### Example webhook payload
+### Ejemplo de payload
 
-Below is an example payload for the `lead.qualified` event:
+Este es un payload de ejemplo para el evento `lead.qualified`:
 
 ```json
 {
@@ -41,26 +41,26 @@ Below is an example payload for the `lead.qualified` event:
 }
 ```
 
-## Setting up a webhook
+## Configurar un webhook
 
 <Steps>
-  <Step title="Open Webhook settings">
-    In DeltaLead, go to **Settings → Webhooks** and click **Add Endpoint**.
+  <Step title="Abrir la configuración de webhooks">
+    En DeltaLead, ir a **Configuración → Webhooks** y hacer clic en **Agregar endpoint**.
   </Step>
-  <Step title="Enter your endpoint URL">
-    Provide the HTTPS URL where DeltaLead should deliver payloads. HTTP endpoints are not accepted — your endpoint must use TLS.
+  <Step title="Indicar la URL del endpoint">
+    Indicar la URL HTTPS donde DeltaLead debe entregar los payloads. No se aceptan endpoints HTTP: el endpoint debe usar TLS.
   </Step>
-  <Step title="Select events">
-    Choose which events should trigger this webhook. You can configure multiple endpoints, each listening to a different set of events.
+  <Step title="Seleccionar los eventos">
+    Elegir qué eventos disparan este webhook. Se pueden configurar varios endpoints, cada uno escuchando un conjunto distinto de eventos.
   </Step>
-  <Step title="Save and copy your webhook secret">
-    DeltaLead generates a webhook secret for each endpoint. Save it securely — you'll use it to verify incoming payloads on your server.
+  <Step title="Guardar y copiar el secreto del webhook">
+    DeltaLead genera un secreto de webhook para cada endpoint. Hay que guardarlo de forma segura: sirve para verificar en el servidor los payloads entrantes.
   </Step>
 </Steps>
 
-### Payload verification
+### Verificación del payload
 
-DeltaLead signs every webhook payload using **HMAC-SHA256** with your webhook secret. The signature is included in the `X-DeltaLead-Signature` header of each request. Verify this signature on your server before processing the payload to ensure the request is genuinely from DeltaLead and hasn't been tampered with.
+DeltaLead firma cada payload de webhook con **HMAC-SHA256** y el secreto del webhook. La firma viaja en la cabecera `X-DeltaLead-Signature` de cada solicitud. Conviene verificarla en el servidor antes de procesar el payload, para confirmar que la solicitud viene realmente de DeltaLead y que no fue alterada.
 
 ```python
 import hmac
@@ -76,27 +76,27 @@ def verify_signature(payload_body: bytes, secret: str, signature_header: str) ->
 ```
 
 <Warning>
-  Always validate the HMAC signature before acting on a webhook payload. Skipping verification leaves your endpoint open to spoofed requests from third parties.
+  Siempre hay que validar la firma HMAC antes de actuar sobre un payload de webhook. Saltear la verificación deja el endpoint expuesto a solicitudes falsificadas de terceros.
 </Warning>
 
-## Zapier and Make
+## Zapier y Make
 
-DeltaLead provides native connectors for both **Zapier** and **Make** (formerly Integromat), so you can build automated workflows without writing any code.
+DeltaLead ofrece conectores nativos para **Zapier** y **Make** (antes Integromat), que permiten armar flujos automatizados sin escribir código.
 
-- **Trigger your Zap or scenario** when a lead is created or qualified in DeltaLead.
-- **Push data** to any of the thousands of apps available in Zapier and Make — CRMs, spreadsheets, project management tools, communication platforms, and more.
-- **Multi-step workflows** — chain multiple actions together. For example: when a lead is qualified → create a deal in Pipedrive → send a Slack message to the assigned seller → add a row to Google Sheets.
+- **Disparar un Zap o un escenario** cuando se crea o se califica un lead en DeltaLead.
+- **Enviar datos** a cualquiera de las miles de aplicaciones disponibles en Zapier y Make: CRM, planillas, herramientas de gestión de proyectos, plataformas de comunicación y más.
+- **Flujos de varios pasos**: encadenar acciones. Por ejemplo, cuando un lead se califica → crear una oportunidad en Pipedrive → enviar un mensaje de Slack al vendedor asignado → agregar una fila en Google Sheets.
 
-To get started, search for **DeltaLead** in the Zapier app directory or the Make app library and connect your DeltaLead API key when prompted.
+Para empezar, buscar **DeltaLead** en el directorio de aplicaciones de Zapier o en la biblioteca de Make y conectar la clave de API de DeltaLead cuando se solicite.
 
 <Tip>
-  Use a Zapier or Make workflow to automatically create a task in **Notion**, **Trello**, **Jira**, or **ClickUp** every time DeltaLead qualifies a high-intent lead. Your sales team gets a task card with the lead's name, vehicle interest, score, and a link back to the DeltaLead conversation — without anyone having to copy and paste anything manually.
+  Un flujo de Zapier o Make puede crear automáticamente una tarea en **Notion**, **Trello**, **Jira** o **ClickUp** cada vez que DeltaLead califica un lead de alta intención. El equipo comercial recibe una tarjeta con el nombre del lead, el vehículo que le interesa, el score y un enlace de vuelta a la conversación en DeltaLead, sin que nadie tenga que copiar y pegar nada a mano.
 </Tip>
 
-## Also available via API
+## También disponible por API
 
-For full programmatic control over leads, conversations, scores, campaigns, and more, use the DeltaLead REST API.
+Para tener control programático total sobre leads, conversaciones, scores, campañas y más, está la API REST de DeltaLead.
 
-<Card title="REST API Reference" icon="code" href="/api-reference/introduction">
-  Authenticate with your `X-API-Key` header and access all DeltaLead resources at `https://platform-api.deltalead.ai/v1`. Full endpoint reference, request/response schemas, and code examples available.
+<Card title="Referencia de la API REST" icon="code" href="/api-reference/introduction">
+  Autenticar con la cabecera `X-API-Key` y acceder a todos los recursos de DeltaLead en `https://platform-api.deltalead.ai/v1`. Incluye la referencia completa de endpoints, los esquemas de solicitud y respuesta y ejemplos de código.
 </Card>

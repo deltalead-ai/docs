@@ -1,10 +1,10 @@
 ---
-title: "Fetch One Lead by ID — DeltaLead REST API Endpoint"
-sidebarTitle: "Get Lead"
-description: "Retrieve all data for one lead by ID — contact details, AI score, purchase intent, vehicle interest, lifecycle status, assignment, and activity timestamps."
+title: "Obtener un lead por ID — endpoint de la API REST de DeltaLead"
+sidebarTitle: "Obtener lead"
+description: "Recuperar todos los datos de un lead por ID: datos de contacto, score de IA, intención de compra, vehículo de interés, estado, asignación y marcas de tiempo."
 ---
 
-Fetch the complete profile of a single lead — including contact details, AI-assigned score, purchase intent, current status, vehicle interest, and all timestamps — by passing its unique identifier in the URL path. Use this endpoint to display lead details inside your own tooling, sync individual records to an external CRM, or check the latest qualification state before taking an action.
+Este endpoint devuelve el perfil completo de un lead —datos de contacto, score asignado por IA, intención de compra, estado actual, vehículo de interés y todas las marcas de tiempo— a partir de su identificador único en la ruta de la URL. Sirve para mostrar el detalle de un lead dentro de herramientas propias, sincronizar registros individuales con un CRM externo o consultar el estado de calificación más reciente antes de ejecutar una acción.
 
 ## Endpoint
 
@@ -12,22 +12,22 @@ Fetch the complete profile of a single lead — including contact details, AI-as
 GET https://platform-api.deltalead.ai/v1/leads/{id}
 ```
 
-## Path Parameters
+## Parámetros de ruta
 
 <ParamField path="id" type="string" required>
-  The unique identifier of the lead to retrieve. Lead IDs are prefixed with `lead_`, e.g. `lead_abc123`. You can obtain lead IDs from the [List Leads](/api-reference/leads/list) endpoint or from webhook payloads.
+  Identificador único del lead a recuperar. Los IDs de lead llevan el prefijo `lead_`, p. ej. `lead_abc123`. Se pueden obtener desde el endpoint [Listar leads](/api-reference/leads/list) o desde los payloads de webhook.
 </ParamField>
 
-## Example Request
+## Ejemplo de solicitud
 
 ```bash cURL
 curl https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
-## Response
+## Respuesta
 
-A successful request returns HTTP `200 OK` with the full lead object.
+Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
 
 ```json 200 OK
 {
@@ -48,72 +48,72 @@ A successful request returns HTTP `200 OK` with the full lead object.
 }
 ```
 
-### Response Fields
+### Campos de la respuesta
 
 <ResponseField name="id" type="string">
-  Unique identifier for the lead, prefixed with `lead_`.
+  Identificador único del lead, con el prefijo `lead_`.
 </ResponseField>
 
 <ResponseField name="name" type="string">
-  Full name of the lead as captured from the source channel or provided at creation.
+  Nombre completo del lead tal como se captó desde el canal de origen o como se indicó al crearlo.
 </ResponseField>
 
 <ResponseField name="phone" type="string">
-  Lead's phone number in E.164 format, e.g. `+5491155551234`.
+  Número de teléfono del lead en formato E.164, p. ej. `+5491155551234`.
 </ResponseField>
 
 <ResponseField name="email" type="string | null">
-  Lead's email address. `null` if not provided.
+  Dirección de email del lead. `null` si no se proporcionó.
 </ResponseField>
 
 <ResponseField name="channel" type="string">
-  The channel through which the lead first contacted your dealership. One of `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
+  Canal por el que el lead contactó por primera vez al concesionario. Uno de `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
 </ResponseField>
 
 <ResponseField name="vehicle_interest" type="string | null">
-  Vehicle model or description the lead expressed interest in, as identified by the AI agent. `null` if not yet determined.
+  Modelo o descripción del vehículo por el que el lead manifestó interés, según lo identificó el agente de IA. `null` si todavía no se determinó.
 </ResponseField>
 
 <ResponseField name="score" type="integer">
-  AI-generated lead quality score from `0` (cold) to `100` (highly qualified), based on purchase intent, budget signals, and urgency indicators extracted from the conversation.
+  Score de calidad del lead generado por IA, de `0` (frío) a `100` (altamente calificado), calculado a partir de la intención de compra, las señales de presupuesto y los indicadores de urgencia extraídos de la conversación.
 </ResponseField>
 
 <ResponseField name="intent" type="string">
-  Purchase intent bucket assigned by the AI agent. One of:
-  - `purchase_30_days` — high urgency, likely to buy within 30 days
-  - `purchase_90_days` — moderate urgency, buying within the quarter
-  - `browsing` — exploring options, no clear timeline
-  - `unknown` — not enough signal to classify
+  Categoría de intención de compra asignada por el agente de IA. Una de:
+  - `purchase_30_days` — urgencia alta, compra probable dentro de los 30 días
+  - `purchase_90_days` — urgencia moderada, compra dentro del trimestre
+  - `browsing` — explorando opciones, sin un plazo definido
+  - `unknown` — señal insuficiente para clasificar
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  Current lifecycle status of the lead. One of `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+  Estado actual del lead dentro de su ciclo de vida. Uno de `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
 </ResponseField>
 
 <ResponseField name="assigned_to" type="string | null">
-  User ID of the sales advisor this lead is assigned to. `null` if the lead has not been assigned.
+  ID de usuario del asesor de ventas al que está asignado el lead. `null` si el lead no fue asignado.
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  ISO 8601 timestamp of when the lead was first captured in DeltaLead.
+  Marca de tiempo ISO 8601 del momento en que el lead se captó en DeltaLead.
 </ResponseField>
 
 <ResponseField name="updated_at" type="string">
-  ISO 8601 timestamp of the most recent change to any field on this lead.
+  Marca de tiempo ISO 8601 del cambio más reciente en cualquier campo de este lead.
 </ResponseField>
 
 <ResponseField name="last_activity_at" type="string">
-  ISO 8601 timestamp of the most recent interaction — message, call, or status change — recorded for this lead.
+  Marca de tiempo ISO 8601 de la interacción más reciente —mensaje, llamada o cambio de estado— registrada para este lead.
 </ResponseField>
 
 <ResponseField name="organization_id" type="string">
-  Unique identifier of the DeltaLead organization (dealership) that owns this lead record.
+  Identificador único de la organización de DeltaLead (concesionario) propietaria de este registro de lead.
 </ResponseField>
 
-## Errors
+## Errores
 
-<Accordion title="404 — Lead not found">
-  Returned when no lead with the given `id` exists in your organization.
+<Accordion title="404 — Lead no encontrado">
+  Se devuelve cuando no existe ningún lead con el `id` indicado dentro de la organización.
 
   ```json 404 Not Found
   {
@@ -125,5 +125,5 @@ A successful request returns HTTP `200 OK` with the full lead object.
   }
   ```
 
-  Verify that the `id` value is correct and belongs to your organization. Lead IDs from a different organization's account will also return `404`.
+  Conviene verificar que el valor de `id` sea correcto y pertenezca a la organización. Los IDs de lead correspondientes a la cuenta de otra organización también devuelven `404`.
 </Accordion>

@@ -1,10 +1,10 @@
 ---
-title: "List and Filter Leads — DeltaLead REST API Endpoint"
-sidebarTitle: "List Leads"
-description: "Retrieve leads by status, intent, channel, or AI score. Paginate with a cursor to walk through your entire pipeline and sync records with your integration."
+title: "Listar y filtrar leads — endpoint de la API REST de DeltaLead"
+sidebarTitle: "Listar leads"
+description: "Recuperar leads por estado, intención, canal o score de IA, y paginar con cursor para recorrer todo el pipeline y sincronizar registros con la integración."
 ---
 
-Retrieve all leads captured across your connected channels — WhatsApp, Meta Ads, MercadoLibre, web forms, calls, and email — in a single paginated response. Use the query parameters below to narrow results by qualification status, purchase intent, source channel, AI score range, or creation date, so you can surface exactly the pipeline segment your integration needs.
+Este endpoint recupera en una sola respuesta paginada todos los leads captados en los canales conectados: WhatsApp, Meta Ads, MercadoLibre, formularios web, llamadas y email. Los parámetros de consulta que siguen permiten acotar los resultados por estado de calificación, intención de compra, canal de origen, rango de score de IA o fecha de creación, para aislar exactamente el segmento del pipeline que necesita la integración.
 
 ## Endpoint
 
@@ -12,54 +12,54 @@ Retrieve all leads captured across your connected channels — WhatsApp, Meta Ad
 GET https://platform-api.deltalead.ai/v1/leads
 ```
 
-## Query Parameters
+## Parámetros de consulta
 
 <ParamField query="limit" type="integer" default="20">
-  Maximum number of leads to return per page. Accepts values between `1` and `100`.
+  Cantidad máxima de leads a devolver por página. Acepta valores entre `1` y `100`.
 </ParamField>
 
 <ParamField query="cursor" type="string">
-  Opaque pagination cursor returned in the previous response's `pagination.next_cursor` field. Omit this parameter to start from the first page.
+  Cursor de paginación opaco devuelto en el campo `pagination.next_cursor` de la respuesta anterior. Se omite este parámetro para empezar por la primera página.
 </ParamField>
 
 <ParamField query="status" type="string">
-  Filter leads by their current status. Accepted values: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+  Filtra los leads por su estado actual. Valores aceptados: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
 </ParamField>
 
 <ParamField query="intent" type="string">
-  Filter leads by AI-detected purchase intent. Accepted values: `purchase_30_days`, `purchase_90_days`, `browsing`, `unknown`.
+  Filtra los leads por la intención de compra detectada por la IA. Valores aceptados: `purchase_30_days`, `purchase_90_days`, `browsing`, `unknown`.
 </ParamField>
 
 <ParamField query="channel" type="string">
-  Filter leads by the channel through which they first entered DeltaLead. Accepted values: `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
+  Filtra los leads por el canal a través del cual ingresaron por primera vez a DeltaLead. Valores aceptados: `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
 </ParamField>
 
 <ParamField query="score_min" type="integer">
-  Return only leads with a score greater than or equal to this value. Range: `0`–`100`.
+  Devuelve solo los leads con un score mayor o igual a este valor. Rango: `0`–`100`.
 </ParamField>
 
 <ParamField query="score_max" type="integer">
-  Return only leads with a score less than or equal to this value. Range: `0`–`100`.
+  Devuelve solo los leads con un score menor o igual a este valor. Rango: `0`–`100`.
 </ParamField>
 
 <ParamField query="created_after" type="string">
-  Return only leads created on or after this timestamp. Must be an ISO 8601 date-time string, e.g. `2024-01-15T00:00:00Z`.
+  Devuelve solo los leads creados en esta marca de tiempo o después. Debe ser una cadena de fecha y hora ISO 8601, p. ej. `2024-01-15T00:00:00Z`.
 </ParamField>
 
 <ParamField query="created_before" type="string">
-  Return only leads created on or before this timestamp. Must be an ISO 8601 date-time string, e.g. `2024-01-31T23:59:59Z`.
+  Devuelve solo los leads creados en esta marca de tiempo o antes. Debe ser una cadena de fecha y hora ISO 8601, p. ej. `2024-01-31T23:59:59Z`.
 </ParamField>
 
-## Example Request
+## Ejemplo de solicitud
 
 ```bash cURL
 curl 'https://platform-api.deltalead.ai/v1/leads?status=qualified&intent=purchase_30_days&limit=20' \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
-## Response
+## Respuesta
 
-A successful request returns HTTP `200 OK` with a JSON object containing a `data` array of lead objects and a `pagination` object for cursor-based navigation.
+Una solicitud exitosa devuelve HTTP `200 OK` con un objeto JSON que contiene un arreglo `data` de objetos lead y un objeto `pagination` para la navegación por cursor.
 
 ```json Example response
 {
@@ -106,88 +106,88 @@ A successful request returns HTTP `200 OK` with a JSON object containing a `data
 }
 ```
 
-### Response Fields
+### Campos de la respuesta
 
 <ResponseField name="data" type="array">
-  Array of lead objects matching the applied filters. See [Get Lead](/api-reference/leads/get) for the full description of each field.
+  Arreglo de objetos lead que coinciden con los filtros aplicados. La descripción completa de cada campo está en [Obtener lead](/api-reference/leads/get).
 </ResponseField>
 
 <ResponseField name="data[].id" type="string">
-  Unique identifier for the lead, prefixed with `lead_`.
+  Identificador único del lead, con el prefijo `lead_`.
 </ResponseField>
 
 <ResponseField name="data[].name" type="string">
-  Full name of the lead as captured from the source channel.
+  Nombre completo del lead tal como se captó desde el canal de origen.
 </ResponseField>
 
 <ResponseField name="data[].phone" type="string">
-  Lead's phone number in E.164 format, e.g. `+5491155551234`.
+  Número de teléfono del lead en formato E.164, p. ej. `+5491155551234`.
 </ResponseField>
 
 <ResponseField name="data[].email" type="string | null">
-  Lead's email address. `null` if not provided.
+  Dirección de email del lead. `null` si no se proporcionó.
 </ResponseField>
 
 <ResponseField name="data[].channel" type="string">
-  The channel through which the lead first contacted your dealership. One of `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
+  Canal por el que el lead contactó por primera vez al concesionario. Uno de `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
 </ResponseField>
 
 <ResponseField name="data[].vehicle_interest" type="string | null">
-  Vehicle model or description the lead expressed interest in. `null` if not yet identified.
+  Modelo o descripción del vehículo por el que el lead manifestó interés. `null` si todavía no se identificó.
 </ResponseField>
 
 <ResponseField name="data[].score" type="integer">
-  AI-generated lead quality score from `0` (cold) to `100` (highly qualified).
+  Score de calidad del lead generado por IA, de `0` (frío) a `100` (altamente calificado).
 </ResponseField>
 
 <ResponseField name="data[].intent" type="string">
-  Detected purchase intent. One of `purchase_30_days`, `purchase_90_days`, `browsing`, `unknown`.
+  Intención de compra detectada. Una de `purchase_30_days`, `purchase_90_days`, `browsing`, `unknown`.
 </ResponseField>
 
 <ResponseField name="data[].status" type="string">
-  Current lifecycle status of the lead. One of `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+  Estado actual del lead dentro de su ciclo de vida. Uno de `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
 </ResponseField>
 
 <ResponseField name="data[].assigned_to" type="string | null">
-  User ID of the sales advisor this lead is assigned to. `null` if unassigned.
+  ID de usuario del asesor de ventas al que está asignado el lead. `null` si no está asignado.
 </ResponseField>
 
 <ResponseField name="data[].created_at" type="string">
-  ISO 8601 timestamp of when the lead was first captured.
+  Marca de tiempo ISO 8601 del momento en que se captó el lead.
 </ResponseField>
 
 <ResponseField name="data[].updated_at" type="string">
-  ISO 8601 timestamp of the most recent field update.
+  Marca de tiempo ISO 8601 de la actualización de campo más reciente.
 </ResponseField>
 
 <ResponseField name="data[].last_activity_at" type="string">
-  ISO 8601 timestamp of the last message, call, or interaction recorded for this lead.
+  Marca de tiempo ISO 8601 del último mensaje, llamada o interacción registrada para este lead.
 </ResponseField>
 
 <ResponseField name="data[].organization_id" type="string">
-  Unique identifier of the DeltaLead organization (dealership) that owns this lead.
+  Identificador único de la organización de DeltaLead (concesionario) propietaria de este lead.
 </ResponseField>
 
 <ResponseField name="pagination" type="object">
-  Cursor-based pagination metadata.
+  Metadatos de la paginación por cursor.
 </ResponseField>
 
 <ResponseField name="pagination.total" type="integer">
-  Total number of leads matching the applied filters (across all pages).
+  Cantidad total de leads que coinciden con los filtros aplicados (en todas las páginas).
 </ResponseField>
 
 <ResponseField name="pagination.limit" type="integer">
-  Number of results returned in this page.
+  Cantidad de resultados devueltos en esta página.
 </ResponseField>
 
 <ResponseField name="pagination.has_more" type="boolean">
-  `true` if additional pages of results exist.
+  `true` si existen páginas adicionales de resultados.
 </ResponseField>
 
 <ResponseField name="pagination.next_cursor" type="string | null">
-  Pass this value as the `cursor` query parameter to fetch the next page. `null` when `has_more` is `false`.
+  Este valor se pasa como parámetro de consulta `cursor` para obtener la página siguiente. Es `null` cuando `has_more` es `false`.
 </ResponseField>
 
 <Tip>
-  To build an efficient sync pipeline, combine `created_after` with a stored cursor. Fetch once with `created_after` set to your last sync timestamp, then paginate using `next_cursor` until `has_more` is `false`.
+  Para armar un pipeline de sincronización eficiente, conviene combinar `created_after` con un cursor almacenado. Se hace una primera consulta con `created_after` en la marca de tiempo de la última sincronización y luego se pagina con `next_cursor` hasta que `has_more` sea `false`.
 </Tip>

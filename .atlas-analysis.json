@@ -9,14 +9,13 @@
   "navigation": {
     "languages": [
       {
-        "language": "en",
-        "default": true,
+        "language": "es",
         "tabs": [
           {
-            "tab": "Documentation",
+            "tab": "Documentación",
             "groups": [
               {
-                "group": "Get Started",
+                "group": "Primeros pasos",
                 "pages": [
                   "introduction",
                   "quickstart",
@@ -24,7 +23,7 @@
                 ]
               },
               {
-                "group": "Core Concepts",
+                "group": "Conceptos",
                 "pages": [
                   "concepts/leads",
                   "concepts/ai-agents",
@@ -33,7 +32,7 @@
                 ]
               },
               {
-                "group": "Platform",
+                "group": "Plataforma",
                 "pages": [
                   "platform/lead-qualification",
                   "platform/lead-traceability",
@@ -43,7 +42,7 @@
                 ]
               },
               {
-                "group": "Integrations",
+                "group": "Integraciones",
                 "pages": [
                   "integrations/overview",
                   "integrations/crm",
@@ -53,7 +52,7 @@
                 ]
               },
               {
-                "group": "Account & Billing",
+                "group": "Cuenta y facturación",
                 "pages": [
                   "account/plans",
                   "account/onboarding",
@@ -63,10 +62,10 @@
             ]
           },
           {
-            "tab": "REST API",
+            "tab": "API REST",
             "groups": [
               {
-                "group": "Overview",
+                "group": "Introducción",
                 "pages": [
                   "api-reference/introduction",
                   "api-reference/authentication",
@@ -84,7 +83,7 @@
                 ]
               },
               {
-                "group": "Conversations",
+                "group": "Conversaciones",
                 "pages": [
                   "api-reference/conversations/list",
                   "api-reference/conversations/get",
@@ -92,7 +91,7 @@
                 ]
               },
               {
-                "group": "Agents",
+                "group": "Agentes",
                 "pages": [
                   "api-reference/agents/list",
                   "api-reference/agents/get",
@@ -109,104 +108,105 @@
               }
             ]
           }
-        ]
+        ],
+        "default": true
       },
       {
-        "language": "es",
+        "language": "en",
         "tabs": [
           {
-            "tab": "Documentación",
+            "tab": "Documentation",
             "groups": [
               {
-                "group": "Primeros pasos",
+                "group": "Get Started",
                 "pages": [
-                  "es/introduction",
-                  "es/quickstart",
-                  "es/authentication"
+                  "en/introduction",
+                  "en/quickstart",
+                  "en/authentication"
                 ]
               },
               {
-                "group": "Conceptos",
+                "group": "Core Concepts",
                 "pages": [
-                  "es/concepts/leads",
-                  "es/concepts/ai-agents",
-                  "es/concepts/omnichannel",
-                  "es/concepts/lead-scoring"
+                  "en/concepts/leads",
+                  "en/concepts/ai-agents",
+                  "en/concepts/omnichannel",
+                  "en/concepts/lead-scoring"
                 ]
               },
               {
-                "group": "Plataforma",
+                "group": "Platform",
                 "pages": [
-                  "es/platform/lead-qualification",
-                  "es/platform/lead-traceability",
-                  "es/platform/vehicle-lifecycle",
-                  "es/platform/unified-inbox",
-                  "es/platform/campaigns"
+                  "en/platform/lead-qualification",
+                  "en/platform/lead-traceability",
+                  "en/platform/vehicle-lifecycle",
+                  "en/platform/unified-inbox",
+                  "en/platform/campaigns"
                 ]
               },
               {
-                "group": "Integraciones",
+                "group": "Integrations",
                 "pages": [
-                  "es/integrations/overview",
-                  "es/integrations/crm",
-                  "es/integrations/channels",
-                  "es/integrations/webhooks-zapier",
-                  "es/integrations/custom-webhook"
+                  "en/integrations/overview",
+                  "en/integrations/crm",
+                  "en/integrations/channels",
+                  "en/integrations/webhooks-zapier",
+                  "en/integrations/custom-webhook"
                 ]
               },
               {
-                "group": "Cuenta y facturación",
+                "group": "Account & Billing",
                 "pages": [
-                  "es/account/plans",
-                  "es/account/onboarding",
-                  "es/account/faq"
+                  "en/account/plans",
+                  "en/account/onboarding",
+                  "en/account/faq"
                 ]
               }
             ]
           },
           {
-            "tab": "API REST",
+            "tab": "REST API",
             "groups": [
               {
-                "group": "Introducción",
+                "group": "Overview",
                 "pages": [
-                  "es/api-reference/introduction",
-                  "es/api-reference/authentication",
-                  "es/api-reference/errors",
-                  "es/api-reference/pagination"
+                  "en/api-reference/introduction",
+                  "en/api-reference/authentication",
+                  "en/api-reference/errors",
+                  "en/api-reference/pagination"
                 ]
               },
               {
                 "group": "Leads",
                 "pages": [
-                  "es/api-reference/leads/list",
-                  "es/api-reference/leads/get",
-                  "es/api-reference/leads/create",
-                  "es/api-reference/leads/update"
+                  "en/api-reference/leads/list",
+                  "en/api-reference/leads/get",
+                  "en/api-reference/leads/create",
+                  "en/api-reference/leads/update"
                 ]
               },
               {
-                "group": "Conversaciones",
+                "group": "Conversations",
                 "pages": [
-                  "es/api-reference/conversations/list",
-                  "es/api-reference/conversations/get",
-                  "es/api-reference/conversations/send-message"
+                  "en/api-reference/conversations/list",
+                  "en/api-reference/conversations/get",
+                  "en/api-reference/conversations/send-message"
                 ]
               },
               {
-                "group": "Agentes",
+                "group": "Agents",
                 "pages": [
-                  "es/api-reference/agents/list",
-                  "es/api-reference/agents/get",
-                  "es/api-reference/agents/update"
+                  "en/api-reference/agents/list",
+                  "en/api-reference/agents/get",
+                  "en/api-reference/agents/update"
                 ]
               },
               {
                 "group": "Webhooks",
                 "pages": [
-                  "es/api-reference/webhooks/overview",
-                  "es/api-reference/webhooks/events",
-                  "es/api-reference/webhooks/custom-inbound"
+                  "en/api-reference/webhooks/overview",
+                  "en/api-reference/webhooks/events",
+                  "en/api-reference/webhooks/custom-inbound"
                 ]
               }
             ]

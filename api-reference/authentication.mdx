@@ -1,34 +1,34 @@
 ---
-title: "DeltaLead API Authentication: X-API-Key Header Guide"
-sidebarTitle: "Authentication"
-description: "Authenticate DeltaLead API requests by passing your API key in the X-API-Key header. Keys are created and managed in your dashboard settings."
+title: "Autenticación de la API de DeltaLead: cabecera X-API-Key"
+sidebarTitle: "Autenticación"
+description: "Las solicitudes a la API de DeltaLead se autentican con la clave de API en la cabecera X-API-Key; las claves se crean y gestionan en el panel."
 ---
 
-Every request to the DeltaLead API must include a valid API key in the `X-API-Key` request header. Requests that omit the header or supply an invalid key are rejected with a `401 Unauthorized` response before any processing occurs.
+Toda solicitud a la API de DeltaLead debe incluir una clave de API válida en la cabecera `X-API-Key`. Las solicitudes que omiten la cabecera o envían una clave inválida se rechazan con una respuesta `401 Unauthorized` antes de cualquier procesamiento.
 
-## Getting Your API Key
+## Obtener la clave de API
 
-Follow these steps to generate a new API key from your DeltaLead dashboard:
+Estos pasos generan una clave de API nueva desde el panel de DeltaLead:
 
 <Steps>
-  <Step title="Open Settings">
-    Log in to your DeltaLead account and navigate to **Settings** in the left sidebar.
+  <Step title="Abrir Configuración">
+    Iniciar sesión en la cuenta de DeltaLead y abrir **Configuración** en la barra lateral izquierda.
   </Step>
-  <Step title="Go to API Keys">
-    Select the **API Keys** section. You will see a list of any keys you have already created, along with their creation date and last-used timestamp.
+  <Step title="Ir a Claves de API">
+    Seleccionar la sección **Claves de API**. Allí se listan las claves ya creadas, con su fecha de creación y la marca de tiempo del último uso.
   </Step>
-  <Step title="Generate a New Key">
-    Click **Generate New Key**, optionally give the key a descriptive label (for example, `Production – Zapier` or `Staging – testing`), and confirm. The full key value is displayed **only once** — copy it immediately and store it securely.
+  <Step title="Generar una clave nueva">
+    Hacer clic en **Generar clave nueva**, opcionalmente asignarle una etiqueta descriptiva (por ejemplo, `Production – Zapier` o `Staging – testing`) y confirmar. El valor completo de la clave se muestra **una sola vez**: hay que copiarlo de inmediato y guardarlo de forma segura.
   </Step>
 </Steps>
 
 <Warning>
-  Your API key grants full access to your DeltaLead account. Never commit it to source code, paste it into chat messages, or store it in plain text. Use environment variables or a dedicated secrets manager (such as AWS Secrets Manager, HashiCorp Vault, or Doppler) to inject the key at runtime. If a key is compromised, revoke it immediately from **Settings → API Keys** and generate a replacement.
+  La clave de API otorga acceso total a la cuenta de DeltaLead. Nunca debe subirse al código fuente, pegarse en mensajes de chat ni guardarse en texto plano. Conviene usar variables de entorno o un gestor de secretos dedicado (como AWS Secrets Manager, HashiCorp Vault o Doppler) para inyectar la clave en tiempo de ejecución. Si una clave queda comprometida, se revoca de inmediato desde **Configuración → Claves de API** y se genera un reemplazo.
 </Warning>
 
-## Sending Your API Key
+## Enviar la clave de API
 
-Pass your API key in the `X-API-Key` header on every request. The examples below show the same `GET /leads` call in three common environments.
+La clave de API se envía en la cabecera `X-API-Key` en cada solicitud. Los ejemplos siguientes muestran la misma llamada `GET /leads` en tres entornos habituales.
 
 <CodeGroup>
 
@@ -59,21 +59,21 @@ leads = response.json()
 
 </CodeGroup>
 
-## Key Scopes
+## Alcance de las claves
 
-Keys created through the dashboard have **full access** to all API resources associated with your account — leads, conversations, agents, webhooks, and account configuration. Scope-restricted keys (read-only, webhook-only, etc.) are available on the Enterprise plan. Contact your account manager to enable granular key permissions.
+Las claves creadas desde el panel tienen **acceso total** a todos los recursos de API asociados a la cuenta: leads, conversaciones, agentes, webhooks y configuración de la cuenta. Las claves con alcance restringido (solo lectura, solo webhooks, etc.) están disponibles en el plan Enterprise. Para habilitar permisos granulares hay que contactar al ejecutivo de cuenta.
 
-## Authentication Errors
+## Errores de autenticación
 
-The API returns the following HTTP status codes for authentication failures:
+La API devuelve los siguientes códigos de estado HTTP ante fallos de autenticación:
 
-| Status | Cause |
+| Estado | Causa |
 |---|---|
-| `401 Unauthorized` | The `X-API-Key` header is missing, malformed, or contains an invalid key |
-| `403 Forbidden` | The key is valid but the associated account is suspended, or the requested operation requires a higher-tier plan |
+| `401 Unauthorized` | Falta la cabecera `X-API-Key`, está mal formada o contiene una clave inválida |
+| `403 Forbidden` | La clave es válida pero la cuenta asociada está suspendida, o la operación solicitada requiere un plan superior |
 
-A `403` on a specific endpoint typically means the feature is not included in your current plan (Growth, Advanced, or Enterprise). Review the [plans page](https://www.deltalead.ai/es-ar/precios) or contact support to upgrade.
+Un `403` en un endpoint concreto suele indicar que la funcionalidad no está incluida en el plan actual (Growth, Advanced o Enterprise). Se puede revisar la [página de planes](https://www.deltalead.ai/es-ar/precios) o contactar a soporte para actualizar.
 
 <Tip>
-  Create separate API keys for your development and production environments — for example, `Staging – integration tests` and `Production – live sync`. This way you can revoke a compromised staging key without disrupting production traffic. Rotate keys periodically as part of your security hygiene, even if they have not been exposed.
+  Conviene crear claves de API separadas para los entornos de desarrollo y producción; por ejemplo, `Staging – integration tests` y `Production – live sync`. Así se puede revocar una clave de staging comprometida sin interrumpir el tráfico de producción. Rotar las claves de forma periódica es parte de una buena higiene de seguridad, incluso si nunca quedaron expuestas.
 </Tip>

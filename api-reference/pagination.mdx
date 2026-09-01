@@ -1,24 +1,24 @@
 ---
-title: "DeltaLead API Cursor-Based Pagination for List Endpoints"
-sidebarTitle: "Pagination"
-description: "DeltaLead list endpoints use cursor-based pagination. Supply the cursor and limit parameters to step through leads, conversations, and agent records."
+title: "Paginación por cursor en los endpoints de listado de DeltaLead"
+sidebarTitle: "Paginación"
+description: "Los endpoints de listado de DeltaLead paginan por cursor: los parámetros cursor y limit permiten recorrer leads, conversaciones y agentes página por página."
 ---
 
-All DeltaLead list endpoints — `GET /leads`, `GET /conversations`, and `GET /agents` — return paginated results using cursor-based pagination. Rather than page numbers, the API returns an opaque `next_cursor` value that encodes your position in the result set. Pass it back as the `cursor` query parameter to fetch the next page. When `has_more` is `false`, you have retrieved all available records.
+Todos los endpoints de listado de DeltaLead —`GET /leads`, `GET /conversations` y `GET /agents`— devuelven resultados paginados mediante paginación por cursor. En lugar de números de página, la API devuelve un valor opaco `next_cursor` que codifica la posición dentro del conjunto de resultados. Ese valor se reenvía como parámetro de consulta `cursor` para obtener la página siguiente. Cuando `has_more` es `false`, ya se recuperaron todos los registros disponibles.
 
-## Pagination Parameters
+## Parámetros de paginación
 
 <ParamField query="limit" type="integer" default="20">
-  The number of results to return per page. Minimum: `1`. Maximum: `100`. Defaults to `20` if omitted.
+  Cantidad de resultados a devolver por página. Mínimo: `1`. Máximo: `100`. Si se omite, el valor predeterminado es `20`.
 </ParamField>
 
 <ParamField query="cursor" type="string">
-  An opaque cursor string returned in the previous response's `pagination.next_cursor` field. Omit this parameter to start from the beginning of the result set.
+  Cadena de cursor opaca devuelta en el campo `pagination.next_cursor` de la respuesta anterior. Se omite este parámetro para empezar desde el inicio del conjunto de resultados.
 </ParamField>
 
-## Paginated Response Format
+## Formato de la respuesta paginada
 
-Every list endpoint wraps results in a `data` array and includes a `pagination` object:
+Todos los endpoints de listado envuelven los resultados en un arreglo `data` e incluyen un objeto `pagination`:
 
 ```json
 {
@@ -34,24 +34,24 @@ Every list endpoint wraps results in a `data` array and includes a `pagination` 
 ```
 
 <ResponseField name="data" type="array">
-  The array of resource objects for the current page.
+  El arreglo de objetos de recurso de la página actual.
 </ResponseField>
 
 <ResponseField name="pagination.limit" type="integer">
-  The page size used for this response — mirrors the `limit` you requested.
+  El tamaño de página usado en esta respuesta; refleja el `limit` solicitado.
 </ResponseField>
 
 <ResponseField name="pagination.next_cursor" type="string">
-  Pass this value as the `cursor` query parameter in your next request to retrieve the following page. This field is `null` when `has_more` is `false`.
+  Este valor se pasa como parámetro de consulta `cursor` en la solicitud siguiente para obtener la próxima página. El campo es `null` cuando `has_more` es `false`.
 </ResponseField>
 
 <ResponseField name="pagination.has_more" type="boolean">
-  `true` if additional pages exist beyond this one; `false` when you have reached the end of the result set.
+  `true` si existen páginas adicionales más allá de esta; `false` cuando se llegó al final del conjunto de resultados.
 </ResponseField>
 
-## Iterating All Pages
+## Recorrer todas las páginas
 
-The example below fetches every lead in your account by looping until `has_more` is `false`:
+El ejemplo siguiente obtiene todos los leads de la cuenta iterando hasta que `has_more` es `false`:
 
 ```javascript Fetch all leads
 async function fetchAllLeads(apiKey) {
@@ -75,13 +75,13 @@ async function fetchAllLeads(apiKey) {
 ```
 
 <Note>
-  Cursors are opaque strings — do not attempt to parse, decode, or construct them manually. Their internal format may change between API versions without notice. Always use the `next_cursor` value exactly as returned in the response.
+  Los cursores son cadenas opacas: no hay que analizarlos, decodificarlos ni construirlos manualmente. Su formato interno puede cambiar entre versiones de la API sin aviso. Siempre se usa el valor de `next_cursor` exactamente como llega en la respuesta.
 </Note>
 
-## Filtering and Sorting with Pagination
+## Filtrado y ordenamiento con paginación
 
-You can combine pagination parameters with any filtering or sorting parameters supported by a given endpoint. Filtering parameters are encoded into the cursor, so you do not need to repeat them on subsequent pages — only the `cursor` (and optionally `limit`) are required after the first request.
+Los parámetros de paginación se pueden combinar con cualquier parámetro de filtrado u ordenamiento que admita un endpoint. Los parámetros de filtrado quedan codificados dentro del cursor, así que no hace falta repetirlos en las páginas siguientes: después de la primera solicitud solo se requiere `cursor` (y, opcionalmente, `limit`).
 
 <Tip>
-  Set `limit=100` when you need to fetch a large number of records. Using the maximum page size minimises the total number of HTTP round-trips required, which reduces both latency and the risk of hitting rate limits. See [Rate Limits](/api-reference/introduction#rate-limits) for details.
+  Conviene usar `limit=100` cuando hay que recuperar una gran cantidad de registros. El tamaño máximo de página minimiza la cantidad total de viajes HTTP, lo que reduce tanto la latencia como el riesgo de alcanzar los límites de tasa. Más detalles en [Límites de tasa](/api-reference/introduction).
 </Tip>

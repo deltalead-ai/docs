@@ -1,10 +1,10 @@
 ---
-title: "Modify Lead Properties — DeltaLead REST API Reference"
-sidebarTitle: "Update Lead"
-description: "Selectively update a lead record. Send only the fields to change — status, advisor, vehicle interest, or notes — and all other properties remain untouched."
+title: "Modificar campos de un lead — referencia de la API de DeltaLead"
+sidebarTitle: "Actualizar lead"
+description: "Actualizar un lead de forma selectiva: solo cambian los campos enviados —estado, asesor, vehículo de interés o notas— y el resto del registro queda intacto."
 ---
 
-Update one or more fields on an existing lead without overwriting the entire record. Common use cases include advancing a lead through the sales pipeline by changing its status, assigning it to a specific sales advisor, correcting the vehicle of interest, or adding internal notes after a conversation. Because this endpoint uses PATCH semantics, you only need to send the fields you want to change.
+Este endpoint actualiza uno o más campos de un lead existente sin sobrescribir el registro completo. Los casos de uso habituales incluyen avanzar un lead en el pipeline de ventas cambiando su estado, asignarlo a un asesor de ventas concreto, corregir el vehículo de interés o agregar notas internas después de una conversación. Como el endpoint usa semántica PATCH, solo hace falta enviar los campos que se quieren cambiar.
 
 ## Endpoint
 
@@ -12,35 +12,35 @@ Update one or more fields on an existing lead without overwriting the entire rec
 PATCH https://platform-api.deltalead.ai/v1/leads/{id}
 ```
 
-## Path Parameters
+## Parámetros de ruta
 
 <ParamField path="id" type="string" required>
-  The unique identifier of the lead to update, e.g. `lead_abc123`.
+  Identificador único del lead a actualizar, p. ej. `lead_abc123`.
 </ParamField>
 
-## Request Body
+## Cuerpo de la solicitud
 
-All fields are optional. Only the fields you include will be modified.
+Todos los campos son opcionales. Solo se modifican los campos incluidos en la solicitud.
 
 <ParamField body="status" type="string">
-  New lifecycle status for the lead. Accepted values: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+  Nuevo estado del ciclo de vida del lead. Valores aceptados: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
 </ParamField>
 
 <ParamField body="assigned_to" type="string">
-  User ID of the sales advisor to assign this lead to. Pass `null` to unassign the lead.
+  ID de usuario del asesor de ventas al que se asigna este lead. Se pasa `null` para dejarlo sin asignar.
 </ParamField>
 
 <ParamField body="vehicle_interest" type="string">
-  Update the vehicle model or description the lead is interested in, e.g. `"Ford Ranger XLS 4x4 2024"`. The AI agent picks up this change on subsequent interactions.
+  Actualiza el modelo o la descripción del vehículo que le interesa al lead, p. ej. `"Ford Ranger XLS 4x4 2024"`. El agente de IA toma este cambio en las interacciones posteriores.
 </ParamField>
 
 <ParamField body="notes" type="string">
-  Internal notes about this lead. This value **replaces** any existing notes — append manually if you need to preserve prior content.
+  Notas internas sobre este lead. Este valor **reemplaza** las notas existentes: si hay que conservar el contenido previo, se debe anexar manualmente.
 </ParamField>
 
-## Example Request
+## Ejemplo de solicitud
 
-Mark a lead as assigned and set the responsible sales advisor:
+Marcar un lead como asignado y definir el asesor de ventas responsable:
 
 ```bash cURL
 curl -X PATCH https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
@@ -49,9 +49,9 @@ curl -X PATCH https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
   -d '{"status": "assigned", "assigned_to": "user_xyz789"}'
 ```
 
-## Response
+## Respuesta
 
-A successful request returns HTTP `200 OK` with the complete, updated lead object.
+Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo y actualizado.
 
 ```json 200 OK
 {
@@ -73,5 +73,5 @@ A successful request returns HTTP `200 OK` with the complete, updated lead objec
 ```
 
 <Note>
-  This endpoint uses **PATCH** semantics — only the fields present in your request body are modified. Fields you omit remain exactly as they were. If you need to clear an optional field such as `assigned_to`, pass it explicitly as `null`.
+  Este endpoint usa semántica **PATCH**: solo se modifican los campos presentes en el cuerpo de la solicitud. Los campos omitidos quedan exactamente como estaban. Para vaciar un campo opcional como `assigned_to`, hay que pasarlo explícitamente como `null`.
 </Note>
