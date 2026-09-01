@@ -141,14 +141,38 @@
               {
                 "group": "Conceptos",
                 "pages": [
-                  "es/concepts/leads"
+                  "es/concepts/leads",
+                  "es/concepts/ai-agents",
+                  "es/concepts/omnichannel",
+                  "es/concepts/lead-scoring"
+                ]
+              },
+              {
+                "group": "Plataforma",
+                "pages": [
+                  "es/platform/lead-qualification",
+                  "es/platform/lead-traceability",
+                  "es/platform/vehicle-lifecycle",
+                  "es/platform/unified-inbox",
+                  "es/platform/campaigns"
                 ]
               },
               {
                 "group": "Integraciones",
                 "pages": [
                   "es/integrations/overview",
+                  "es/integrations/crm",
+                  "es/integrations/channels",
+                  "es/integrations/webhooks-zapier",
                   "es/integrations/custom-webhook"
+                ]
+              },
+              {
+                "group": "Cuenta y facturación",
+                "pages": [
+                  "es/account/plans",
+                  "es/account/onboarding",
+                  "es/account/faq"
                 ]
               }
             ]
