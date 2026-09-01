@@ -58,9 +58,13 @@ Send an optional `Idempotency-Key` request header to make retries safe:
 Idempotency-Key: 8f14e45f-ea67-4f6a-b3c1-9c1e2d0b7a52
 ```
 
-A delivery carrying a key already seen for your account returns `200 {"status":"duplicate"}` and creates nothing.
+A delivery carrying a key already seen for your account returns `200 {"status": "duplicate"}` and creates nothing.
 
-Without the header, DeltaLead falls back to a content hash of the payload, so an identical retry is still deduplicated. Sending an explicit key is preferred: it lets you retry a delivery whose payload is genuinely identical to an earlier, unrelated one without losing the second lead.
+<Warning>
+  Deliveries sent **without** an `Idempotency-Key` are not deduplicated. Two identical requests create two leads. If your client retries — on a timeout, a `500`, or a network error — send an `Idempotency-Key` or you will duplicate the lead.
+</Warning>
+
+Generate the key from something stable in your own system, such as the submission ID of the form that produced the lead. Reusing that value on every retry of the same submission is what makes the retry safe.
 
 ## Limits
 
@@ -90,9 +94,9 @@ A failure returns an error envelope, where `detail` identifies the cause:
 |---|---|---|
 | `200` | `ok` | Delivery accepted for processing |
 | `200` | `duplicate` | The `Idempotency-Key` has already been seen |
-| `400` | `invalid_body` | The body could not be decoded |
-| `400` | `invalid_json` | The body decoded but is not a JSON object |
-| `400` | `missing_required_fields` | Lead contract v1 is not satisfied |
+| `400` | `invalid_body` | The body could not be read |
+| `400` | `invalid_json` | The body is empty, is not valid JSON, or is not a JSON object |
+| `400` | `missing_required_fields` | Lead contract v1 is not satisfied, including a missing or non-object `lead` |
 | `400` | `payload_too_large` | The body is over 256 KB |
 | `401` | `unauthorized` | Any authentication failure |
 | `500` | `enqueue_failed` | Accepted but could not be queued |
@@ -102,7 +106,7 @@ The route accepts `POST` only. Any other method, or any other path on this host,
 A `200` confirms that DeltaLead has accepted the delivery, not that the lead exists. The lead is created asynchronously a few seconds later.
 
 <Tip>
-  Retry on `500 enqueue_failed` — the delivery was valid and the failure is on our side. Do not retry any `4xx`; the request will fail again unchanged. Retries are always safe when you send an `Idempotency-Key`.
+  Retry on `500 enqueue_failed` — the delivery was valid and the failure is on our side. Do not retry any `4xx`; the request will fail again unchanged. Always send an `Idempotency-Key` on a request you might retry, since retries are only deduplicated when you do.
 </Tip>
 
 ## Examples
