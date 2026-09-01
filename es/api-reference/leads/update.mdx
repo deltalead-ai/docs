@@ -1,0 +1,77 @@
+---
+title: "Modificar campos de un lead — referencia de la API de DeltaLead"
+sidebarTitle: "Actualizar lead"
+description: "Actualizar un lead de forma selectiva: solo cambian los campos enviados —estado, asesor, vehículo de interés o notas— y el resto del registro queda intacto."
+---
+
+Este endpoint actualiza uno o más campos de un lead existente sin sobrescribir el registro completo. Los casos de uso habituales incluyen avanzar un lead en el pipeline de ventas cambiando su estado, asignarlo a un asesor de ventas concreto, corregir el vehículo de interés o agregar notas internas después de una conversación. Como el endpoint usa semántica PATCH, solo hace falta enviar los campos que se quieren cambiar.
+
+## Endpoint
+
+```text
+PATCH https://api.deltalead.ai/v1/leads/{id}
+```
+
+## Parámetros de ruta
+
+<ParamField path="id" type="string" required>
+  Identificador único del lead a actualizar, p. ej. `lead_abc123`.
+</ParamField>
+
+## Cuerpo de la solicitud
+
+Todos los campos son opcionales. Solo se modifican los campos incluidos en la solicitud.
+
+<ParamField body="status" type="string">
+  Nuevo estado del ciclo de vida del lead. Valores aceptados: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+</ParamField>
+
+<ParamField body="assigned_to" type="string">
+  ID de usuario del asesor de ventas al que se asigna este lead. Se pasa `null` para dejarlo sin asignar.
+</ParamField>
+
+<ParamField body="vehicle_interest" type="string">
+  Actualiza el modelo o la descripción del vehículo que le interesa al lead, p. ej. `"Ford Ranger XLS 4x4 2024"`. El agente de IA toma este cambio en las interacciones posteriores.
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Notas internas sobre este lead. Este valor **reemplaza** las notas existentes: si hay que conservar el contenido previo, se debe anexar manualmente.
+</ParamField>
+
+## Ejemplo de solicitud
+
+Marcar un lead como asignado y definir el asesor de ventas responsable:
+
+```bash cURL
+curl -X PATCH https://api.deltalead.ai/v1/leads/lead_abc123 \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "assigned", "assigned_to": "user_xyz789"}'
+```
+
+## Respuesta
+
+Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo y actualizado.
+
+```json 200 OK
+{
+  "id": "lead_abc123",
+  "name": "María García",
+  "phone": "+5491155551234",
+  "email": "maria@example.com",
+  "channel": "whatsapp",
+  "vehicle_interest": "Toyota Hilux SRX 2024",
+  "score": 87,
+  "intent": "purchase_30_days",
+  "status": "assigned",
+  "assigned_to": "user_xyz789",
+  "created_at": "2024-03-10T14:22:00Z",
+  "updated_at": "2024-03-12T11:30:45Z",
+  "last_activity_at": "2024-03-12T11:30:45Z",
+  "organization_id": "org_00112233"
+}
+```
+
+<Note>
+  Este endpoint usa semántica **PATCH**: solo se modifican los campos presentes en el cuerpo de la solicitud. Los campos omitidos quedan exactamente como estaban. Para vaciar un campo opcional como `assigned_to`, hay que pasarlo explícitamente como `null`.
+</Note>

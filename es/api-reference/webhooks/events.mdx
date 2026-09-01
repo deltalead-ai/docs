@@ -1,0 +1,202 @@
+---
+title: "Referencia de eventos de webhook — todos los tipos de evento"
+sidebarTitle: "Eventos"
+description: "Referencia de todos los eventos de webhook de DeltaLead: ciclo de vida del lead, conversación, citas y derivaciones, con sus esquemas de payload completos."
+---
+
+Esta página es la referencia definitiva de cada evento de webhook que DeltaLead puede entregar a un endpoint. Los eventos se agrupan por dominio: ciclo de vida del lead, actividad de conversación, citas y derivaciones de agente. De cada evento se documenta la condición que lo dispara y un payload de ejemplo completo, para saber con exactitud qué esperar en el manejador.
+
+<Note>
+  Conviene suscribirse únicamente a los eventos que la integración realmente necesita. Descartar los tipos de evento irrelevantes reduce las solicitudes POST innecesarias hacia el servidor y mantiene acotada la lógica del manejador.
+</Note>
+
+## Eventos del ciclo de vida del lead
+
+<Accordion title="lead.created — Ingresa un lead nuevo a DeltaLead">
+  Se dispara en el momento en que llega un lead nuevo a DeltaLead desde cualquier canal conectado: WhatsApp, Meta Ads, MercadoLibre, formulario web, email o teléfono. Al crearse, el score del lead es `0`; la calificación ocurre de forma asincrónica y dispara `lead.qualified` una vez completada.
+
+  ```json Example payload
+  {
+    "event": "lead.created",
+    "timestamp": "2024-11-07T10:00:00Z",
+    "organization_id": "org_xyz789",
+    "data": {
+      "id": "lead_abc123",
+      "name": "Carlos Rodríguez",
+      "phone": "+5491144441234",
+      "channel": "facebook",
+      "vehicle_interest": "Hilux 2024",
+      "status": "new",
+      "score": 0,
+      "created_at": "2024-11-07T10:00:00Z"
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="lead.qualified — La IA completa la calificación del lead">
+  Se dispara cuando el agente de IA termina su conversación de calificación y asigna un score de intención de compra. El campo `score` va de `0` a `100`. El campo `intent` refleja la evaluación de la IA sobre qué tan cerca está el lead de comprar, por ejemplo `purchase_30_days` o `researching`.
+
+  ```json Example payload
+  {
+    "event": "lead.qualified",
+    "timestamp": "2024-11-07T10:07:30Z",
+    "organization_id": "org_xyz789",
+    "data": {
+      "id": "lead_abc123",
+      "name": "Carlos Rodríguez",
+      "phone": "+5491144441234",
+      "score": 87,
+      "intent": "purchase_30_days",
+      "vehicle_interest": "Hilux SRX 2024",
+      "status": "qualified",
+      "channel": "facebook"
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="lead.updated — Cambia el estado, el score o la asignación del lead">
+  Se dispara cada vez que se modifica un registro de lead después de su creación. Entre los disparadores habituales están un cambio manual de estado hecho por un vendedor, una revisión del score tras una conversación de seguimiento o una actualización del vehículo de interés.
+
+  ```json Example payload
+  {
+    "event": "lead.updated",
+    "timestamp": "2024-11-07T11:00:00Z",
+    "organization_id": "org_xyz789",
+    "data": {
+      "id": "lead_abc123",
+      "name": "Carlos Rodríguez",
+      "phone": "+5491144441234",
+      "score": 91,
+      "status": "in_progress",
+      "vehicle_interest": "Hilux SRX 2024",
+      "channel": "facebook",
+      "updated_at": "2024-11-07T11:00:00Z"
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="lead.assigned — El lead se asigna a un vendedor humano">
+  Se dispara cuando un lead calificado se asigna a un integrante concreto del equipo de ventas, ya sea de forma automática por las reglas de enrutamiento de DeltaLead o de forma manual por un responsable. Este evento sirve para avisarle al vendedor asignado desde sistemas propios.
+
+  ```json Example payload
+  {
+    "event": "lead.assigned",
+    "timestamp": "2024-11-07T11:05:00Z",
+    "organization_id": "org_xyz789",
+    "data": {
+      "id": "lead_abc123",
+      "name": "Carlos Rodríguez",
+      "phone": "+5491144441234",
+      "score": 91,
+      "status": "assigned",
+      "assigned_to": {
+        "id": "user_seller001",
+        "name": "Laura Méndez",
+        "email": "laura.mendez@concesionaria.com"
+      },
+      "channel": "facebook",
+      "vehicle_interest": "Hilux SRX 2024"
+    }
+  }
+  ```
+</Accordion>
+
+## Eventos de conversación
+
+<Accordion title="conversation.started — Comienza una conversación nueva">
+  Se dispara cuando un lead inicia una conversación nueva en cualquier canal. Un mismo lead puede tener varias conversaciones a lo largo del tiempo; cada una dispara su propio evento `conversation.started`.
+
+  ```json Example payload
+  {
+    "event": "conversation.started",
+    "timestamp": "2024-11-07T10:00:05Z",
+    "organization_id": "org_xyz789",
+    "data": {
+      "conversation_id": "conv_111aaa",
+      "lead_id": "lead_abc123",
+      "lead_name": "Carlos Rodríguez",
+      "channel": "facebook",
+      "agent_id": "agent_abc123",
+      "agent_name": "Martín de Ventas",
+      "started_at": "2024-11-07T10:00:05Z"
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="conversation.message.received — Llega un mensaje entrante">
+  Se dispara cada vez que se recibe un mensaje entrante del lead durante una conversación activa. Suscribirse a este evento permite replicar el historial de conversación en un CRM o data warehouse propio en tiempo real.
+
+  ```json Example payload
+  {
+    "event": "conversation.message.received",
+    "timestamp": "2024-11-07T10:01:20Z",
+    "organization_id": "org_xyz789",
+    "data": {
+      "conversation_id": "conv_111aaa",
+      "lead_id": "lead_abc123",
+      "lead_name": "Carlos Rodríguez",
+      "channel": "facebook",
+      "message": {
+        "id": "msg_999zzz",
+        "body": "¿Tienen la Hilux SRX en stock?",
+        "type": "text",
+        "received_at": "2024-11-07T10:01:20Z"
+      }
+    }
+  }
+  ```
+</Accordion>
+
+## Eventos de citas
+
+<Accordion title="appointment.scheduled — La IA agenda un test drive o una visita al showroom">
+  Se dispara cuando un agente de IA logra agendar una cita con un lead, por lo general un test drive o una visita al showroom. Este evento sirve para sumar la cita al sistema de calendario, avisarle al vendedor responsable o preparar el vehículo.
+
+  ```json Example payload
+  {
+    "event": "appointment.scheduled",
+    "timestamp": "2024-11-07T10:12:00Z",
+    "organization_id": "org_xyz789",
+    "data": {
+      "lead_id": "lead_abc123",
+      "lead_name": "Carlos Rodríguez",
+      "appointment_type": "test_drive",
+      "scheduled_at": "2024-11-09T11:00:00Z",
+      "vehicle_interest": "Hilux SRX 2024"
+    }
+  }
+  ```
+</Accordion>
+
+## Eventos de agente
+
+<Accordion title="agent.handoff — La IA transfiere la conversación a una persona">
+  Se dispara cuando un agente de IA determina que la conversación requiere intervención humana e inicia una derivación. Ocurre al detectarse uno de los `handoff_triggers` configurados en el agente, por ejemplo un lead que pide negociar el precio o consultar las condiciones de financiación. El vendedor que la recibe obtiene el contexto completo de la conversación.
+
+  ```json Example payload
+  {
+    "event": "agent.handoff",
+    "timestamp": "2024-11-07T10:15:00Z",
+    "organization_id": "org_xyz789",
+    "data": {
+      "conversation_id": "conv_111aaa",
+      "lead_id": "lead_abc123",
+      "lead_name": "Carlos Rodríguez",
+      "agent_id": "agent_abc123",
+      "agent_name": "Martín de Ventas",
+      "trigger": "financing",
+      "channel": "facebook",
+      "assigned_to": {
+        "id": "user_seller001",
+        "name": "Laura Méndez",
+        "email": "laura.mendez@concesionaria.com"
+      },
+      "handoff_at": "2024-11-07T10:15:00Z"
+    }
+  }
+  ```
+</Accordion>

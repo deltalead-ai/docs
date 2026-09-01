@@ -1,0 +1,87 @@
+---
+title: "Paginación por cursor en los endpoints de listado de DeltaLead"
+sidebarTitle: "Paginación"
+description: "Los endpoints de listado de DeltaLead paginan por cursor: los parámetros cursor y limit permiten recorrer leads, conversaciones y agentes página por página."
+---
+
+Todos los endpoints de listado de DeltaLead —`GET /leads`, `GET /conversations` y `GET /agents`— devuelven resultados paginados mediante paginación por cursor. En lugar de números de página, la API devuelve un valor opaco `next_cursor` que codifica la posición dentro del conjunto de resultados. Ese valor se reenvía como parámetro de consulta `cursor` para obtener la página siguiente. Cuando `has_more` es `false`, ya se recuperaron todos los registros disponibles.
+
+## Parámetros de paginación
+
+<ParamField query="limit" type="integer" default="20">
+  Cantidad de resultados a devolver por página. Mínimo: `1`. Máximo: `100`. Si se omite, el valor predeterminado es `20`.
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Cadena de cursor opaca devuelta en el campo `pagination.next_cursor` de la respuesta anterior. Se omite este parámetro para empezar desde el inicio del conjunto de resultados.
+</ParamField>
+
+## Formato de la respuesta paginada
+
+Todos los endpoints de listado envuelven los resultados en un arreglo `data` e incluyen un objeto `pagination`:
+
+```json
+{
+  "data": [
+    { "id": "lead_abc123", "..." }
+  ],
+  "pagination": {
+    "limit": 20,
+    "next_cursor": "eyJpZCI6ImxlYWRfYWJjMTIzIn0",
+    "has_more": true
+  }
+}
+```
+
+<ResponseField name="data" type="array">
+  El arreglo de objetos de recurso de la página actual.
+</ResponseField>
+
+<ResponseField name="pagination.limit" type="integer">
+  El tamaño de página usado en esta respuesta; refleja el `limit` solicitado.
+</ResponseField>
+
+<ResponseField name="pagination.next_cursor" type="string">
+  Este valor se pasa como parámetro de consulta `cursor` en la solicitud siguiente para obtener la próxima página. El campo es `null` cuando `has_more` es `false`.
+</ResponseField>
+
+<ResponseField name="pagination.has_more" type="boolean">
+  `true` si existen páginas adicionales más allá de esta; `false` cuando se llegó al final del conjunto de resultados.
+</ResponseField>
+
+## Recorrer todas las páginas
+
+El ejemplo siguiente obtiene todos los leads de la cuenta iterando hasta que `has_more` es `false`:
+
+```javascript Fetch all leads
+async function fetchAllLeads(apiKey) {
+  const leads = [];
+  let cursor = null;
+
+  do {
+    const url = new URL('https://api.deltalead.ai/v1/leads');
+    url.searchParams.set('limit', '100');
+    if (cursor) url.searchParams.set('cursor', cursor);
+
+    const res = await fetch(url, { headers: { 'X-API-Key': apiKey } });
+    const page = await res.json();
+
+    leads.push(...page.data);
+    cursor = page.pagination.has_more ? page.pagination.next_cursor : null;
+  } while (cursor);
+
+  return leads;
+}
+```
+
+<Note>
+  Los cursores son cadenas opacas: no hay que analizarlos, decodificarlos ni construirlos manualmente. Su formato interno puede cambiar entre versiones de la API sin aviso. Siempre se usa el valor de `next_cursor` exactamente como llega en la respuesta.
+</Note>
+
+## Filtrado y ordenamiento con paginación
+
+Los parámetros de paginación se pueden combinar con cualquier parámetro de filtrado u ordenamiento que admita un endpoint. Los parámetros de filtrado quedan codificados dentro del cursor, así que no hace falta repetirlos en las páginas siguientes: después de la primera solicitud solo se requiere `cursor` (y, opcionalmente, `limit`).
+
+<Tip>
+  Conviene usar `limit=100` cuando hay que recuperar una gran cantidad de registros. El tamaño máximo de página minimiza la cantidad total de viajes HTTP, lo que reduce tanto la latencia como el riesgo de alcanzar los límites de tasa. Más detalles en [Límites de tasa](/es/api-reference/introduction).
+</Tip>

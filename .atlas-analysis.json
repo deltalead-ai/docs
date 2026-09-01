@@ -7,100 +7,184 @@
   "lightColor": "#ffffff",
   "darkColor": "#243c9b",
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Documentation",
-        "groups": [
+        "language": "en",
+        "default": true,
+        "tabs": [
           {
-            "group": "Get Started",
-            "pages": [
-              "introduction",
-              "quickstart",
-              "authentication"
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Get Started",
+                "pages": [
+                  "introduction",
+                  "quickstart",
+                  "authentication"
+                ]
+              },
+              {
+                "group": "Core Concepts",
+                "pages": [
+                  "concepts/leads",
+                  "concepts/ai-agents",
+                  "concepts/omnichannel",
+                  "concepts/lead-scoring"
+                ]
+              },
+              {
+                "group": "Platform",
+                "pages": [
+                  "platform/lead-qualification",
+                  "platform/lead-traceability",
+                  "platform/vehicle-lifecycle",
+                  "platform/unified-inbox",
+                  "platform/campaigns"
+                ]
+              },
+              {
+                "group": "Integrations",
+                "pages": [
+                  "integrations/overview",
+                  "integrations/crm",
+                  "integrations/channels",
+                  "integrations/webhooks-zapier",
+                  "integrations/custom-webhook"
+                ]
+              },
+              {
+                "group": "Account & Billing",
+                "pages": [
+                  "account/plans",
+                  "account/onboarding",
+                  "account/faq"
+                ]
+              }
             ]
           },
           {
-            "group": "Core Concepts",
-            "pages": [
-              "concepts/leads",
-              "concepts/ai-agents",
-              "concepts/omnichannel",
-              "concepts/lead-scoring"
-            ]
-          },
-          {
-            "group": "Platform",
-            "pages": [
-              "platform/lead-qualification",
-              "platform/lead-traceability",
-              "platform/vehicle-lifecycle",
-              "platform/unified-inbox",
-              "platform/campaigns"
-            ]
-          },
-          {
-            "group": "Integrations",
-            "pages": [
-              "integrations/overview",
-              "integrations/crm",
-              "integrations/channels",
-              "integrations/webhooks-zapier",
-              "integrations/custom-webhook"
-            ]
-          },
-          {
-            "group": "Account & Billing",
-            "pages": [
-              "account/plans",
-              "account/onboarding",
-              "account/faq"
+            "tab": "REST API",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api-reference/introduction",
+                  "api-reference/authentication",
+                  "api-reference/errors",
+                  "api-reference/pagination"
+                ]
+              },
+              {
+                "group": "Leads",
+                "pages": [
+                  "api-reference/leads/list",
+                  "api-reference/leads/get",
+                  "api-reference/leads/create",
+                  "api-reference/leads/update"
+                ]
+              },
+              {
+                "group": "Conversations",
+                "pages": [
+                  "api-reference/conversations/list",
+                  "api-reference/conversations/get",
+                  "api-reference/conversations/send-message"
+                ]
+              },
+              {
+                "group": "Agents",
+                "pages": [
+                  "api-reference/agents/list",
+                  "api-reference/agents/get",
+                  "api-reference/agents/update"
+                ]
+              },
+              {
+                "group": "Webhooks",
+                "pages": [
+                  "api-reference/webhooks/overview",
+                  "api-reference/webhooks/events",
+                  "api-reference/webhooks/custom-inbound"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "REST API",
-        "groups": [
+        "language": "es",
+        "tabs": [
           {
-            "group": "Overview",
-            "pages": [
-              "api-reference/introduction",
-              "api-reference/authentication",
-              "api-reference/errors",
-              "api-reference/pagination"
+            "tab": "Documentación",
+            "groups": [
+              {
+                "group": "Primeros pasos",
+                "pages": [
+                  "es/introduction",
+                  "es/quickstart",
+                  "es/authentication"
+                ]
+              },
+              {
+                "group": "Conceptos",
+                "pages": [
+                  "es/concepts/leads"
+                ]
+              },
+              {
+                "group": "Integraciones",
+                "pages": [
+                  "es/integrations/overview",
+                  "es/integrations/custom-webhook"
+                ]
+              }
             ]
           },
           {
-            "group": "Leads",
-            "pages": [
-              "api-reference/leads/list",
-              "api-reference/leads/get",
-              "api-reference/leads/create",
-              "api-reference/leads/update"
-            ]
-          },
-          {
-            "group": "Conversations",
-            "pages": [
-              "api-reference/conversations/list",
-              "api-reference/conversations/get",
-              "api-reference/conversations/send-message"
-            ]
-          },
-          {
-            "group": "Agents",
-            "pages": [
-              "api-reference/agents/list",
-              "api-reference/agents/get",
-              "api-reference/agents/update"
-            ]
-          },
-          {
-            "group": "Webhooks",
-            "pages": [
-              "api-reference/webhooks/overview",
-              "api-reference/webhooks/events",
-              "api-reference/webhooks/custom-inbound"
+            "tab": "API REST",
+            "groups": [
+              {
+                "group": "Introducción",
+                "pages": [
+                  "es/api-reference/introduction",
+                  "es/api-reference/authentication",
+                  "es/api-reference/errors",
+                  "es/api-reference/pagination"
+                ]
+              },
+              {
+                "group": "Leads",
+                "pages": [
+                  "es/api-reference/leads/list",
+                  "es/api-reference/leads/get",
+                  "es/api-reference/leads/create",
+                  "es/api-reference/leads/update"
+                ]
+              },
+              {
+                "group": "Conversaciones",
+                "pages": [
+                  "es/api-reference/conversations/list",
+                  "es/api-reference/conversations/get",
+                  "es/api-reference/conversations/send-message"
+                ]
+              },
+              {
+                "group": "Agentes",
+                "pages": [
+                  "es/api-reference/agents/list",
+                  "es/api-reference/agents/get",
+                  "es/api-reference/agents/update"
+                ]
+              },
+              {
+                "group": "Webhooks",
+                "pages": [
+                  "es/api-reference/webhooks/overview",
+                  "es/api-reference/webhooks/events",
+                  "es/api-reference/webhooks/custom-inbound"
+                ]
+              }
             ]
           }
         ]
