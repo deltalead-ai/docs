@@ -44,7 +44,8 @@
               "integrations/overview",
               "integrations/crm",
               "integrations/channels",
-              "integrations/webhooks-zapier"
+              "integrations/webhooks-zapier",
+              "integrations/custom-webhook"
             ]
           },
           {
@@ -98,7 +99,8 @@
             "group": "Webhooks",
             "pages": [
               "api-reference/webhooks/overview",
-              "api-reference/webhooks/events"
+              "api-reference/webhooks/events",
+              "api-reference/webhooks/custom-inbound"
             ]
           }
         ]

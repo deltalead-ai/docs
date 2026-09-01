@@ -1,0 +1,156 @@
+---
+title: "POST /webhooks/custom — Inbound Lead Webhook | DeltaLead"
+sidebarTitle: "Inbound Leads"
+description: "POST an inbound lead to DeltaLead with a bearer key. Covers authentication, the v1 lead contract, idempotency, rate limits, and every response code."
+---
+
+The Custom Webhook accepts a lead pushed into DeltaLead from an external system. One route, one purpose, one required header. For dashboard key creation and the difference between key modes, see the [Custom Webhook guide](/integrations/custom-webhook).
+
+## Endpoint
+
+```text
+POST https://integrations.deltalead.ai/webhooks/custom
+```
+
+## Authentication
+
+Send your key as a bearer token:
+
+```text
+Authorization: Bearer dl_{live|sandbox}_{random}
+```
+
+The scheme is matched case-insensitively and the token is trimmed, so `bearer  dl_live_abc ` is accepted. The key identifies both the account and the mode — nothing else in the request selects them.
+
+<Note>
+  A missing header, a malformed header, an unknown key, a revoked key, and an expired key all return the **same** `401 unauthorized` response. The bodies are identical by design: a caller cannot use the error to learn whether a given key exists.
+</Note>
+
+## Request Body
+
+The body is a JSON object with a single `lead` key. Lead contract v1 requires `lead.name`, **plus at least one** of `lead.email` or `lead.phone`. Missing either condition returns `400 missing_required_fields`.
+
+<ParamField body="lead.name" type="string" required>
+  Full name of the lead. DeltaLead splits it at the **first space**: everything before becomes the first name, everything after becomes the surname. `"María García"` gives `María` / `García`, and `"Probe Alpha Betamax"` gives `Probe` / `Alpha Betamax`.
+
+  The split is positional, not linguistic, so a compound given name lands in the surname field — `"María José García"` gives `María` / `José García`. If your system already stores given and family names separately, join them with a single space in that order rather than sending a display name.
+</ParamField>
+
+<ParamField body="lead.email" type="string">
+  Email address. Required unless `lead.phone` is present.
+</ParamField>
+
+<ParamField body="lead.phone" type="string">
+  Phone number. Required unless `lead.email` is present. E.164 format is recommended, e.g. `+5491155551234`.
+</ParamField>
+
+<ParamField body="lead.source" type="string">
+  Free-form origin label for the delivery, e.g. `landing-page`. Recorded on the lead and used by downstream processing — it appears in the lead's AI summary. Every delivery through this endpoint is reported on the lead as the `Custom` channel regardless of what you send here, so use `source` to distinguish which of your systems produced the lead.
+</ParamField>
+
+<Warning>
+  These four fields are the entire contract. Any other key inside `lead` is accepted — the request still returns `200` — but it is **discarded** and never reaches the lead record. Do not rely on extra keys surviving the request.
+</Warning>
+
+## Idempotency
+
+Send an optional `Idempotency-Key` request header to make retries safe:
+
+```text
+Idempotency-Key: 8f14e45f-ea67-4f6a-b3c1-9c1e2d0b7a52
+```
+
+A delivery carrying a key already seen for your account returns `200 {"status": "duplicate"}` and creates nothing.
+
+<Warning>
+  Without an `Idempotency-Key`, the endpoint does not detect repeats. Every delivery is accepted and returns `{"status": "ok"}`, including one that is byte-identical to the delivery before it. Send the header on any request your client might retry — it is the only way to get a repeat reported back to you rather than silently accepted.
+</Warning>
+
+Generate the key from something stable in your own system, such as the submission ID of the form that produced the lead. Reusing that value on every retry of the same submission is what makes the retry safe.
+
+### Contact matching
+
+Two things deduplicate, at different layers, and they are worth keeping apart.
+
+The `Idempotency-Key` deduplicates **deliveries**. A repeat is rejected before any work happens and reported to you as `{"status": "duplicate"}`.
+
+Contact matching deduplicates **people**. After a delivery is accepted, DeltaLead matches it against your existing contacts on email or phone. A match resolves onto the existing lead and enriches it rather than creating a second one — so a delivery carrying only a phone can attach to a lead created earlier from an email, and the contact ends up holding both.
+
+The practical consequence is that a delivery which matches an existing contact still returns `{"status": "ok"}`, not `duplicate`. The `200` tells you the delivery was accepted; it never tells you whether a new lead was created.
+
+<Note>
+  Matching is on email **or** phone, not both. Two genuinely different people who share a phone number — a household, or a dealership switchboard — resolve to the same lead. Send the most specific contact details you have.
+</Note>
+
+## Limits
+
+| Limit | Value |
+|---|---|
+| Request body size | 256 KB |
+| Rate, sustained | 5 requests per second |
+| Rate, burst | 10 requests |
+
+Rate limits apply per route.
+
+## Responses
+
+A successful delivery returns a `status`:
+
+```json 200 OK
+{"status": "ok"}
+```
+
+A failure returns an error envelope, where `detail` identifies the cause:
+
+```json 401 Unauthorized
+{"status": "error", "detail": "unauthorized"}
+```
+
+| Status | `status` / `detail` | When |
+|---|---|---|
+| `200` | `ok` | Delivery accepted for processing |
+| `200` | `duplicate` | The `Idempotency-Key` has already been seen |
+| `400` | `invalid_body` | The body could not be read |
+| `400` | `invalid_json` | The body is empty, is not valid JSON, or is not a JSON object |
+| `400` | `missing_required_fields` | Lead contract v1 is not satisfied, including a missing or non-object `lead` |
+| `400` | `payload_too_large` | The body is over 256 KB |
+| `401` | `unauthorized` | Any authentication failure |
+| `500` | `enqueue_failed` | Accepted but could not be queued |
+
+The route accepts `POST` only. Any other method, or any other path on this host, returns `404 {"message": "Not Found"}` from the gateway before the webhook handler runs.
+
+A `200` confirms that DeltaLead has accepted the delivery, not that the lead exists. The lead is created asynchronously a few seconds later.
+
+<Tip>
+  Retry on `500 enqueue_failed` — the delivery was valid and the failure is on our side. Do not retry any `4xx`; the request will fail again unchanged. Always send an `Idempotency-Key` on a request you might retry, since retries are only deduplicated when you do.
+</Tip>
+
+## Examples
+
+Sandbox — the minimum valid request:
+
+```bash cURL
+curl -X POST https://integrations.deltalead.ai/webhooks/custom \
+  -H "Authorization: Bearer dl_sandbox_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"lead":{"name":"María García","email":"maria@example.com"}}'
+```
+
+Live — the same request with every field:
+
+```bash cURL
+curl -X POST https://integrations.deltalead.ai/webhooks/custom \
+  -H "Authorization: Bearer dl_live_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"lead":{"name":"María García","email":"maria@example.com","phone":"+5491155551234","source":"landing-page"}}'
+```
+
+Live, with an idempotency key — safe to retry:
+
+```bash cURL
+curl -X POST https://integrations.deltalead.ai/webhooks/custom \
+  -H "Authorization: Bearer dl_live_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: 8f14e45f-ea67-4f6a-b3c1-9c1e2d0b7a52" \
+  -d '{"lead":{"name":"María García","phone":"+5491155551234","source":"landing-page"}}'
+```
