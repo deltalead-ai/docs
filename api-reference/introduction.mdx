@@ -11,7 +11,7 @@ The DeltaLead REST API gives you programmatic access to leads, conversations, AI
 All API requests are made over HTTPS to the following base URL:
 
 ```text
-https://api.deltalead.ai/v1
+https://platform-api.deltalead.ai/v1
 ```
 
 ## Quick Example
@@ -19,7 +19,7 @@ https://api.deltalead.ai/v1
 The following request retrieves your most recent leads using `curl`. Replace `YOUR_API_KEY` with the key generated in your dashboard.
 
 ```bash
-curl https://api.deltalead.ai/v1/leads \
+curl https://platform-api.deltalead.ai/v1/leads \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
@@ -28,7 +28,7 @@ curl https://api.deltalead.ai/v1/leads \
 All request and response bodies use JSON. When sending data in `POST` or `PATCH` requests, include the `Content-Type: application/json` header so the API can parse the request body correctly.
 
 ```bash
-curl -X POST https://api.deltalead.ai/v1/leads \
+curl -X POST https://platform-api.deltalead.ai/v1/leads \
   -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"name": "Martín Sosa", "phone": "+5491122334455"}'

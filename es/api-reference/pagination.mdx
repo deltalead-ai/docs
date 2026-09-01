@@ -59,7 +59,7 @@ async function fetchAllLeads(apiKey) {
   let cursor = null;
 
   do {
-    const url = new URL('https://api.deltalead.ai/v1/leads');
+    const url = new URL('https://platform-api.deltalead.ai/v1/leads');
     url.searchParams.set('limit', '100');
     if (cursor) url.searchParams.set('cursor', cursor);
 

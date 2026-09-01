@@ -9,7 +9,7 @@ Update one or more fields on an existing lead without overwriting the entire rec
 ## Endpoint
 
 ```text
-PATCH https://api.deltalead.ai/v1/leads/{id}
+PATCH https://platform-api.deltalead.ai/v1/leads/{id}
 ```
 
 ## Path Parameters
@@ -43,7 +43,7 @@ All fields are optional. Only the fields you include will be modified.
 Mark a lead as assigned and set the responsible sales advisor:
 
 ```bash cURL
-curl -X PATCH https://api.deltalead.ai/v1/leads/lead_abc123 \
+curl -X PATCH https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
   -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"status": "assigned", "assigned_to": "user_xyz789"}'

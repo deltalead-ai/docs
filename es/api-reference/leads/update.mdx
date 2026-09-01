@@ -9,7 +9,7 @@ Este endpoint actualiza uno o más campos de un lead existente sin sobrescribir 
 ## Endpoint
 
 ```text
-PATCH https://api.deltalead.ai/v1/leads/{id}
+PATCH https://platform-api.deltalead.ai/v1/leads/{id}
 ```
 
 ## Parámetros de ruta
@@ -43,7 +43,7 @@ Todos los campos son opcionales. Solo se modifican los campos incluidos en la so
 Marcar un lead como asignado y definir el asesor de ventas responsable:
 
 ```bash cURL
-curl -X PATCH https://api.deltalead.ai/v1/leads/lead_abc123 \
+curl -X PATCH https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
   -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"status": "assigned", "assigned_to": "user_xyz789"}'

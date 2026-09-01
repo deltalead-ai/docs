@@ -48,8 +48,20 @@ The body is a JSON object with a single `lead` key. Lead contract v1 requires `l
   Free-form origin label for the delivery, e.g. `landing-page`. Recorded on the lead and used by downstream processing — it appears in the lead's AI summary. Every delivery through this endpoint is reported on the lead as the `Custom` channel regardless of what you send here, so use `source` to distinguish which of your systems produced the lead.
 </ParamField>
 
+<ParamField body="lead.vehicle_of_interest" type="string">
+  Free-text description of the vehicle the lead asked about, e.g. `Toyota Hilux SRX 2024`. Recorded on the lead and used by the AI summary to match against catalogue stock, so send what the buyer actually wrote rather than an internal stock code.
+</ParamField>
+
+<ParamField body="lead.notes" type="string">
+  Free-text context from your side. Appended to the lead's **Notas**, attributed to the webhook, and visible to the advisor. Deduplicated per delivery, so a retry does not add the same note twice.
+</ParamField>
+
+<ParamField body="lead.metadata" type="object">
+  Arbitrary JSON object stored on the lead as passthrough, merged across deliveries rather than overwritten. Use it for identifiers from your own system that have no home in the contract. Nothing in DeltaLead interprets it and it is never shown to the AI agent. Keys containing `.` or `$` are rejected.
+</ParamField>
+
 <Warning>
-  These four fields are the entire contract. Any other key inside `lead` is accepted — the request still returns `200` — but it is **discarded** and never reaches the lead record. Do not rely on extra keys surviving the request.
+  These seven fields are the entire contract. Any other key inside `lead` is accepted — the request still returns `200` — but it is **discarded** and never reaches the lead record. Anything outside the contract belongs in `metadata`, which is the only field that accepts arbitrary shape.
 </Warning>
 
 ## Idempotency
@@ -142,7 +154,7 @@ Live — the same request with every field:
 curl -X POST https://integrations.deltalead.ai/webhooks/custom \
   -H "Authorization: Bearer dl_live_YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"lead":{"name":"María García","email":"maria@example.com","phone":"+5491155551234","source":"landing-page"}}'
+  -d '{"lead":{"name":"María García","email":"maria@example.com","phone":"+5491155551234","source":"landing-page","vehicle_of_interest":"Toyota Hilux SRX 2024","notes":"Consultó por financiación a 12 cuotas.","metadata":{"form_id":"web-123","campaign":"verano"}}}'
 ```
 
 Live, with an idempotency key — safe to retry:
