@@ -31,7 +31,9 @@ The scheme is matched case-insensitively and the token is trimmed, so `bearer  d
 The body is a JSON object with a single `lead` key. Lead contract v1 requires `lead.name`, **plus at least one** of `lead.email` or `lead.phone`. Missing either condition returns `400 missing_required_fields`.
 
 <ParamField body="lead.name" type="string" required>
-  Full name of the lead. DeltaLead splits it into first and last name on the contact record.
+  Full name of the lead. DeltaLead splits it at the **first space**: everything before becomes the first name, everything after becomes the surname. `"María García"` gives `María` / `García`, and `"Probe Alpha Betamax"` gives `Probe` / `Alpha Betamax`.
+
+  The split is positional, not linguistic, so a compound given name lands in the surname field — `"María José García"` gives `María` / `José García`. If your system already stores given and family names separately, join them with a single space in that order rather than sending a display name.
 </ParamField>
 
 <ParamField body="lead.email" type="string">
