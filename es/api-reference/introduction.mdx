@@ -1,0 +1,72 @@
+---
+title: "API REST de DeltaLead: gestionar leads y agentes por código"
+sidebarTitle: "Introducción"
+description: "La API REST de DeltaLead permite crear y gestionar leads, conversaciones y agentes de IA mediante endpoints que aceptan y devuelven JSON sobre HTTPS."
+---
+
+La API REST de DeltaLead da acceso programático a leads, conversaciones, agentes de IA y configuración de webhooks. Sirve para construir integraciones a medida, automatizar flujos de trabajo o sincronizar con sistemas que las integraciones nativas no cubren: un DMS propietario, un data warehouse interno o un CRM hecho a medida.
+
+## URL base
+
+Todas las solicitudes a la API se realizan sobre HTTPS contra la siguiente URL base:
+
+```text
+https://api.deltalead.ai/v1
+```
+
+## Ejemplo rápido
+
+La siguiente solicitud recupera los leads más recientes con `curl`. `YOUR_API_KEY` se reemplaza por la clave generada en el panel.
+
+```bash
+curl https://api.deltalead.ai/v1/leads \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+## Formato de las solicitudes
+
+Todos los cuerpos de solicitud y respuesta usan JSON. Al enviar datos en solicitudes `POST` o `PATCH`, hay que incluir la cabecera `Content-Type: application/json` para que la API pueda interpretar el cuerpo correctamente.
+
+```bash
+curl -X POST https://api.deltalead.ai/v1/leads \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Martín Sosa", "phone": "+5491122334455"}'
+```
+
+Las solicitudes `GET` y `DELETE` no requieren la cabecera `Content-Type`.
+
+## Recursos disponibles
+
+<CardGroup cols={2}>
+  <Card title="Leads" icon="user" href="/es/api-reference/leads/list">
+    Crear, consultar, actualizar y eliminar registros de leads. Filtrar por estado, canal, score y más.
+  </Card>
+  <Card title="Conversaciones" icon="comments" href="/es/api-reference/conversations/list">
+    Acceder al historial completo de mensajes de cualquier lead en todos los canales: WhatsApp, email, llamadas y formularios web.
+  </Card>
+  <Card title="Agentes" icon="robot" href="/es/api-reference/agents/list">
+    Listar y configurar los agentes de IA, incluidos idioma, tono, reglas de escalamiento y canales activos.
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/es/api-reference/webhooks/overview">
+    Suscribirse a eventos en tiempo real como nuevos leads, cambios de estado e hitos de una conversación.
+  </Card>
+</CardGroup>
+
+## Límites de tasa
+
+La API admite hasta **1.000 solicitudes por minuto** por clave de API. Al superar ese límite, la API devuelve una respuesta `429 Too Many Requests`.
+
+Cada respuesta incluye dos cabeceras para seguir el consumo actual:
+
+| Cabecera | Descripción |
+|---|---|
+| `X-RateLimit-Remaining` | Cantidad de solicitudes restantes en la ventana de un minuto en curso |
+| `X-RateLimit-Reset` | Marca de tiempo Unix (UTC) en la que se reinicia la ventana del límite de tasa |
+
+Cuando la integración recibe una respuesta `429`, conviene esperar hasta `X-RateLimit-Reset` antes de reintentar, o aplicar backoff exponencial. La [referencia de errores](/es/api-reference/errors) detalla el manejo completo de `429`.
+
+## Próximos pasos
+
+- [Autenticación](/es/api-reference/authentication) — cómo generar y enviar la clave de API
+- [Errores](/es/api-reference/errors) — códigos de estado, forma de los errores y estrategias de reintento

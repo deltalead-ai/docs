@@ -1,0 +1,77 @@
+---
+title: "Quickstart de DeltaLead: en funcionamiento en 30 minutos"
+sidebarTitle: "Quickstart"
+description: "Conectar el número de WhatsApp, configurar el agente de IA y empezar a calificar leads automotrices de forma automática, en menos de 30 minutos."
+---
+
+Esta guía cubre la puesta en marcha de DeltaLead, desde una cuenta recién creada hasta un agente de IA activo que califica leads por su cuenta. Al terminar hay un número de WhatsApp conectado, un catálogo de vehículos cargado, un agente de IA configurado y una integración con el CRM funcionando, todo sin escribir una sola línea de código.
+
+<Steps>
+  <Step title="Crear la cuenta e iniciar la prueba gratuita de 14 días">
+    Ir a [www.deltalead.ai](https://www.deltalead.ai) y crear la cuenta. No hace falta tarjeta de crédito para empezar. La prueba gratuita de 14 días da acceso completo a la plataforma, así se puede probar con leads reales antes de contratar.
+
+    <Info>
+      Después del registro, el equipo de onboarding de DeltaLead agenda una llamada inicial para configurar la plataforma según la operación concreta: modelos que se venden, regiones que se cubren y tamaño del equipo.
+    </Info>
+  </Step>
+
+  <Step title="Conectar el número de WhatsApp Business">
+    Ir a **Configuración → Canales → WhatsApp** y seguir el asistente guiado para vincular el número de WhatsApp Business mediante la API de Meta Business.
+
+    Antes de conectar, conviene tener en cuenta estos puntos:
+
+    - **El número deja de usarse en la app de WhatsApp Business.** Una vez vinculado a DeltaLead, el número pertenece a la plataforma: la app nativa y DeltaLead no pueden compartir el mismo número al mismo tiempo.
+    - Si se prefiere no migrar el número actual, se puede comprar un SIM o eSIM nuevo. Solo hace falta insertarlo en cualquier teléfono unos 5 minutos para completar la verificación de Meta y después se puede retirar. El número sigue activo en DeltaLead sin el SIM presente.
+    - Las llamadas VoIP de WhatsApp entrantes están incluidas desde el plan **Growth**. Las llamadas VoIP salientes, desde **Advanced**. La telefonía tradicional está disponible en **Enterprise**.
+
+    <Warning>
+      El número de WhatsApp Business no debe seguir activo en la app de WhatsApp Business después de conectarlo a DeltaLead. Tener ambos funcionando en paralelo provoca fallas en la entrega de mensajes.
+    </Warning>
+  </Step>
+
+  <Step title="Cargar el catálogo de vehículos">
+    Ir a **Catálogo → Importar** y subir el stock. DeltaLead acepta:
+
+    - **Fichas técnicas en PDF** — la IA extrae automáticamente nombres de modelos, especificaciones de motor, versiones, precios y disponibilidad.
+    - **Planillas** (`.xlsx`, `.csv`) — las columnas se mapean a los campos de DeltaLead en el asistente de importación.
+
+    Una vez importado, el catálogo queda activo. El agente de IA lo consulta en tiempo real antes de responder cualquier consulta sobre precio, stock o disponibilidad, así nunca ofrece un vehículo ya vendido o reservado.
+
+    <Tip>
+      Alcanza con una planilla básica de nombres de modelos y precios para arrancar. El catálogo se puede enriquecer con fotos, especificaciones y condiciones de financiación después de los primeros leads.
+    </Tip>
+  </Step>
+
+  <Step title="Configurar el agente de IA">
+    Ir a **Agentes → Nuevo agente** y armar el agente que va a atender los leads. Ajustes clave:
+
+    - **Variante de idioma** — elegir entre `es-AR`, `es-MX`, `es-CR`, `es-CO`, `pt-BR` o `en-US` según el tono y el dialecto del mercado.
+    - **Tono y estilo** — tono formal de concesionario, cercano y conversacional, o una personalidad propia basada en la marca.
+    - **Temas que el agente puede tratar** — precios, disponibilidad, opciones de financiación, agendamiento de test drive, tasación de usados.
+    - **Temas a escalar** — definir qué consultas el agente siempre debe derivar a un asesor humano (por ejemplo, descuentos de flota por encima de cierto umbral, disputas legales, reclamos).
+    - **Disparadores de derivación** — configurar cuándo el agente transfiere una conversación al equipo comercial: la persona pide hablar con alguien, el score del lead supera un umbral, o la conversación llega a determinada etapa del embudo.
+    - **Cadencia de seguimiento** — definir cuántos mensajes de seguimiento se envían, en cuántos días y por qué canal, según el nivel de score del lead.
+  </Step>
+
+  <Step title="Conectar el CRM o el DMS">
+    Ir a **Configuración → Integraciones** y elegir el CRM o DMS de la lista. DeltaLead ofrece integraciones nativas con:
+
+    **Salesforce**, **HubSpot**, **Microsoft Dynamics 365**, **Pipedrive**, **Odoo**, **Bitrix**, **PilotSolution**, **Tecnom** y **Google Sheets**.
+
+    Cada integración usa un flujo OAuth o una clave de API; el asistente detalla los pasos exactos de cada plataforma. Una vez conectada, los leads calificados y toda la actividad de las conversaciones se sincronizan automáticamente, sin exportaciones manuales.
+
+    Si el sistema en uso no figura en la lista, escribir a [hola@deltalead.ai](mailto:hola@deltalead.ai): el equipo técnico puede desarrollar una integración a medida durante el onboarding, o bien se puede usar la [API REST](/es/api-reference/introduction) y los webhooks para enviar los datos a donde haga falta.
+  </Step>
+</Steps>
+
+<Tip>
+  Antes de pasar a producción completa, conviene activar el agente de IA solo en horario nocturno y fines de semana. Eso permite revisar conversaciones reales, ajustar las respuestas del agente y confirmar que todo funciona como se espera, sin afectar las franjas de mayor venta. Ya con esa confianza, el agente pasa a cobertura 24/7 con un solo interruptor.
+</Tip>
+
+## Qué sigue
+
+Con el agente activo, empieza a responder a cada lead nuevo en menos de 9 segundos, sin importar si el equipo está atendiendo en el salón, en una reunión o durmiendo. Cada lead recibe un score automático por intención de compra, presupuesto y urgencia. El equipo comercial se encuentra con un Inbox ordenado de oportunidades calificadas, cada una con el historial completo de la conversación y una acción sugerida.
+
+Las secuencias de seguimiento corren solas: el agente retoma el contacto con los leads que quedaron en silencio, reactiva los leads dormidos y se detiene automáticamente apenas el lead responde, agenda una visita o se marca como ganado o perdido.
+
+Para monitorear el rendimiento del agente, ir a **Analítica → Embudo** y ver el pipeline completo: leads → conversaciones → leads calificados → citas agendadas → visitas al concesionario → ventas cerradas, desglosado por canal, modelo y vendedor.

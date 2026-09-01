@@ -1,0 +1,135 @@
+---
+title: "Obtener un hilo de conversación — API REST de DeltaLead"
+sidebarTitle: "Obtener conversación"
+description: "Obtener una conversación por ID con su historial completo de mensajes, metadatos del canal y el Resumen de IA con las señales clave y las tareas del asesor."
+---
+
+Este endpoint devuelve una conversación puntual a partir de su identificador único, con el hilo completo de mensajes, los metadatos del canal y el resumen generado por IA que DeltaLead produce después de cada interacción. Sirve para incrustar el historial de conversación dentro de los registros del CRM, auditar las respuestas de la IA o mostrarle el contexto completo a un asesor de ventas antes de que tome el relevo del agente de IA.
+
+## Endpoint
+
+```text
+GET https://api.deltalead.ai/v1/conversations/{id}
+```
+
+## Parámetros de ruta
+
+<ParamField path="id" type="string" required>
+  Identificador único de la conversación que se quiere recuperar, por ejemplo `conv_xyz789`. Los ID de conversación se obtienen desde el endpoint [Listar conversaciones](/es/api-reference/conversations/list) o desde los payloads de webhook.
+</ParamField>
+
+## Solicitud de ejemplo
+
+```bash cURL
+curl https://api.deltalead.ai/v1/conversations/conv_xyz789 \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+## Respuesta
+
+Una solicitud correcta devuelve `200 OK` con el objeto de la conversación, un arreglo anidado `messages` con el historial completo de mensajes y un campo `ai_summary`.
+
+```json 200 OK
+{
+  "id": "conv_xyz789",
+  "lead_id": "lead_abc123",
+  "channel": "whatsapp",
+  "status": "transferred",
+  "created_at": "2024-03-10T14:22:05Z",
+  "updated_at": "2024-03-11T09:05:33Z",
+  "last_message_at": "2024-03-11T09:05:33Z",
+  "ai_summary": "Lead is highly interested in the Toyota Hilux SRX 2024 in black. Confirmed budget around US$45,000. Requested financing options and a test drive for this week. Conversation transferred to human advisor for follow-up on financing.",
+  "messages": [
+    {
+      "id": "msg_001",
+      "conversation_id": "conv_xyz789",
+      "direction": "inbound",
+      "type": "text",
+      "content": "Hola! Vi la Hilux SRX 2024 que tienen publicada, ¿sigue disponible en negro?",
+      "sent_by": "lead",
+      "created_at": "2024-03-10T14:22:05Z"
+    },
+    {
+      "id": "msg_002",
+      "conversation_id": "conv_xyz789",
+      "direction": "outbound",
+      "type": "text",
+      "content": "¡Hola María! 👋 Sí, la Hilux SRX 2024 en negro sigue disponible. ¿Querés que te cuente las opciones de financiación o preferís coordinar un test drive?",
+      "sent_by": "ai_agent",
+      "created_at": "2024-03-10T14:22:13Z"
+    },
+    {
+      "id": "msg_003",
+      "conversation_id": "conv_xyz789",
+      "direction": "inbound",
+      "type": "text",
+      "content": "Me interesa la financiación, tengo un presupuesto de unos 45000 dólares.",
+      "sent_by": "lead",
+      "created_at": "2024-03-10T14:25:40Z"
+    },
+    {
+      "id": "msg_004",
+      "conversation_id": "conv_xyz789",
+      "direction": "outbound",
+      "type": "text",
+      "content": "Perfecto, María. Para darte las mejores opciones de financiación te voy a conectar con uno de nuestros asesores. Te contactan en breve. 🙌",
+      "sent_by": "ai_agent",
+      "created_at": "2024-03-10T14:25:48Z"
+    }
+  ]
+}
+```
+
+### Campos de la respuesta
+
+<ResponseField name="id" type="string">
+  Identificador único de la conversación, con el prefijo `conv_`.
+</ResponseField>
+
+<ResponseField name="lead_id" type="string">
+  ID del lead al que pertenece la conversación.
+</ResponseField>
+
+<ResponseField name="channel" type="string">
+  Canal en el que ocurrió la conversación. Uno de `whatsapp`, `facebook`, `instagram`, `email`, `phone`.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Estado actual: `open`, `closed` o `transferred`.
+</ResponseField>
+
+<ResponseField name="ai_summary" type="string">
+  Resumen de la conversación en texto plano, generado por IA. Se actualiza después de cada turno de la IA. Destaca el interés en el vehículo, el presupuesto, las señales de urgencia y las tareas pendientes para el equipo de ventas.
+</ResponseField>
+
+<ResponseField name="messages" type="array">
+  Arreglo ordenado de objetos de mensaje, del más antiguo al más reciente.
+
+  <Expandable title="Campos del objeto de mensaje">
+    <ResponseField name="id" type="string">
+      Identificador único del mensaje, con el prefijo `msg_`.
+    </ResponseField>
+    <ResponseField name="conversation_id" type="string">
+      ID de la conversación a la que pertenece el mensaje.
+    </ResponseField>
+    <ResponseField name="direction" type="string">
+      `inbound` para los mensajes enviados por el lead; `outbound` para los mensajes enviados por DeltaLead (agente de IA o asesor humano).
+    </ResponseField>
+    <ResponseField name="type" type="string">
+      Tipo de medio del mensaje. Uno de `text`, `audio`, `image`, `document`.
+    </ResponseField>
+    <ResponseField name="content" type="string">
+      Cuerpo de texto del mensaje. Para los tipos `audio`, `image` y `document`, este campo contiene una URL al archivo multimedia.
+    </ResponseField>
+    <ResponseField name="sent_by" type="string">
+      Quién originó el mensaje. Uno de `ai_agent`, `human`, `lead`.
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      Marca de tiempo ISO 8601 del momento en que el mensaje se envió o se recibió.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<Note>
+  Las conversaciones telefónicas usan un campo `transcript` en lugar de un arreglo `messages`. El `transcript` es un bloque de texto estructurado que se genera a partir de la grabación de la llamada y contiene etiquetas de hablante (por ejemplo, `Agent:` / `Lead:`), marcas de tiempo y el diálogo completo. El resto de los campos de la conversación no cambia.
+</Note>
