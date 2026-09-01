@@ -74,6 +74,8 @@ Idempotency-Key: 8f14e45f-ea67-4f6a-b3c1-9c1e2d0b7a52
 
 Un envío que trae una clave ya vista para la cuenta devuelve `200 {"status": "duplicate"}` y no crea nada.
 
+Las claves de idempotencia tienen alcance de **cuenta**, no de modo. Un valor ya usado con una clave sandbox suprime ese mismo valor cuando después llega con una clave live, así que no conviene arrastrar los valores de prueba al cambiar de modo.
+
 <Warning>
   Sin `Idempotency-Key`, el endpoint no detecta repeticiones. Todo envío se acepta y devuelve `{"status": "ok"}`, incluso uno idéntico byte a byte al anterior. Conviene mandar la cabecera en cualquier solicitud que el cliente pueda reintentar: es la única forma de que una repetición se informe en lugar de aceptarse en silencio.
 </Warning>

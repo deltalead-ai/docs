@@ -83,6 +83,10 @@ Lo que cambia es qué pasa con el lead una vez que llega:
   Lo recomendable es construir y verificar la integración con una clave sandbox y después cambiarla por una live. Nada más de la solicitud cambia: misma URL, mismos headers, mismo body. Las entregas de sandbox nunca llegan al equipo comercial y se limpian solas.
 </Note>
 
+<Warning>
+  Hay algo que **no** está aislado por modo: los valores de `Idempotency-Key` se registran por cuenta, no por modo de clave. Un valor ya enviado con una clave sandbox se considera repetido cuando después llega con una clave live, y esa entrega live devuelve `duplicate` sin crear el lead. Conviene usar valores distintos durante las pruebas —con un prefijo, por ejemplo— o generar valores nuevos al pasar a live.
+</Warning>
+
 ## Enviar el primer lead
 
 <Steps>

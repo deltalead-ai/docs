@@ -83,6 +83,10 @@ What changes is what happens to the lead after it arrives:
   Build and verify your integration with a sandbox key, then swap in a live one. Nothing else about the request changes — same URL, same headers, same body. Sandbox deliveries never reach your sales team, and they clean themselves up.
 </Note>
 
+<Warning>
+  One thing is **not** isolated by mode: `Idempotency-Key` values are tracked per account, not per key mode. A value already sent with a sandbox key is treated as a repeat when it later arrives with a live key, and the live delivery returns `duplicate` without creating a lead. Use distinct values while testing — prefixing them, for example — or generate fresh ones when switching to live.
+</Warning>
+
 ## Send Your First Lead
 
 <Steps>
