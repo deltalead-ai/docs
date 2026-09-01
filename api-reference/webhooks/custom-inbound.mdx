@@ -74,6 +74,8 @@ Idempotency-Key: 8f14e45f-ea67-4f6a-b3c1-9c1e2d0b7a52
 
 A delivery carrying a key already seen for your account returns `200 {"status": "duplicate"}` and creates nothing.
 
+Idempotency keys are scoped to the **account**, not to the key mode. A value burned with a sandbox key suppresses the same value arriving later with a live key, so do not carry test values over when switching modes.
+
 <Warning>
   Without an `Idempotency-Key`, the endpoint does not detect repeats. Every delivery is accepted and returns `{"status": "ok"}`, including one that is byte-identical to the delivery before it. Send the header on any request your client might retry — it is the only way to get a repeat reported back to you rather than silently accepted.
 </Warning>
