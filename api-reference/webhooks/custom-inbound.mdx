@@ -61,10 +61,14 @@ Idempotency-Key: 8f14e45f-ea67-4f6a-b3c1-9c1e2d0b7a52
 A delivery carrying a key already seen for your account returns `200 {"status": "duplicate"}` and creates nothing.
 
 <Warning>
-  Deliveries sent **without** an `Idempotency-Key` are not deduplicated. Two identical requests create two leads. If your client retries — on a timeout, a `500`, or a network error — send an `Idempotency-Key` or you will duplicate the lead.
+  Without an `Idempotency-Key`, the endpoint does not detect repeats. Every delivery is accepted and returns `{"status": "ok"}`, including one that is byte-identical to the delivery before it. Send the header on any request your client might retry — it is the only way to get a repeat reported back to you rather than silently accepted.
 </Warning>
 
 Generate the key from something stable in your own system, such as the submission ID of the form that produced the lead. Reusing that value on every retry of the same submission is what makes the retry safe.
+
+<Note>
+  Deduplication at this endpoint is separate from contact matching further downstream. Two accepted deliveries describing the same person may still resolve to a single lead, because DeltaLead matches contacts on email and phone after the delivery is queued. Do not rely on that as a retry strategy — it is not part of this contract, and only the `Idempotency-Key` gives you a definite answer.
+</Note>
 
 ## Limits
 
