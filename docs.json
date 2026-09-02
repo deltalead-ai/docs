@@ -8,12 +8,12 @@
     "dark": "#243c9b"
   },
   "logo": {
-    "light": "/logo/wordmark-on-dark.svg",
-    "dark": "/logo/wordmark-on-light.svg"
+    "light": "/logo/wordmark-on-light.svg",
+    "dark": "/logo/wordmark-on-dark.svg"
   },
   "favicon": {
-    "light": "/logo/icon-on-dark.svg",
-    "dark": "/logo/icon-on-light.svg"
+    "light": "/logo/icon-on-light.svg",
+    "dark": "/logo/icon-on-dark.svg"
   },
   "navbar": {
     "primary": {
