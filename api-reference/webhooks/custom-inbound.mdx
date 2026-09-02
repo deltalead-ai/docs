@@ -49,7 +49,7 @@ El cuerpo es un objeto JSON con una única clave `lead`. El contrato de lead v1 
 </ParamField>
 
 <ParamField body="lead.vehicle_of_interest" type="string">
-  Descripción libre del vehículo por el que consulta el lead, por ejemplo `Toyota Hilux SRX 2024`. Queda registrada en el lead y la usa el Resumen de IA para buscar coincidencias en el stock del catálogo, así que conviene enviar lo que escribió el comprador y no un código interno de stock.
+  Descripción libre del vehículo por el que consulta el lead, por ejemplo `Toyota Hilux SRX 2024`. Se resuelve contra el catálogo al procesar el lead. Si hay coincidencia, se agrega a `interested_vehicles` del lead; si no la hay, el valor queda como nota para que un vendedor la resuelva a mano. Conviene enviar lo que escribió el comprador y no un código interno de stock. Se trunca a 200 caracteres.
 </ParamField>
 
 <ParamField body="lead.notes" type="string">
@@ -57,7 +57,7 @@ El cuerpo es un objeto JSON con una única clave `lead`. El contrato de lead v1 
 </ParamField>
 
 <ParamField body="lead.metadata" type="object">
-  Objeto JSON arbitrario que se guarda en el lead como passthrough y se combina entre envíos en lugar de sobrescribirse. Sirve para identificadores del sistema de origen que no tienen lugar en el contrato. DeltaLead no lo interpreta y nunca se le muestra al agente de IA. Las claves que contienen `.` o `$` se rechazan.
+  Objeto JSON arbitrario que se guarda en el lead como passthrough y se combina entre envíos en lugar de sobrescribirse. Sirve para identificadores del sistema de origen que no tienen lugar en el contrato. DeltaLead no lo interpreta y nunca se le muestra al agente de IA. Las claves que empiezan con `$` o contienen `.` se descartan silenciosamente; el resto del objeto se guarda y la solicitud devuelve `200`.
 </ParamField>
 
 <Warning>
@@ -104,7 +104,19 @@ La consecuencia práctica es que un envío que coincide con un contacto existent
 | Tasa sostenida | 5 solicitudes por segundo |
 | Ráfaga | 10 solicitudes |
 
-Los límites de tasa se aplican por ruta.
+Los límites de tasa se aplican por ruta. Aparte, los campos del contrato tienen sus propios límites de contenido:
+
+| Campo | Límite | Al excederse |
+|---|---|---|
+| `lead.notes` | 4.000 caracteres | se trunca |
+| `lead.vehicle_of_interest` | 200 caracteres | se trunca |
+| `metadata` — profundidad | 4 niveles | se descarta la rama |
+| `metadata` — largo de clave | 128 caracteres | se trunca |
+| `metadata` — valor de texto | 2.048 caracteres | se trunca |
+| `metadata` — items por arreglo | 50 | se descarta el resto |
+| `metadata` — tamaño total | 8 KB | se descartan claves desde el final |
+
+La respuesta no informa los truncamientos, así que conviene mantener los valores dentro de estos límites en lugar de esperar que la plataforma avise.
 
 ## Respuestas
 
@@ -124,7 +136,6 @@ Un fallo devuelve un sobre de error, donde `detail` identifica la causa:
 |---|---|---|
 | `200` | `ok` | El envío fue aceptado para procesar |
 | `200` | `duplicate` | La `Idempotency-Key` ya se había visto |
-| `400` | `invalid_body` | No se pudo leer el cuerpo |
 | `400` | `invalid_json` | El cuerpo está vacío, no es JSON válido o no es un objeto JSON |
 | `400` | `missing_required_fields` | No se cumple el contrato de lead v1, incluido un `lead` ausente o que no es un objeto |
 | `400` | `payload_too_large` | El cuerpo supera los 256 KB |

@@ -90,7 +90,7 @@ Implement **exponential backoff** for all retried requests: wait for `Retry-Afte
 
 ## Server Errors (500)
 
-`500 Internal Server Error` indicates a transient fault on DeltaLead's infrastructure. Retry the request using exponential backoff — the vast majority of transient errors resolve within a few seconds. If a `500` persists for more than a few minutes, check the [DeltaLead status page](https://status.deltalead.ai) or contact support.
+`500 Internal Server Error` indicates a transient fault on DeltaLead's infrastructure. Retry the request using exponential backoff — the vast majority of transient errors resolve within a few seconds. If a `500` persists for more than a few minutes, check the [DeltaLead status page](https://deltalead.instatus.com/) or contact support.
 
 <Tip>
   Always log the **full error response body**, not just the HTTP status code. The `error.code` field is machine-readable and stable across API versions, making it suitable for alerting rules and automated remediation. For example, you can detect `lead_not_found` and skip the record, or catch `validation_error` and surface `error.details` directly to an operator's dashboard.

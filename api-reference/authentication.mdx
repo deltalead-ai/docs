@@ -12,7 +12,7 @@ Estos pasos generan una clave de API nueva desde el panel de DeltaLead:
 
 <Steps>
   <Step title="Abrir Configuración">
-    Iniciar sesión en la cuenta de DeltaLead y abrir **Configuración** en la barra lateral izquierda.
+    Iniciar sesión en la cuenta de DeltaLead y abrir **Organización → Integraciones** en la barra lateral izquierda.
   </Step>
   <Step title="Ir a Claves de API">
     Seleccionar la sección **Claves de API**. Allí se listan las claves ya creadas, con su fecha de creación y la marca de tiempo del último uso.
@@ -23,7 +23,7 @@ Estos pasos generan una clave de API nueva desde el panel de DeltaLead:
 </Steps>
 
 <Warning>
-  La clave de API otorga acceso total a la cuenta de DeltaLead. Nunca debe subirse al código fuente, pegarse en mensajes de chat ni guardarse en texto plano. Conviene usar variables de entorno o un gestor de secretos dedicado (como AWS Secrets Manager, HashiCorp Vault o Doppler) para inyectar la clave en tiempo de ejecución. Si una clave queda comprometida, se revoca de inmediato desde **Configuración → Claves de API** y se genera un reemplazo.
+  La clave de API otorga acceso total a la cuenta de DeltaLead. Nunca debe subirse al código fuente, pegarse en mensajes de chat ni guardarse en texto plano. Conviene usar variables de entorno o un gestor de secretos dedicado (como AWS Secrets Manager, HashiCorp Vault o Doppler) para inyectar la clave en tiempo de ejecución. Si una clave queda comprometida, se revoca de inmediato desde **Organización → Integraciones → Custom Webhooks** y se genera un reemplazo.
 </Warning>
 
 ## Enviar la clave de API
