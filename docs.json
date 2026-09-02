@@ -8,10 +8,10 @@
     "dark": "#243c9b"
   },
   "logo": {
-    "light": "https://media.brand.dev/650d383e-759b-44b2-b785-e688fa1e3816.svg",
-    "dark": "https://media.brand.dev/650d383e-759b-44b2-b785-e688fa1e3816.svg"
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
   },
-  "favicon": "https://media.brand.dev/0bffb82c-daa6-43b8-bba8-21b4b97c8439.svg",
+  "favicon": "/favicon.svg",
   "navbar": {
     "primary": {
       "type": "button",
