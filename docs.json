@@ -8,10 +8,13 @@
     "dark": "#243c9b"
   },
   "logo": {
-    "light": "https://media.brand.dev/650d383e-759b-44b2-b785-e688fa1e3816.svg",
-    "dark": "https://media.brand.dev/650d383e-759b-44b2-b785-e688fa1e3816.svg"
+    "light": "/logo/wordmark-on-dark.svg",
+    "dark": "/logo/wordmark-on-light.svg"
   },
-  "favicon": "https://media.brand.dev/0bffb82c-daa6-43b8-bba8-21b4b97c8439.svg",
+  "favicon": {
+    "light": "/logo/icon-on-dark.svg",
+    "dark": "/logo/icon-on-light.svg"
+  },
   "navbar": {
     "primary": {
       "type": "button",

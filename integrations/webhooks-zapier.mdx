@@ -34,8 +34,7 @@ Este es un payload de ejemplo para el evento `lead.qualified`:
     "name": "María García",
     "phone": "+5491155551234",
     "score": 92,
-    "vehicle_interest": "Toyota Hilux SRX 2024",
-    "intent": "purchase_30_days",
+    "interested_vehicles": ["veh_8a2f01"],
     "channel": "whatsapp"
   }
 }
@@ -98,5 +97,5 @@ Para empezar, buscar **DeltaLead** en el directorio de aplicaciones de Zapier o 
 Para tener control programático total sobre leads, conversaciones, scores, campañas y más, está la API REST de DeltaLead.
 
 <Card title="Referencia de la API REST" icon="code" href="/api-reference/introduction">
-  Autenticar con la cabecera `X-API-Key` y acceder a todos los recursos de DeltaLead en `https://platform-api.deltalead.ai/v1`. Incluye la referencia completa de endpoints, los esquemas de solicitud y respuesta y ejemplos de código.
+  Autenticar con una clave `Authorization: Bearer dl_live_...` y acceder a todos los recursos de DeltaLead en `https://platform-api.deltalead.ai/v1`. Incluye la referencia completa de endpoints, los esquemas de solicitud y respuesta y ejemplos de código.
 </Card>
