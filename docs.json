@@ -8,10 +8,13 @@
     "dark": "#243c9b"
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/wordmark-on-dark.svg",
+    "dark": "/logo/wordmark-on-light.svg"
   },
-  "favicon": "/favicon.svg",
+  "favicon": {
+    "light": "/logo/icon-on-dark.svg",
+    "dark": "/logo/icon-on-light.svg"
+  },
   "navbar": {
     "primary": {
       "type": "button",

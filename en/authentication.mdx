@@ -1,48 +1,52 @@
 ---
-title: "Authenticate DeltaLead API Requests with Your API Key"
+title: "Authenticate DeltaLead API Requests with a Bearer Key"
 sidebarTitle: "Authentication"
-description: "DeltaLead authenticates all API requests using an API key passed in the X-API-Key header. Learn how to find your key and use it securely."
+description: "DeltaLead authenticates API requests with a bearer key that also selects live or sandbox mode. How to get a key, send it, and handle auth errors."
 ---
 
-DeltaLead uses API key authentication to protect every endpoint. Every request you make to `https://platform-api.deltalead.ai/v1` must include your API key in the `X-API-Key` header — without it, the request is rejected immediately before any processing occurs. There are no cookies, sessions, or OAuth flows for server-to-server API access; a valid key in the header is all you need.
+<Note>
+  The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
+</Note>
 
-## Getting your API key
+Every request to `https://platform-api.deltalead.ai/v1` carries a key in the `Authorization` header. Without it the request is rejected before any processing. There are no cookies, sessions, or OAuth flows for server-to-server access — a valid bearer key is all that is needed.
+
+The key also selects the mode. A `dl_live_` key writes real leads; a `dl_sandbox_` key writes to an isolated store that never reaches the inbox and self-purges. Nothing else in the request changes between them, so the same integration can be verified against sandbox and then promoted by swapping the key.
+
+## Getting a key
 
 <Steps>
-  <Step title="Open API Keys settings">
-    In the DeltaLead dashboard, click your account name in the top-right corner, then go to **Organización → Integraciones → Custom Webhooks**.
+  <Step title="Open the integrations screen">
+    In the DeltaLead dashboard, go to **Organization → Integrations → Custom Webhooks**.
   </Step>
-  <Step title="Generate a new key">
-    Click **Generate New Key**. Give the key a descriptive label (for example, `production-crm-sync` or `dev-testing`) so you can identify it later.
+  <Step title="Create a key">
+    Choose production or sandbox, give the key a descriptive name — `production-crm-sync`, `dev-testing` — and optionally an expiry between 1 and 365 days.
   </Step>
-  <Step title="Copy and store the key securely">
-    Copy the key immediately after it appears on screen and store it in a secure secret manager (such as AWS Secrets Manager, HashiCorp Vault, or your platform's equivalent). You will not be able to view the full key again after closing this dialog.
+  <Step title="Copy and store it">
+    Copy the key before closing the dialog and store it in a secret manager such as AWS Secrets Manager or HashiCorp Vault.
   </Step>
 </Steps>
 
 <Warning>
-  Your API key is displayed **only once** at the moment of creation. If you navigate away or close the dialog without copying it, you must revoke the key and generate a new one. Never store API keys in source code, `.env` files committed to version control, or plain-text documents.
+  The key is shown **only once**, at creation. Only a hash is stored, so a lost key cannot be recovered — it is rotated. Never keep keys in source code, in `.env` files under version control, or in plain-text documents.
 </Warning>
 
-## Using your API key
-
-Pass your API key in the `X-API-Key` header on every request. The example below retrieves your leads list:
+## Sending the key
 
 ```bash
 curl https://platform-api.deltalead.ai/v1/leads \
-  -H "X-API-Key: YOUR_API_KEY"
+  -H "Authorization: Bearer dl_live_YOUR_KEY"
 ```
 
-Replace `YOUR_API_KEY` with the key you copied from the dashboard. The header name is case-insensitive, but `X-API-Key` is the canonical form used throughout this documentation.
+Replace `dl_live_YOUR_KEY` with the key copied from the dashboard. The scheme is matched case-insensitively and the token is trimmed.
 
-Here is the same request using a popular HTTP client library:
+The same request from common HTTP clients:
 
 <CodeGroup>
 
 ```python Python
 import httpx
 
-client = httpx.Client(headers={"X-API-Key": "YOUR_API_KEY"})
+client = httpx.Client(headers={"Authorization": "Bearer dl_live_YOUR_KEY"})
 response = client.get("https://platform-api.deltalead.ai/v1/leads")
 print(response.json())
 ```
@@ -50,7 +54,7 @@ print(response.json())
 ```javascript Node.js
 const response = await fetch("https://platform-api.deltalead.ai/v1/leads", {
   headers: {
-    "X-API-Key": "YOUR_API_KEY",
+    Authorization: "Bearer dl_live_YOUR_KEY",
   },
 });
 const data = await response.json();
@@ -59,7 +63,7 @@ console.log(data);
 
 ```php PHP
 $ch = curl_init("https://platform-api.deltalead.ai/v1/leads");
-curl_setopt($ch, CURLOPT_HTTPHEADER, ["X-API-Key: YOUR_API_KEY"]);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer dl_live_YOUR_KEY"]);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 curl_close($ch);
@@ -70,35 +74,25 @@ echo $response;
 
 ## Error responses
 
-If authentication fails, the API returns one of two HTTP error codes.
-
-| Status code | Meaning | Common cause |
+| Status | Meaning | Common cause |
 |---|---|---|
-| `401 Unauthorized` | The request did not include a valid API key. | The `X-API-Key` header is missing, the key value is misspelled, or the key has been revoked. |
-| `403 Forbidden` | The key is valid but does not have permission to perform this action. | The key was created with restricted scopes that exclude the endpoint or method you are calling. |
+| `401 Unauthorized` | The request carried no valid key. | Header missing, key misspelled, revoked, or expired. |
+| `403 Forbidden` | The key is valid but the account cannot perform the action. | The account is suspended. |
 
-A `401` response body looks like this:
+Every authentication failure returns the same `401` body, so an error never reveals whether a given key exists:
 
-```json
-{
-  "error": "unauthorized",
-  "message": "Missing or invalid API key. Include your key in the X-API-Key header."
-}
+```json 401 Unauthorized
+{"status": "error", "detail": "unauthorized"}
 ```
 
-A `403` response body looks like this:
-
-```json
-{
-  "error": "forbidden",
-  "message": "Your API key does not have permission to access this resource."
-}
+```json 403 Forbidden
+{"status": "error", "detail": "forbidden"}
 ```
 
 <Tip>
-  Create a separate API key for each environment (development, staging, production) and for each integration or service that calls the API. This limits the blast radius if a key is ever compromised — you revoke only the affected key without disrupting other services. Rotate keys on a regular schedule by generating a new key, updating your secret manager, confirming traffic flows correctly, and then revoking the old key.
+  Use a separate key per integration and per mode, so revoking one never disrupts the others. Rotate on a schedule: create the new key, update the secret manager, confirm traffic flows, then revoke the old one.
 </Tip>
 
 ## Next steps
 
-Now that your API key is set up and working, explore the full set of available endpoints in the [API Reference](/en/api-reference/introduction) — including leads management, campaign triggers, agent configuration, and webhook subscriptions.
+With a key in place, see the [API Reference](/en/api-reference/introduction) for the full set of endpoints, or the [Custom Webhook](/en/integrations/custom-webhook) if the goal is pushing leads into DeltaLead — that surface is available today.
