@@ -1,10 +1,14 @@
 ---
 title: "Modify Lead Properties — DeltaLead REST API Reference"
 sidebarTitle: "Update Lead"
-description: "Selectively update a lead record. Send only the fields to change — status, advisor, vehicle interest, or notes — and all other properties remain untouched."
+description: "Selectively update a lead — status, contact, tags, assignment, vehicles, channels, source, score, and internal notes — leaving everything else untouched."
 ---
 
-Update one or more fields on an existing lead without overwriting the entire record. Common use cases include advancing a lead through the sales pipeline by changing its status, assigning it to a specific sales advisor, correcting the vehicle of interest, or adding internal notes after a conversation. Because this endpoint uses PATCH semantics, you only need to send the fields you want to change.
+<Note>
+  The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
+</Note>
+
+Update one or more fields on an existing lead without overwriting the whole record: advance the lead through the pipeline, assign it to a salesperson, correct the contact details, or change the vehicles of interest. The semantics are PATCH, so you only send the fields that change.
 
 ## Endpoint
 
@@ -20,58 +24,100 @@ PATCH https://platform-api.deltalead.ai/v1/leads/{id}
 
 ## Request Body
 
-All fields are optional. Only the fields you include will be modified.
+All fields are optional, and only the ones present in the request are modified. Fields outside this list are silently ignored: the response is still `200`, but the value is not stored.
 
 <ParamField body="status" type="string">
-  New lifecycle status for the lead. Accepted values: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+  New status for the lead. Closed enum: `new`, `contacted`, `qualified`, `appointment`, `proposal`, `incubating`, `won`, `lost`.
 </ParamField>
 
-<ParamField body="assigned_to" type="string">
-  User ID of the sales advisor to assign this lead to. Pass `null` to unassign the lead.
+<ParamField body="contact" type="object">
+  Contact details: `first_name`, `last_name`, `email`, `phone`, `display_name`. They are merged field by field, so anything not sent inside `contact` stays as it was.
 </ParamField>
 
-<ParamField body="vehicle_interest" type="string">
-  Update the vehicle model or description the lead is interested in, e.g. `"Ford Ranger XLS 4x4 2024"`. The AI agent picks up this change on subsequent interactions.
+<ParamField body="tags" type="array of string">
+  Tags on the lead. The array replaces the previous one entirely.
 </ParamField>
 
-<ParamField body="notes" type="string">
-  Internal notes about this lead. This value **replaces** any existing notes — append manually if you need to preserve prior content.
+<ParamField body="assigned_to" type="string | null">
+  ID of the salesperson responsible for the lead. Pass `null` to leave it unassigned.
+</ParamField>
+
+<ParamField body="interested_vehicles" type="array of string">
+  Catalogue vehicle IDs. The array replaces the previous one entirely. Writes take plain IDs, even though the lead detail returns them enriched.
+</ParamField>
+
+<ParamField body="channels" type="array of string">
+  Channels associated with the lead: `whatsapp`, `mercadolibre`, `typeform`, `custom`, `manual`, `email`. The array replaces the previous one entirely.
+</ParamField>
+
+<ParamField body="source" type="string">
+  Origin label for the lead, e.g. `landing-page`.
+</ParamField>
+
+<ParamField body="score" type="integer">
+  Qualification score, an integer from `0` to `100`. A value written through the API replaces whatever the AI computed.
+</ParamField>
+
+<ParamField body="internal_notes" type="string">
+  Your team's internal notes on the lead. This is a write-only field: it does not appear in the lead returned by this endpoint or by [Get Lead](/en/api-reference/leads/get).
 </ParamField>
 
 ## Example Request
 
-Mark a lead as assigned and set the responsible sales advisor:
+Book an appointment, assign the salesperson, and update the vehicles of interest:
 
 ```bash cURL
 curl -X PATCH https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
-  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Authorization: Bearer dl_live_YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"status": "assigned", "assigned_to": "user_xyz789"}'
+  -d '{
+    "status": "appointment",
+    "assigned_to": "user_xyz789",
+    "tags": ["financiacion", "test-drive"],
+    "interested_vehicles": ["veh_9f2c41", "veh_71ba08"]
+  }'
 ```
 
 ## Response
 
-A successful request returns HTTP `200 OK` with the complete, updated lead object.
+A successful request returns HTTP `200 OK` with the complete, updated lead. See [Get Lead](/en/api-reference/leads/get) for the field-by-field description.
 
 ```json 200 OK
 {
   "id": "lead_abc123",
-  "name": "María García",
-  "phone": "+5491155551234",
-  "email": "maria@example.com",
-  "channel": "whatsapp",
-  "vehicle_interest": "Toyota Hilux SRX 2024",
+  "organization_id": "org_00112233",
+  "status": "appointment",
+  "source": "landing-page",
   "score": 87,
-  "intent": "purchase_30_days",
-  "status": "assigned",
+  "contact": {
+    "first_name": "María",
+    "last_name": "García",
+    "email": "maria@example.com",
+    "phone": "+5491155551234",
+    "display_name": "María García"
+  },
+  "channels": ["whatsapp", "custom"],
+  "interested_vehicles": ["veh_9f2c41", "veh_71ba08"],
+  "tags": ["financiacion", "test-drive"],
   "assigned_to": "user_xyz789",
-  "created_at": "2024-03-10T14:22:00Z",
-  "updated_at": "2024-03-12T11:30:45Z",
+  "notes": [
+    {
+      "id": "note_4d7e21",
+      "body": "Consultó por financiación a 36 cuotas.",
+      "author_id": "user_xyz789",
+      "source": "manual",
+      "created_at": "2024-03-10T15:02:11Z",
+      "updated_at": "2024-03-10T15:02:11Z"
+    }
+  ],
+  "ai_summary": "Consulta por una Hilux SRX 2024 con financiación a 36 cuotas. Pidió que la contacten por la tarde.",
+  "ai_summary_status": "completed",
   "last_activity_at": "2024-03-12T11:30:45Z",
-  "organization_id": "org_00112233"
+  "created_at": "2024-03-10T14:22:00Z",
+  "updated_at": "2024-03-12T11:30:45Z"
 }
 ```
 
 <Note>
-  This endpoint uses **PATCH** semantics — only the fields present in your request body are modified. Fields you omit remain exactly as they were. If you need to clear an optional field such as `assigned_to`, pass it explicitly as `null`.
+  Only the fields present in the body are modified; omitted fields stay exactly as they were. Arrays are replaced whole rather than appended to: to add one tag, send the complete list. To clear an optional field such as `assigned_to`, pass it explicitly as `null`.
 </Note>

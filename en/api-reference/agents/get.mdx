@@ -1,10 +1,16 @@
 ---
 title: "GET /v1/agents/{id}: Get AI Agent Details | DeltaLead"
 sidebarTitle: "Get Agent"
-description: "GET /v1/agents/{id} — fetch full configuration details for a single AI agent including tone, handoff triggers, and follow-up cadence."
+description: "GET /v1/agents/{id} — fetch the full configuration of a single AI agent: language, tone, message length, assigned phone number, and rules."
 ---
 
-Use this endpoint to fetch the complete configuration of a single AI agent by its ID. The response includes every setting that governs how the agent communicates — its tone, the topics it is permitted to discuss, the conditions under which it hands off to a human seller, and the cadence it follows when sending automated follow-ups.
+<Note>
+  The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
+</Note>
+
+Fetch the complete configuration of a single AI agent by its ID: the language it converses in, its tone, the length of the messages it writes, the number it writes from, and the business and qualification rules it follows.
+
+An AI agent is not a seller. Sellers are people at the dealership and receive handed-off conversations; AI agents are the ones that converse automatically, and they are the resource this section describes.
 
 ## Endpoint
 
@@ -12,121 +18,102 @@ Use this endpoint to fetch the complete configuration of a single AI agent by it
 GET https://platform-api.deltalead.ai/v1/agents/{id}
 ```
 
-## Path Parameters
+## Path parameters
 
 <ParamField path="id" type="string" required>
-  The unique identifier of the agent to retrieve, e.g. `agent_abc123`.
+  The unique identifier of the AI agent to retrieve, e.g. `agent_abc123`.
 </ParamField>
 
-## Example Request
+## Example request
 
 ```bash cURL
 curl https://platform-api.deltalead.ai/v1/agents/agent_abc123 \
-  -H "X-API-Key: YOUR_API_KEY"
+  -H "Authorization: Bearer dl_live_..."
 ```
 
 ## Response
 
-<ResponseField name="id" type="string">
-  Unique identifier for the agent.
-</ResponseField>
-
-<ResponseField name="organization_id" type="string">
-  ID of the organization this agent belongs to.
-</ResponseField>
-
-<ResponseField name="name" type="string">
-  Display name of the agent.
-</ResponseField>
-
-<ResponseField name="status" type="string">
-  Current status: `active`, `inactive`, or `draft`.
-</ResponseField>
-
-<ResponseField name="language" type="string">
-  Language locale the agent uses: `es-AR`, `es-MX`, `es-CR`, `es-CO`, `pt-BR`, or `en-US`.
-</ResponseField>
-
-<ResponseField name="channels" type="array">
-  Channels the agent is assigned to: `whatsapp`, `facebook`, `instagram`, `web`, `email`, or `phone`.
-</ResponseField>
-
-<ResponseField name="created_at" type="string">
-  ISO 8601 timestamp of agent creation.
-</ResponseField>
-
-<ResponseField name="updated_at" type="string">
-  ISO 8601 timestamp of the most recent update.
-</ResponseField>
-
-<ResponseField name="configuration" type="object">
-  Full behavioral configuration for the agent.
-
-  <Expandable title="Configuration fields">
-    <ResponseField name="tone" type="string">
-      Conversational tone used by the agent: `formal`, `friendly`, or `professional`.
-    </ResponseField>
-    <ResponseField name="handoff_triggers" type="array">
-      List of topics or situations that cause the agent to transfer the conversation to a human seller, e.g. `"pricing negotiation"` or `"financing"`.
-    </ResponseField>
-    <ResponseField name="allowed_topics" type="array">
-      List of topics the agent is permitted to discuss, e.g. `"vehicle availability"` or `"test drive scheduling"`.
-    </ResponseField>
-    <ResponseField name="follow_up_cadence" type="object">
-      Settings that control automated follow-up messages.
-
-      <Expandable title="Follow-up cadence fields">
-        <ResponseField name="max_follow_ups" type="integer">
-          Maximum number of follow-up messages the agent will send per lead.
-        </ResponseField>
-        <ResponseField name="interval_days" type="integer">
-          Number of days to wait between each follow-up message.
-        </ResponseField>
-        <ResponseField name="channel" type="string">
-          Channel used to send follow-up messages, e.g. `whatsapp`.
-        </ResponseField>
-      </Expandable>
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+A successful request returns `200 OK` with the full AI agent object.
 
 ```json 200 OK
 {
   "id": "agent_abc123",
   "organization_id": "org_xyz789",
   "name": "Martín de Ventas",
-  "status": "active",
-  "language": "es-AR",
-  "channels": ["whatsapp", "instagram"],
+  "type": "sales",
+  "language": "es_AR",
+  "tone_of_voice": "friendly",
+  "text_size": "short",
+  "assigned_phone_value": "+5491123456789",
+  "version": 7,
+  "business_rules": "No ofrecer descuentos mayores al 5% sin aprobación. Financiación hasta 60 cuotas.",
+  "lead_qualification_rules": "Calificar cuando el lead confirma modelo, presupuesto y plazo de compra.",
   "created_at": "2024-01-15T10:00:00Z",
-  "updated_at": "2024-10-01T08:30:00Z",
-  "configuration": {
-    "tone": "friendly",
-    "handoff_triggers": [
-      "pricing negotiation",
-      "financing",
-      "trade-in valuation"
-    ],
-    "allowed_topics": [
-      "vehicle availability",
-      "pricing",
-      "test drive scheduling",
-      "financing options"
-    ],
-    "follow_up_cadence": {
-      "max_follow_ups": 5,
-      "interval_days": 3,
-      "channel": "whatsapp"
-    }
-  }
+  "updated_at": "2024-10-01T08:30:00Z"
 }
 ```
 
-## Error Responses
+### Response fields
+
+<ResponseField name="id" type="string">
+  Unique identifier of the AI agent.
+</ResponseField>
+
+<ResponseField name="organization_id" type="string">
+  ID of the organization the AI agent belongs to.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name the AI agent introduces itself with to the lead.
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Agent type, e.g. `sales` or `support`. It determines the playbook the agent follows and is set during onboarding.
+</ResponseField>
+
+<ResponseField name="language" type="string">
+  Locale key the AI agent converses in: `es_AR`, `es_MX`, `es_CR`, `es_CO`, `pt_BR`, or `en_US`.
+</ResponseField>
+
+<ResponseField name="tone_of_voice" type="string">
+  Conversational tone: `formal`, `friendly`, or `professional`.
+</ResponseField>
+
+<ResponseField name="text_size" type="string">
+  Length of the messages the AI agent writes: `short`, `medium`, or `long`.
+</ResponseField>
+
+<ResponseField name="assigned_phone_value" type="string | null">
+  E.164 phone number the AI agent converses from. `null` if no number is assigned yet.
+</ResponseField>
+
+<ResponseField name="version" type="integer">
+  Version number of the configuration. It increments on every update.
+</ResponseField>
+
+<ResponseField name="business_rules" type="string">
+  Business rules the AI agent answers from: discount limits, financing terms, delivery times. This is the text edited through [Update agent](/en/api-reference/agents/update).
+</ResponseField>
+
+<ResponseField name="lead_qualification_rules" type="string">
+  Rules that define when the AI agent considers a lead qualified and what information it must gather first.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  ISO 8601 timestamp of when the AI agent was created.
+</ResponseField>
+
+<ResponseField name="updated_at" type="string">
+  ISO 8601 timestamp of the most recent update.
+</ResponseField>
+
+## Error responses
+
+When the ID does not match any AI agent in your organization, the API returns `404 Not Found`.
 
 ```json 404 Not Found
 {
-  "error": "not_found",
-  "message": "No agent with ID agent_abc123 exists in your organization."
+  "status": "error",
+  "detail": "agent_not_found"
 }
 ```

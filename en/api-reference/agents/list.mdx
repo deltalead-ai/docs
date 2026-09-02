@@ -1,10 +1,14 @@
 ---
 title: "List All AI Agents in Your Organization | DeltaLead"
 sidebarTitle: "List Agents"
-description: "GET /v1/agents — list all AI agents configured in your DeltaLead organization, including their status, language, and channel assignments."
+description: "GET /v1/agents — list the AI agents configured in your DeltaLead organization, with their language, tone, assigned phone number, and rules."
 ---
 
-This endpoint returns a paginated list of all AI agents configured in your DeltaLead organization. Each agent record includes its current status, the language it converses in, and the channels it is assigned to handle — giving you a full operational snapshot of your AI workforce at a glance.
+<Note>
+  The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
+</Note>
+
+Returns a paginated list of the AI agents configured in your organization. Each record carries the full configuration that governs how the agent converses: language, tone, message length, assigned phone number, and the business and qualification rules it works from.
 
 ## Endpoint
 
@@ -12,75 +16,26 @@ This endpoint returns a paginated list of all AI agents configured in your Delta
 GET https://platform-api.deltalead.ai/v1/agents
 ```
 
-## Query Parameters
+## Query parameters
 
 <ParamField query="limit" type="integer" default="20">
-  Maximum number of agents to return per page. Accepts values between `1` and `100`.
+  Maximum number of AI agents to return per page. Accepts values between `1` and `100`.
 </ParamField>
 
 <ParamField query="cursor" type="string">
-  Pagination cursor returned in the previous response's `pagination.next_cursor` field. Omit this parameter to start from the beginning of the list.
+  Opaque pagination cursor taken from the `next_cursor` field of the previous response. Omit it to start from the beginning of the list. Do not parse or construct the cursor yourself.
 </ParamField>
 
-<ParamField query="status" type="string">
-  Filter results by agent status. Accepted values: `active`, `inactive`, `draft`. Omit to return agents of all statuses.
-</ParamField>
-
-## Example Request
+## Example request
 
 ```bash cURL
 curl https://platform-api.deltalead.ai/v1/agents \
-  -H "X-API-Key: YOUR_API_KEY"
+  -H "Authorization: Bearer dl_live_..."
 ```
 
 ## Response
 
-<ResponseField name="data" type="array">
-  Array of agent objects matching the query.
-
-  <Expandable title="Agent object fields">
-    <ResponseField name="id" type="string">
-      Unique identifier for the agent, e.g. `agent_abc123`.
-    </ResponseField>
-    <ResponseField name="organization_id" type="string">
-      ID of the organization this agent belongs to.
-    </ResponseField>
-    <ResponseField name="name" type="string">
-      Display name of the agent, e.g. `Martín de Ventas`.
-    </ResponseField>
-    <ResponseField name="status" type="string">
-      Current status of the agent: `active`, `inactive`, or `draft`.
-    </ResponseField>
-    <ResponseField name="language" type="string">
-      Language locale the agent uses: `es-AR`, `es-MX`, `es-CR`, `es-CO`, `pt-BR`, or `en-US`.
-    </ResponseField>
-    <ResponseField name="channels" type="array">
-      List of channels the agent handles: `whatsapp`, `facebook`, `instagram`, `web`, `email`, or `phone`.
-    </ResponseField>
-    <ResponseField name="created_at" type="string">
-      ISO 8601 timestamp of when the agent was created.
-    </ResponseField>
-    <ResponseField name="updated_at" type="string">
-      ISO 8601 timestamp of the most recent update to the agent.
-    </ResponseField>
-  </Expandable>
-</ResponseField>
-
-<ResponseField name="pagination" type="object">
-  Pagination metadata for the result set.
-
-  <Expandable title="Pagination fields">
-    <ResponseField name="limit" type="integer">
-      The `limit` value applied to this request.
-    </ResponseField>
-    <ResponseField name="next_cursor" type="string | null">
-      Cursor to pass as `cursor` in your next request to retrieve the following page. `null` when no further pages exist.
-    </ResponseField>
-    <ResponseField name="has_more" type="boolean">
-      `true` if additional pages of results are available.
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+A successful request returns `200 OK` with a `data` array of AI agents and the pagination fields `next_cursor` and `has_more` at the root level.
 
 ```json 200 OK
 {
@@ -89,9 +44,14 @@ curl https://platform-api.deltalead.ai/v1/agents \
       "id": "agent_abc123",
       "organization_id": "org_xyz789",
       "name": "Martín de Ventas",
-      "status": "active",
-      "language": "es-AR",
-      "channels": ["whatsapp", "instagram"],
+      "type": "sales",
+      "language": "es_AR",
+      "tone_of_voice": "friendly",
+      "text_size": "short",
+      "assigned_phone_value": "+5491123456789",
+      "version": 7,
+      "business_rules": "No ofrecer descuentos mayores al 5% sin aprobación. Financiación hasta 60 cuotas.",
+      "lead_qualification_rules": "Calificar cuando el lead confirma modelo, presupuesto y plazo de compra.",
       "created_at": "2024-01-15T10:00:00Z",
       "updated_at": "2024-10-01T08:30:00Z"
     },
@@ -99,21 +59,79 @@ curl https://platform-api.deltalead.ai/v1/agents \
       "id": "agent_def456",
       "organization_id": "org_xyz789",
       "name": "Ana Atención",
-      "status": "active",
-      "language": "es-CR",
-      "channels": ["web", "email"],
+      "type": "support",
+      "language": "es_CR",
+      "tone_of_voice": "formal",
+      "text_size": "medium",
+      "assigned_phone_value": null,
+      "version": 2,
+      "business_rules": "Derivar toda consulta de posventa al taller.",
+      "lead_qualification_rules": "No calificar: este agente solo responde consultas de servicio.",
       "created_at": "2024-03-20T14:00:00Z",
       "updated_at": "2024-09-15T11:00:00Z"
     }
   ],
-  "pagination": {
-    "limit": 20,
-    "next_cursor": null,
-    "has_more": false
-  }
+  "next_cursor": null,
+  "has_more": false
 }
 ```
 
+### Response fields
+
+<ResponseField name="data" type="array">
+  Array of the AI agents in your organization.
+
+  <Expandable title="AI agent fields">
+    <ResponseField name="id" type="string">
+      Unique identifier of the AI agent, e.g. `agent_abc123`.
+    </ResponseField>
+    <ResponseField name="organization_id" type="string">
+      ID of the organization the AI agent belongs to.
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Name the AI agent introduces itself with to the lead.
+    </ResponseField>
+    <ResponseField name="type" type="string">
+      Agent type, e.g. `sales` or `support`. It determines the playbook the agent follows and is set during onboarding.
+    </ResponseField>
+    <ResponseField name="language" type="string">
+      Locale key the AI agent converses in: `es_AR`, `es_MX`, `es_CR`, `es_CO`, `pt_BR`, or `en_US`.
+    </ResponseField>
+    <ResponseField name="tone_of_voice" type="string">
+      Conversational tone: `formal`, `friendly`, or `professional`.
+    </ResponseField>
+    <ResponseField name="text_size" type="string">
+      Length of the messages the AI agent writes: `short`, `medium`, or `long`.
+    </ResponseField>
+    <ResponseField name="assigned_phone_value" type="string | null">
+      E.164 phone number the AI agent converses from. `null` if no number is assigned yet.
+    </ResponseField>
+    <ResponseField name="version" type="integer">
+      Version number of the configuration. It increments on every update to the AI agent.
+    </ResponseField>
+    <ResponseField name="business_rules" type="string">
+      Business rules the AI agent answers from: discount limits, financing terms, delivery times.
+    </ResponseField>
+    <ResponseField name="lead_qualification_rules" type="string">
+      Rules that define when the AI agent considers a lead qualified and what information it must gather first.
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      ISO 8601 timestamp of when the AI agent was created.
+    </ResponseField>
+    <ResponseField name="updated_at" type="string">
+      ISO 8601 timestamp of the most recent update.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="next_cursor" type="string | null">
+  Pass this value as `cursor` to fetch the next page. `null` when `has_more` is `false`.
+</ResponseField>
+
+<ResponseField name="has_more" type="boolean">
+  `true` if additional pages exist.
+</ResponseField>
+
 <Note>
-  `active` agents are currently handling live conversations. `inactive` agents are paused and will not respond to new messages. `draft` agents have been created but never published — they have not yet interacted with any leads.
+  This endpoint lists AI agents, not sellers. Sellers are people at the dealership, with a name, nickname, and description, and they are who a handed-off conversation is assigned to through the `assignee` field. The two resources are separate and do not share identifiers.
 </Note>

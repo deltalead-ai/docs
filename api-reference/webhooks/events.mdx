@@ -4,7 +4,11 @@ sidebarTitle: "Eventos"
 description: "Referencia de todos los eventos de webhook de DeltaLead: ciclo de vida del lead, conversación, citas y derivaciones, con sus esquemas de payload completos."
 ---
 
-Esta página es la referencia definitiva de cada evento de webhook que DeltaLead puede entregar a un endpoint. Los eventos se agrupan por dominio: ciclo de vida del lead, actividad de conversación, citas y derivaciones de agente. De cada evento se documenta la condición que lo dispara y un payload de ejemplo completo, para saber con exactitud qué esperar en el manejador.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Esta página es la referencia definitiva de cada evento de webhook que DeltaLead puede entregar a un endpoint. Los eventos se agrupan por dominio: ciclo de vida del lead, actividad de conversación, citas y derivaciones a una persona. De cada evento se documenta la condición que lo dispara y un payload de ejemplo completo, para saber con exactitud qué esperar en el manejador.
 
 <Note>
   Conviene suscribirse únicamente a los eventos que la integración realmente necesita. Descartar los tipos de evento irrelevantes reduce las solicitudes POST innecesarias hacia el servidor y mantiene acotada la lógica del manejador.
@@ -13,7 +17,7 @@ Esta página es la referencia definitiva de cada evento de webhook que DeltaLead
 ## Eventos del ciclo de vida del lead
 
 <Accordion title="lead.created — Ingresa un lead nuevo a DeltaLead">
-  Se dispara en el momento en que llega un lead nuevo a DeltaLead desde cualquier canal conectado: WhatsApp, Meta Ads, MercadoLibre, formulario web, email o teléfono. Al crearse, el score del lead es `0`; la calificación ocurre de forma asincrónica y dispara `lead.qualified` una vez completada.
+  Se dispara en el momento en que llega un lead nuevo a DeltaLead desde cualquier canal conectado: WhatsApp, MercadoLibre, Typeform, el Custom Webhook, email o carga manual. Al crearse, el score del lead es `0`; la calificación ocurre de forma asincrónica y dispara `lead.qualified` una vez completada.
 
   ```json Example payload
   {
@@ -22,12 +26,17 @@ Esta página es la referencia definitiva de cada evento de webhook que DeltaLead
     "organization_id": "org_xyz789",
     "data": {
       "id": "lead_abc123",
-      "name": "Carlos Rodríguez",
-      "phone": "+5491144441234",
-      "channel": "facebook",
-      "vehicle_interest": "Hilux 2024",
       "status": "new",
       "score": 0,
+      "source": "landing-page",
+      "contact": {
+        "first_name": "Carlos",
+        "last_name": "Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "phone": "+5491144441234"
+      },
+      "channels": ["whatsapp"],
+      "interested_vehicles": ["veh_9f3c21"],
       "created_at": "2024-11-07T10:00:00Z"
     }
   }
@@ -35,7 +44,7 @@ Esta página es la referencia definitiva de cada evento de webhook que DeltaLead
 </Accordion>
 
 <Accordion title="lead.qualified — La IA completa la calificación del lead">
-  Se dispara cuando el agente de IA termina su conversación de calificación y asigna un score de intención de compra. El campo `score` va de `0` a `100`. El campo `intent` refleja la evaluación de la IA sobre qué tan cerca está el lead de comprar, por ejemplo `purchase_30_days` o `researching`.
+  Se dispara cuando el agente de IA termina su conversación de calificación y asigna un score de intención de compra. El campo `score` va de `0` a `100`. El resumen que produce la calificación se refleja en `ai_summary_status`, que pasa a `completed` cuando el Resumen de IA queda disponible en el lead.
 
   ```json Example payload
   {
@@ -44,20 +53,24 @@ Esta página es la referencia definitiva de cada evento de webhook que DeltaLead
     "organization_id": "org_xyz789",
     "data": {
       "id": "lead_abc123",
-      "name": "Carlos Rodríguez",
-      "phone": "+5491144441234",
-      "score": 87,
-      "intent": "purchase_30_days",
-      "vehicle_interest": "Hilux SRX 2024",
       "status": "qualified",
-      "channel": "facebook"
+      "score": 87,
+      "contact": {
+        "first_name": "Carlos",
+        "last_name": "Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "phone": "+5491144441234"
+      },
+      "channels": ["whatsapp"],
+      "interested_vehicles": ["veh_9f3c21"],
+      "ai_summary_status": "completed"
     }
   }
   ```
 </Accordion>
 
 <Accordion title="lead.updated — Cambia el estado, el score o la asignación del lead">
-  Se dispara cada vez que se modifica un registro de lead después de su creación. Entre los disparadores habituales están un cambio manual de estado hecho por un vendedor, una revisión del score tras una conversación de seguimiento o una actualización del vehículo de interés.
+  Se dispara cada vez que se modifica un registro de lead después de su creación. Entre los disparadores habituales están un cambio manual de estado hecho por un vendedor, una revisión del score tras una conversación de seguimiento o una actualización de los vehículos de interés.
 
   ```json Example payload
   {
@@ -66,19 +79,23 @@ Esta página es la referencia definitiva de cada evento de webhook que DeltaLead
     "organization_id": "org_xyz789",
     "data": {
       "id": "lead_abc123",
-      "name": "Carlos Rodríguez",
-      "phone": "+5491144441234",
+      "status": "contacted",
       "score": 91,
-      "status": "in_progress",
-      "vehicle_interest": "Hilux SRX 2024",
-      "channel": "facebook",
+      "contact": {
+        "first_name": "Carlos",
+        "last_name": "Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "phone": "+5491144441234"
+      },
+      "channels": ["whatsapp"],
+      "interested_vehicles": ["veh_9f3c21"],
       "updated_at": "2024-11-07T11:00:00Z"
     }
   }
   ```
 </Accordion>
 
-<Accordion title="lead.assigned — El lead se asigna a un vendedor humano">
+<Accordion title="lead.assigned — El lead se asigna a un vendedor">
   Se dispara cuando un lead calificado se asigna a un integrante concreto del equipo de ventas, ya sea de forma automática por las reglas de enrutamiento de DeltaLead o de forma manual por un responsable. Este evento sirve para avisarle al vendedor asignado desde sistemas propios.
 
   ```json Example payload
@@ -88,17 +105,21 @@ Esta página es la referencia definitiva de cada evento de webhook que DeltaLead
     "organization_id": "org_xyz789",
     "data": {
       "id": "lead_abc123",
-      "name": "Carlos Rodríguez",
-      "phone": "+5491144441234",
+      "status": "qualified",
       "score": 91,
-      "status": "assigned",
+      "contact": {
+        "first_name": "Carlos",
+        "last_name": "Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "phone": "+5491144441234"
+      },
       "assigned_to": {
         "id": "user_seller001",
         "name": "Laura Méndez",
         "email": "laura.mendez@concesionaria.com"
       },
-      "channel": "facebook",
-      "vehicle_interest": "Hilux SRX 2024"
+      "channels": ["whatsapp"],
+      "interested_vehicles": ["veh_9f3c21"]
     }
   }
   ```
@@ -115,35 +136,34 @@ Esta página es la referencia definitiva de cada evento de webhook que DeltaLead
     "timestamp": "2024-11-07T10:00:05Z",
     "organization_id": "org_xyz789",
     "data": {
-      "conversation_id": "conv_111aaa",
+      "id": "conv_111aaa",
       "lead_id": "lead_abc123",
-      "lead_name": "Carlos Rodríguez",
-      "channel": "facebook",
-      "agent_id": "agent_abc123",
-      "agent_name": "Martín de Ventas",
-      "started_at": "2024-11-07T10:00:05Z"
+      "status": "open",
+      "assignee": null,
+      "unread_count": 1,
+      "last_inbound_at": "2024-11-07T10:00:05Z"
     }
   }
   ```
 </Accordion>
 
-<Accordion title="conversation.message.received — Llega un mensaje entrante">
-  Se dispara cada vez que se recibe un mensaje entrante del lead durante una conversación activa. Suscribirse a este evento permite replicar el historial de conversación en un CRM o data warehouse propio en tiempo real.
+<Accordion title="message.received — Llega un mensaje entrante">
+  Se dispara cada vez que se recibe un mensaje entrante del lead durante una conversación activa. Suscribirse a este evento permite replicar el historial de conversación en un CRM o data warehouse propio en tiempo real. El cuerpo del mensaje viaja en `body`; los adjuntos y la transcripción de audio, cuando existen, viajan en `media`.
 
   ```json Example payload
   {
-    "event": "conversation.message.received",
+    "event": "message.received",
     "timestamp": "2024-11-07T10:01:20Z",
     "organization_id": "org_xyz789",
     "data": {
       "conversation_id": "conv_111aaa",
       "lead_id": "lead_abc123",
-      "lead_name": "Carlos Rodríguez",
-      "channel": "facebook",
       "message": {
         "id": "msg_999zzz",
+        "direction": "inbound",
         "body": "¿Tienen la Hilux SRX en stock?",
         "type": "text",
+        "media": [],
         "received_at": "2024-11-07T10:01:20Z"
       }
     }
@@ -163,39 +183,36 @@ Esta página es la referencia definitiva de cada evento de webhook que DeltaLead
     "organization_id": "org_xyz789",
     "data": {
       "lead_id": "lead_abc123",
-      "lead_name": "Carlos Rodríguez",
+      "conversation_id": "conv_111aaa",
       "appointment_type": "test_drive",
-      "scheduled_at": "2024-11-09T11:00:00Z",
-      "vehicle_interest": "Hilux SRX 2024"
+      "scheduled_at": "2024-11-09T11:00:00Z"
     }
   }
   ```
 </Accordion>
 
-## Eventos de agente
+## Eventos de derivación
 
-<Accordion title="agent.handoff — La IA transfiere la conversación a una persona">
-  Se dispara cuando un agente de IA determina que la conversación requiere intervención humana e inicia una derivación. Ocurre al detectarse uno de los `handoff_triggers` configurados en el agente, por ejemplo un lead que pide negociar el precio o consultar las condiciones de financiación. El vendedor que la recibe obtiene el contexto completo de la conversación.
+<Accordion title="escalation.created — La IA transfiere la conversación a una persona">
+  Se dispara cuando un agente de IA determina que la conversación requiere intervención humana y la deriva. Ocurre al cumplirse alguna de las reglas de negocio configuradas en el agente, por ejemplo un lead que pide negociar el precio o consultar las condiciones de financiación. El vendedor que la recibe obtiene el contexto completo de la conversación.
 
   ```json Example payload
   {
-    "event": "agent.handoff",
+    "event": "escalation.created",
     "timestamp": "2024-11-07T10:15:00Z",
     "organization_id": "org_xyz789",
     "data": {
       "conversation_id": "conv_111aaa",
       "lead_id": "lead_abc123",
-      "lead_name": "Carlos Rodríguez",
-      "agent_id": "agent_abc123",
-      "agent_name": "Martín de Ventas",
-      "trigger": "financing",
-      "channel": "facebook",
+      "ai_agent_id": "agent_abc123",
+      "ai_agent_name": "Martín de Ventas",
+      "reason": "financing",
       "assigned_to": {
         "id": "user_seller001",
         "name": "Laura Méndez",
         "email": "laura.mendez@concesionaria.com"
       },
-      "handoff_at": "2024-11-07T10:15:00Z"
+      "escalated_at": "2024-11-07T10:15:00Z"
     }
   }
   ```

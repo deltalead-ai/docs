@@ -1,10 +1,14 @@
 ---
 title: "Obtener un lead por ID — endpoint de la API REST de DeltaLead"
 sidebarTitle: "Obtener lead"
-description: "Recuperar todos los datos de un lead por ID: datos de contacto, score de IA, intención de compra, vehículo de interés, estado, asignación y marcas de tiempo."
+description: "Recuperar todos los datos de un lead por ID: contacto, estado, score, canales, vehículos de interés, notas, Resumen de IA y marcas de tiempo."
 ---
 
-Este endpoint devuelve el perfil completo de un lead —datos de contacto, score asignado por IA, intención de compra, estado actual, vehículo de interés y todas las marcas de tiempo— a partir de su identificador único en la ruta de la URL. Sirve para mostrar el detalle de un lead dentro de herramientas propias, sincronizar registros individuales con un CRM externo o consultar el estado de calificación más reciente antes de ejecutar una acción.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Este endpoint devuelve el detalle completo de un lead a partir de su identificador. Sirve para mostrar un lead dentro de herramientas propias, sincronizar un registro con un CRM externo o leer el estado más reciente antes de ejecutar una acción.
 
 ## Endpoint
 
@@ -15,14 +19,14 @@ GET https://platform-api.deltalead.ai/v1/leads/{id}
 ## Parámetros de ruta
 
 <ParamField path="id" type="string" required>
-  Identificador único del lead a recuperar. Los IDs de lead llevan el prefijo `lead_`, p. ej. `lead_abc123`. Se pueden obtener desde el endpoint [Listar leads](/api-reference/leads/list) o desde los payloads de webhook.
+  Identificador único del lead. Los IDs llevan el prefijo `lead_`, por ejemplo `lead_abc123`. Se obtienen desde [Listar leads](/api-reference/leads/list) o desde los payloads de webhook.
 </ParamField>
 
 ## Ejemplo de solicitud
 
 ```bash cURL
 curl https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
-  -H "X-API-Key: YOUR_API_KEY"
+  -H "Authorization: Bearer dl_live_YOUR_KEY"
 ```
 
 ## Respuesta
@@ -32,19 +36,41 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
 ```json 200 OK
 {
   "id": "lead_abc123",
-  "name": "María García",
-  "phone": "+5491155551234",
-  "email": "maria@example.com",
-  "channel": "whatsapp",
-  "vehicle_interest": "Toyota Hilux SRX 2024",
-  "score": 87,
-  "intent": "purchase_30_days",
+  "organization_id": "org_00112233",
   "status": "qualified",
+  "source": "landing-page",
+  "score": 87,
+  "contact": {
+    "first_name": "María",
+    "last_name": "García",
+    "email": "maria@example.com",
+    "phone": "+5491155551234",
+    "display_name": "María García"
+  },
+  "channels": ["whatsapp", "custom"],
+  "interested_vehicles": [
+    {
+      "id": "veh_9f2c41",
+      "name": "Toyota Hilux SRX 2024"
+    }
+  ],
+  "tags": ["financiacion"],
   "assigned_to": "user_xyz789",
-  "created_at": "2024-03-10T14:22:00Z",
-  "updated_at": "2024-03-11T09:05:33Z",
+  "notes": [
+    {
+      "id": "note_4d7e21",
+      "body": "Consultó por financiación a 36 cuotas.",
+      "author_id": "user_xyz789",
+      "source": "manual",
+      "created_at": "2024-03-10T15:02:11Z",
+      "updated_at": "2024-03-10T15:02:11Z"
+    }
+  ],
+  "ai_summary": "Consulta por una Hilux SRX 2024 con financiación a 36 cuotas. Pidió que la contacten por la tarde.",
+  "ai_summary_status": "completed",
   "last_activity_at": "2024-03-11T09:05:33Z",
-  "organization_id": "org_00112233"
+  "created_at": "2024-03-10T14:22:00Z",
+  "updated_at": "2024-03-11T09:05:33Z"
 }
 ```
 
@@ -54,76 +80,129 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
   Identificador único del lead, con el prefijo `lead_`.
 </ResponseField>
 
-<ResponseField name="name" type="string">
-  Nombre completo del lead tal como se captó desde el canal de origen o como se indicó al crearlo.
-</ResponseField>
-
-<ResponseField name="phone" type="string">
-  Número de teléfono del lead en formato E.164, p. ej. `+5491155551234`.
-</ResponseField>
-
-<ResponseField name="email" type="string | null">
-  Dirección de email del lead. `null` si no se proporcionó.
-</ResponseField>
-
-<ResponseField name="channel" type="string">
-  Canal por el que el lead contactó por primera vez al concesionario. Uno de `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
-</ResponseField>
-
-<ResponseField name="vehicle_interest" type="string | null">
-  Modelo o descripción del vehículo por el que el lead manifestó interés, según lo identificó el agente de IA. `null` si todavía no se determinó.
-</ResponseField>
-
-<ResponseField name="score" type="integer">
-  Score de calidad del lead generado por IA, de `0` (frío) a `100` (altamente calificado), calculado a partir de la intención de compra, las señales de presupuesto y los indicadores de urgencia extraídos de la conversación.
-</ResponseField>
-
-<ResponseField name="intent" type="string">
-  Categoría de intención de compra asignada por el agente de IA. Una de:
-  - `purchase_30_days` — urgencia alta, compra probable dentro de los 30 días
-  - `purchase_90_days` — urgencia moderada, compra dentro del trimestre
-  - `browsing` — explorando opciones, sin un plazo definido
-  - `unknown` — señal insuficiente para clasificar
+<ResponseField name="organization_id" type="string">
+  Identificador de la organización (concesionario) propietaria del lead.
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  Estado actual del lead dentro de su ciclo de vida. Uno de `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+  Estado actual dentro del pipeline. Uno de `new`, `contacted`, `qualified`, `appointment`, `proposal`, `incubating`, `won`, `lost`.
+</ResponseField>
+
+<ResponseField name="source" type="string | null">
+  Etiqueta de origen informada por el sistema que generó el lead, por ejemplo `landing-page`. Es texto libre y no reemplaza a `channels`.
+</ResponseField>
+
+<ResponseField name="score" type="integer">
+  Score de calificación, entero de `0` a `100`.
+</ResponseField>
+
+<ResponseField name="contact" type="object">
+  Datos de contacto de la persona. El nombre, el email y el teléfono viven acá, nunca en el nivel raíz del lead.
+</ResponseField>
+
+<ResponseField name="contact.first_name" type="string | null">
+  Nombre de pila.
+</ResponseField>
+
+<ResponseField name="contact.last_name" type="string | null">
+  Apellido.
+</ResponseField>
+
+<ResponseField name="contact.email" type="string | null">
+  Dirección de email. `null` si no se conoce.
+</ResponseField>
+
+<ResponseField name="contact.phone" type="string | null">
+  Número de teléfono, normalmente en formato E.164. `null` si no se conoce.
+</ResponseField>
+
+<ResponseField name="contact.display_name" type="string">
+  Nombre para mostrar, compuesto a partir de `first_name` y `last_name` cuando no se informó uno propio.
+</ResponseField>
+
+<ResponseField name="channels" type="array of string">
+  Canales por los que el lead se comunicó. Es un arreglo porque un lead los acumula. Valores posibles: `whatsapp`, `mercadolibre`, `typeform`, `custom`, `manual`, `email`.
+</ResponseField>
+
+<ResponseField name="interested_vehicles" type="array of object">
+  Vehículos del catálogo por los que el lead consultó. En el detalle vienen enriquecidos con los datos del vehículo; en las escrituras y en [Listar leads](/api-reference/leads/list) son solo IDs.
+</ResponseField>
+
+<ResponseField name="interested_vehicles[].id" type="string">
+  Identificador del vehículo en el catálogo.
+</ResponseField>
+
+<ResponseField name="interested_vehicles[].name" type="string">
+  Nombre del vehículo tal como figura en el catálogo.
+</ResponseField>
+
+<ResponseField name="tags" type="array of string">
+  Etiquetas aplicadas al lead por el equipo.
 </ResponseField>
 
 <ResponseField name="assigned_to" type="string | null">
-  ID de usuario del asesor de ventas al que está asignado el lead. `null` si el lead no fue asignado.
+  ID del vendedor al que está asignado el lead. `null` si no está asignado.
 </ResponseField>
 
-<ResponseField name="created_at" type="string">
-  Marca de tiempo ISO 8601 del momento en que el lead se captó en DeltaLead.
+<ResponseField name="notes" type="array of object">
+  Notas del lead, de la más antigua a la más reciente. Siempre es un arreglo de objetos.
 </ResponseField>
 
-<ResponseField name="updated_at" type="string">
-  Marca de tiempo ISO 8601 del cambio más reciente en cualquier campo de este lead.
+<ResponseField name="notes[].id" type="string">
+  Identificador de la nota.
+</ResponseField>
+
+<ResponseField name="notes[].body" type="string">
+  Texto de la nota.
+</ResponseField>
+
+<ResponseField name="notes[].author_id" type="string | null">
+  ID de la persona que escribió la nota. `null` cuando la generó una integración.
+</ResponseField>
+
+<ResponseField name="notes[].source" type="string">
+  Origen de la nota: `manual` cuando la escribió una persona o llegó por la API, o el canal que la produjo.
+</ResponseField>
+
+<ResponseField name="notes[].created_at" type="string">
+  Marca de tiempo ISO 8601 de creación de la nota.
+</ResponseField>
+
+<ResponseField name="notes[].updated_at" type="string">
+  Marca de tiempo ISO 8601 de la última edición de la nota.
+</ResponseField>
+
+<ResponseField name="ai_summary" type="string | null">
+  Resumen de IA de la conversación. Es `null` mientras `ai_summary_status` no sea `completed`.
+</ResponseField>
+
+<ResponseField name="ai_summary_status" type="string">
+  Estado del Resumen de IA. Uno de `not_requested`, `pending`, `completed`, `failed`.
 </ResponseField>
 
 <ResponseField name="last_activity_at" type="string">
-  Marca de tiempo ISO 8601 de la interacción más reciente —mensaje, llamada o cambio de estado— registrada para este lead.
+  Marca de tiempo ISO 8601 de la última interacción registrada para este lead.
 </ResponseField>
 
-<ResponseField name="organization_id" type="string">
-  Identificador único de la organización de DeltaLead (concesionario) propietaria de este registro de lead.
+<ResponseField name="created_at" type="string">
+  Marca de tiempo ISO 8601 de creación del lead.
+</ResponseField>
+
+<ResponseField name="updated_at" type="string">
+  Marca de tiempo ISO 8601 del cambio más reciente en cualquier campo del lead.
 </ResponseField>
 
 ## Errores
 
 <Accordion title="404 — Lead no encontrado">
-  Se devuelve cuando no existe ningún lead con el `id` indicado dentro de la organización.
+  Se devuelve cuando no existe ningún lead con ese `id` dentro de la organización.
 
   ```json 404 Not Found
   {
-    "error": {
-      "code": "lead_not_found",
-      "message": "No lead with id 'lead_abc123' was found in your organization.",
-      "status": 404
-    }
+    "status": "error",
+    "detail": "lead_not_found"
   }
   ```
 
-  Conviene verificar que el valor de `id` sea correcto y pertenezca a la organización. Los IDs de lead correspondientes a la cuenta de otra organización también devuelven `404`.
+  Un ID que pertenece a otra organización devuelve también `404`. Conviene ramificar por el identificador de `detail`, nunca por el texto: ver [Errores](/api-reference/errors).
 </Accordion>

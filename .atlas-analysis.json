@@ -240,6 +240,6 @@
     "GET /v1/agents/{id} — Retrieve an agent",
     "PATCH /v1/agents/{id} — Update agent configuration",
     "POST /v1/webhooks — Register a webhook endpoint",
-    "Webhook events: lead.created, lead.qualified, lead.updated, conversation.started, conversation.message.received, appointment.scheduled"
+    "Webhook events: lead.created, lead.qualified, lead.updated, conversation.started, message.received, appointment.scheduled"
   ]
 }

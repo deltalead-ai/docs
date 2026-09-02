@@ -1,10 +1,14 @@
 ---
 title: "Modificar campos de un lead — referencia de la API de DeltaLead"
 sidebarTitle: "Actualizar lead"
-description: "Actualizar un lead de forma selectiva: solo cambian los campos enviados —estado, asesor, vehículo de interés o notas— y el resto del registro queda intacto."
+description: "Actualizar un lead de forma selectiva: estado, contacto, etiquetas, asignación, vehículos, canales, origen, score y notas internas, sin tocar el resto."
 ---
 
-Este endpoint actualiza uno o más campos de un lead existente sin sobrescribir el registro completo. Los casos de uso habituales incluyen avanzar un lead en el pipeline de ventas cambiando su estado, asignarlo a un asesor de ventas concreto, corregir el vehículo de interés o agregar notas internas después de una conversación. Como el endpoint usa semántica PATCH, solo hace falta enviar los campos que se quieren cambiar.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Este endpoint actualiza uno o más campos de un lead existente sin sobrescribir el registro completo: avanzar el lead en el pipeline, asignarlo a un vendedor, corregir los datos de contacto o cambiar los vehículos de interés. La semántica es PATCH, así que alcanza con enviar los campos que cambian.
 
 ## Endpoint
 
@@ -15,63 +19,105 @@ PATCH https://platform-api.deltalead.ai/v1/leads/{id}
 ## Parámetros de ruta
 
 <ParamField path="id" type="string" required>
-  Identificador único del lead a actualizar, p. ej. `lead_abc123`.
+  Identificador único del lead a actualizar, por ejemplo `lead_abc123`.
 </ParamField>
 
 ## Cuerpo de la solicitud
 
-Todos los campos son opcionales. Solo se modifican los campos incluidos en la solicitud.
+Todos los campos son opcionales y solo se modifican los que vienen en la solicitud. Los campos que no forman parte de esta lista se ignoran en silencio: la respuesta es `200` igual, pero el valor no se guarda.
 
 <ParamField body="status" type="string">
-  Nuevo estado del ciclo de vida del lead. Valores aceptados: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
+  Nuevo estado del lead. Enum cerrado: `new`, `contacted`, `qualified`, `appointment`, `proposal`, `incubating`, `won`, `lost`.
 </ParamField>
 
-<ParamField body="assigned_to" type="string">
-  ID de usuario del asesor de ventas al que se asigna este lead. Se pasa `null` para dejarlo sin asignar.
+<ParamField body="contact" type="object">
+  Datos de contacto: `first_name`, `last_name`, `email`, `phone`, `display_name`. Se combinan campo por campo, así que los que no se envían dentro de `contact` quedan como estaban.
 </ParamField>
 
-<ParamField body="vehicle_interest" type="string">
-  Actualiza el modelo o la descripción del vehículo que le interesa al lead, p. ej. `"Ford Ranger XLS 4x4 2024"`. El agente de IA toma este cambio en las interacciones posteriores.
+<ParamField body="tags" type="array of string">
+  Etiquetas del lead. El arreglo reemplaza al anterior por completo.
 </ParamField>
 
-<ParamField body="notes" type="string">
-  Notas internas sobre este lead. Este valor **reemplaza** las notas existentes: si hay que conservar el contenido previo, se debe anexar manualmente.
+<ParamField body="assigned_to" type="string | null">
+  ID del vendedor responsable del lead. Se pasa `null` para dejarlo sin asignar.
+</ParamField>
+
+<ParamField body="interested_vehicles" type="array of string">
+  IDs de vehículos del catálogo. El arreglo reemplaza al anterior por completo. En la escritura son solo IDs, aunque el detalle del lead los devuelva enriquecidos.
+</ParamField>
+
+<ParamField body="channels" type="array of string">
+  Canales asociados al lead: `whatsapp`, `mercadolibre`, `typeform`, `custom`, `manual`, `email`. El arreglo reemplaza al anterior por completo.
+</ParamField>
+
+<ParamField body="source" type="string">
+  Etiqueta de origen del lead, por ejemplo `landing-page`.
+</ParamField>
+
+<ParamField body="score" type="integer">
+  Score de calificación, entero de `0` a `100`. Un valor escrito por la API reemplaza al que haya calculado la IA.
+</ParamField>
+
+<ParamField body="internal_notes" type="string">
+  Notas internas del equipo sobre el lead. Es un campo de escritura: no aparece en el lead que devuelven este endpoint ni [Obtener lead](/api-reference/leads/get).
 </ParamField>
 
 ## Ejemplo de solicitud
 
-Marcar un lead como asignado y definir el asesor de ventas responsable:
+Agendar una visita, asignar al vendedor y actualizar los vehículos de interés:
 
 ```bash cURL
 curl -X PATCH https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
-  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Authorization: Bearer dl_live_YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"status": "assigned", "assigned_to": "user_xyz789"}'
+  -d '{
+    "status": "appointment",
+    "assigned_to": "user_xyz789",
+    "tags": ["financiacion", "test-drive"],
+    "interested_vehicles": ["veh_9f2c41", "veh_71ba08"]
+  }'
 ```
 
 ## Respuesta
 
-Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo y actualizado.
+Una solicitud exitosa devuelve HTTP `200 OK` con el lead completo ya actualizado. La descripción campo por campo está en [Obtener lead](/api-reference/leads/get).
 
 ```json 200 OK
 {
   "id": "lead_abc123",
-  "name": "María García",
-  "phone": "+5491155551234",
-  "email": "maria@example.com",
-  "channel": "whatsapp",
-  "vehicle_interest": "Toyota Hilux SRX 2024",
+  "organization_id": "org_00112233",
+  "status": "appointment",
+  "source": "landing-page",
   "score": 87,
-  "intent": "purchase_30_days",
-  "status": "assigned",
+  "contact": {
+    "first_name": "María",
+    "last_name": "García",
+    "email": "maria@example.com",
+    "phone": "+5491155551234",
+    "display_name": "María García"
+  },
+  "channels": ["whatsapp", "custom"],
+  "interested_vehicles": ["veh_9f2c41", "veh_71ba08"],
+  "tags": ["financiacion", "test-drive"],
   "assigned_to": "user_xyz789",
-  "created_at": "2024-03-10T14:22:00Z",
-  "updated_at": "2024-03-12T11:30:45Z",
+  "notes": [
+    {
+      "id": "note_4d7e21",
+      "body": "Consultó por financiación a 36 cuotas.",
+      "author_id": "user_xyz789",
+      "source": "manual",
+      "created_at": "2024-03-10T15:02:11Z",
+      "updated_at": "2024-03-10T15:02:11Z"
+    }
+  ],
+  "ai_summary": "Consulta por una Hilux SRX 2024 con financiación a 36 cuotas. Pidió que la contacten por la tarde.",
+  "ai_summary_status": "completed",
   "last_activity_at": "2024-03-12T11:30:45Z",
-  "organization_id": "org_00112233"
+  "created_at": "2024-03-10T14:22:00Z",
+  "updated_at": "2024-03-12T11:30:45Z"
 }
 ```
 
 <Note>
-  Este endpoint usa semántica **PATCH**: solo se modifican los campos presentes en el cuerpo de la solicitud. Los campos omitidos quedan exactamente como estaban. Para vaciar un campo opcional como `assigned_to`, hay que pasarlo explícitamente como `null`.
+  Solo se modifican los campos presentes en el cuerpo; los omitidos quedan exactamente como estaban. Los arreglos se reemplazan enteros, no se agregan elementos: para sumar una etiqueta hay que enviar la lista completa. Para vaciar un campo opcional como `assigned_to`, se lo pasa explícitamente como `null`.
 </Note>

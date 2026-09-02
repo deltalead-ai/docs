@@ -1,10 +1,14 @@
 ---
 title: "Crear un lead por API — referencia de la API REST de DeltaLead"
 sidebarTitle: "Crear lead"
-description: "Agregar un lead a DeltaLead sin interacción por canal: ideal para importar sistemas heredados, formularios propios o fuentes de terceros sin integración nativa."
+description: "Agregar un lead a DeltaLead sin interacción por canal: datos de contacto anidados, vehículos del catálogo y notas, con las dos reglas de validación reales."
 ---
 
-Este endpoint crea un registro de lead nuevo en DeltaLead de forma programática, sin que el contacto tenga que llegar por uno de los canales conectados. Es el endpoint indicado para importar contactos desde una base de datos heredada, enviar los envíos de un formulario de captación propio o derivar leads desde una fuente de terceros sin integración nativa. Una vez creado, el lead aparece de inmediato en el Inbox unificado y queda habilitado para la calificación por IA, los flujos de asignación y las campañas salientes.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Este endpoint crea un lead en DeltaLead sin que el contacto tenga que llegar por un canal conectado. Sirve para importar contactos desde una base heredada, enviar los envíos de un formulario propio o derivar leads desde una fuente de terceros sin integración nativa. El lead queda visible en el Inbox unificado apenas se crea.
 
 ## Endpoint
 
@@ -14,68 +18,140 @@ POST https://platform-api.deltalead.ai/v1/leads
 
 ## Cuerpo de la solicitud
 
-<ParamField body="name" type="string" required>
-  Nombre completo del lead. Se usa para dirigirse al contacto en los mensajes generados por IA y en los escritos por personas.
+<ParamField body="contact" type="object" required>
+  Datos de contacto de la persona. Es un objeto anidado: ni el nombre ni el teléfono se envían en el nivel raíz del lead.
 </ParamField>
 
-<ParamField body="phone" type="string" required>
-  Número de teléfono del lead en [formato E.164](https://en.wikipedia.org/wiki/E.164), p. ej. `+5491155551234`. Debe incluir el código de país.
+<ParamField body="contact.first_name" type="string">
+  Nombre de pila.
 </ParamField>
 
-<ParamField body="email" type="string">
-  Dirección de email del lead. Opcional: se omite si no está disponible.
+<ParamField body="contact.last_name" type="string">
+  Apellido.
 </ParamField>
 
-<ParamField body="channel" type="string" default="api">
-  Canal de origen a asociar con este lead. Valores aceptados: `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`. Si no se indica, toma el valor `api`, lo que facilita identificar en los reportes los registros creados por código.
+<ParamField body="contact.email" type="string">
+  Dirección de email.
 </ParamField>
 
-<ParamField body="vehicle_interest" type="string">
-  Descripción en texto libre del vehículo que le interesa al lead, p. ej. `"Toyota Hilux SRX 2024"`. El agente de IA usa este campo para personalizar las respuestas.
+<ParamField body="contact.phone" type="string">
+  Número de teléfono. Se recomienda el [formato E.164](https://en.wikipedia.org/wiki/E.164), por ejemplo `+5491155551234`.
 </ParamField>
 
-<ParamField body="notes" type="string">
-  Notas internas sobre este lead. Son visibles para el equipo en el Inbox unificado, pero nunca se envían al lead.
+<ParamField body="contact.display_name" type="string">
+  Nombre para mostrar. Si se omite, DeltaLead lo compone a partir de `first_name` y `last_name`.
 </ParamField>
+
+<ParamField body="status" type="string" default="new">
+  Estado inicial del lead. Enum cerrado: `new`, `contacted`, `qualified`, `appointment`, `proposal`, `incubating`, `won`, `lost`.
+</ParamField>
+
+<ParamField body="score" type="integer">
+  Score de calificación, entero de `0` a `100`. Si se omite, el lead queda sin calificación hasta que la IA lo evalúe.
+</ParamField>
+
+<ParamField body="interested_vehicles" type="array of string">
+  IDs de vehículos del catálogo, no texto libre. Un vehículo que no está en el catálogo se carga primero ahí y después se referencia por su ID.
+</ParamField>
+
+<ParamField body="notes" type="array of object">
+  Notas del lead. Cada elemento es un objeto y alcanza con `body`; el resto de los campos de la nota los completa DeltaLead.
+</ParamField>
+
+<ParamField body="notes[].body" type="string" required>
+  Texto de la nota. Es visible para el equipo y nunca se le envía al lead.
+</ParamField>
+
+### Reglas de validación
+
+Son dos, y son las únicas:
+
+1. Al menos uno de `contact.first_name` o `contact.last_name`.
+2. Al menos uno de `contact.email` o `contact.phone`.
+
+Si falta cualquiera de las dos condiciones, la respuesta es `422` y ningún lead se crea.
 
 ## Ejemplo de solicitud
 
 ```bash cURL
 curl -X POST https://platform-api.deltalead.ai/v1/leads \
-  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Authorization: Bearer dl_live_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "María García",
-    "phone": "+5491155551234",
-    "email": "maria@example.com",
-    "channel": "web_form",
-    "vehicle_interest": "Toyota Hilux SRX 2024"
+    "contact": {
+      "first_name": "María",
+      "last_name": "García",
+      "email": "maria@example.com",
+      "phone": "+5491155551234"
+    },
+    "status": "new",
+    "score": 40,
+    "interested_vehicles": ["veh_9f2c41"],
+    "notes": [
+      {"body": "Consultó por financiación a 36 cuotas."}
+    ]
   }'
 ```
 
 ## Respuesta
 
-Una solicitud exitosa devuelve HTTP `201 Created` con el objeto lead recién creado.
+Una solicitud exitosa devuelve HTTP `201 Created` con el lead recién creado. La descripción campo por campo está en [Obtener lead](/api-reference/leads/get).
 
 ```json 201 Created
 {
-  "id": "lead_abc123",
-  "name": "María García",
-  "phone": "+5491155551234",
-  "email": "maria@example.com",
-  "channel": "web_form",
-  "vehicle_interest": "Toyota Hilux SRX 2024",
-  "score": 0,
-  "intent": "unknown",
+  "id": "lead_ghi789",
+  "organization_id": "org_00112233",
   "status": "new",
+  "source": null,
+  "score": 40,
+  "contact": {
+    "first_name": "María",
+    "last_name": "García",
+    "email": "maria@example.com",
+    "phone": "+5491155551234",
+    "display_name": "María García"
+  },
+  "channels": [],
+  "interested_vehicles": ["veh_9f2c41"],
+  "tags": [],
   "assigned_to": null,
-  "created_at": "2024-03-12T10:15:00Z",
-  "updated_at": "2024-03-12T10:15:00Z",
+  "notes": [
+    {
+      "id": "note_5b3d10",
+      "body": "Consultó por financiación a 36 cuotas.",
+      "author_id": null,
+      "source": "manual",
+      "created_at": "2024-03-12T10:15:00Z",
+      "updated_at": "2024-03-12T10:15:00Z"
+    }
+  ],
+  "ai_summary": null,
+  "ai_summary_status": "not_requested",
   "last_activity_at": "2024-03-12T10:15:00Z",
-  "organization_id": "org_00112233"
+  "created_at": "2024-03-12T10:15:00Z",
+  "updated_at": "2024-03-12T10:15:00Z"
 }
 ```
 
-<Note>
-  Crear un lead por la API **no** inicia automáticamente una conversación con IA. El `score` inicial del lead es `0` y su `intent` es `unknown` hasta que un agente de IA interactúe con el contacto. Para disparar una secuencia de contacto automatizada —como un saludo por WhatsApp o una llamada de seguimiento— hay que configurar un **workflow** en el panel de DeltaLead, en **Automatizaciones → Workflows**, y definir el disparador _"Lead creado por API"_.
-</Note>
+Un lead creado por la API no tiene canal: `channels` queda vacío y se va llenando a medida que la persona conversa por WhatsApp, MercadoLibre, email u otro canal. `ai_summary_status` arranca en `not_requested`.
+
+## Errores
+
+<Accordion title="422 — Validación">
+  Se devuelve cuando el cuerpo no cumple alguna de las dos reglas de validación. El arreglo `errors` indica qué campo falló.
+
+  ```json 422 Unprocessable Entity
+  {
+    "status": "error",
+    "detail": "validation_error",
+    "errors": [
+      {
+        "field": "contact",
+        "detail": "email_or_phone_required"
+      }
+    ]
+  }
+  ```
+
+  Conviene ramificar por el identificador de `detail`, nunca por el texto. La lista completa de códigos está en [Errores](/api-reference/errors).
+</Accordion>

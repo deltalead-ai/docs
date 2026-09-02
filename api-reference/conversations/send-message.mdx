@@ -1,10 +1,16 @@
 ---
 title: "Enviar un mensaje humano — API REST de conversaciones"
 sidebarTitle: "Enviar mensaje"
-description: "Publicar un mensaje como asesor humano en una conversación abierta, sin pasar por la IA, y usar pause_ai para detener las respuestas automáticas del agente."
+description: "Publicar un mensaje como vendedor en una conversación abierta, sin pasar por la IA, y derivar o resolver la conversación desde la API."
 ---
 
-Este endpoint envía un mensaje a una conversación activa en nombre de un vendedor humano, sin intervención del agente de IA. Es la opción indicada cuando un asesor de ventas necesita entrar en un momento crítico —una charla sobre financiación, una negociación de precio o el cierre de una operación— sin esperar a que la IA responda primero. De forma opcional se puede pausar el agente de IA en esa conversación para que no interfiera mientras el equipo maneja el intercambio de manera directa.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Envía un mensaje a una conversación activa en nombre de una persona del equipo, sin intervención del agente de IA. Es la opción indicada cuando un vendedor necesita entrar en un momento crítico —una charla sobre financiación, una negociación de precio o el cierre de una operación— sin esperar a que la IA responda primero.
+
+El envío es asíncrono. La API responde `202 Accepted` cuando el mensaje queda encolado hacia el canal, no cuando el destinatario lo recibe: la entrega se sigue después por el campo `status` del mensaje.
 
 ## Endpoint
 
@@ -15,45 +21,52 @@ POST https://platform-api.deltalead.ai/v1/conversations/{id}/messages
 ## Parámetros de ruta
 
 <ParamField path="id" type="string" required>
-  Identificador único de la conversación a la que se envía el mensaje, por ejemplo `conv_xyz789`. La conversación debe tener el estado `open`.
+  Identificador único de la conversación a la que se envía el mensaje, por ejemplo `conv_xyz789`. La conversación no puede estar en estado `resolved`.
 </ParamField>
 
 ## Cuerpo de la solicitud
 
-<ParamField body="content" type="string" required>
-  Cuerpo de texto del mensaje que se envía. Debe ser una cadena no vacía. El formato Markdown no se renderiza en el dispositivo del destinatario: conviene enviar texto plano.
+<ParamField body="body" type="string" required>
+  Cuerpo de texto del mensaje. Debe ser una cadena no vacía, salvo cuando el mensaje lleva un adjunto. El formato Markdown no se renderiza en el dispositivo del destinatario: conviene enviar texto plano.
 </ParamField>
 
 <ParamField body="type" type="string" default="text">
-  Tipo de medio del mensaje. Valores aceptados: `text`, `image`, `document`. Para `image` y `document`, `content` debe ser una URL de acceso público al archivo. El valor por defecto es `text`.
+  Tipo de mensaje. Valores aceptados: `text`, `image`, `document`. El valor por defecto es `text`.
 </ParamField>
 
-<ParamField body="pause_ai" type="boolean" default="false">
-  Con `true`, el agente de IA queda pausado en esta conversación inmediatamente después de enviar el mensaje. La IA no genera más respuestas automáticas hasta que se la reanude desde el panel de DeltaLead o mediante el endpoint de reanudación de la API. El valor por defecto es `false`.
+<ParamField body="media_url" type="string">
+  URL de acceso público del archivo que se adjunta. Es obligatoria cuando `type` es `image` o `document`, y se ignora cuando `type` es `text`.
 </ParamField>
 
 ## Solicitud de ejemplo
 
 ```bash cURL
 curl -X POST https://platform-api.deltalead.ai/v1/conversations/conv_xyz789/messages \
-  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Authorization: Bearer dl_live_..." \
   -H "Content-Type: application/json" \
-  -d '{"content": "Hi María, I'\''m your sales advisor. Let me check the financing options for you.", "pause_ai": true}'
+  -d '{"body": "Hi María, I'\''m your sales advisor. Let me check the financing options for you."}'
 ```
 
 ## Respuesta
 
-Una solicitud correcta devuelve `201 Created` con el objeto del mensaje creado.
+Una solicitud correcta devuelve `202 Accepted` con el mensaje ya creado y encolado. El mensaje nace con `status` en `queued`.
 
-```json 201 Created
+```json 202 Accepted
 {
   "id": "msg_005",
   "conversation_id": "conv_xyz789",
   "direction": "outbound",
+  "body": "Hi María, I'm your sales advisor. Let me check the financing options for you.",
   "type": "text",
-  "content": "Hi María, I'm your sales advisor. Let me check the financing options for you.",
-  "sent_by": "human",
-  "created_at": "2024-03-11T09:05:33Z"
+  "media": [],
+  "sender": "human",
+  "ai_agent_id": null,
+  "ai_agent_name": null,
+  "status": "queued",
+  "error_code": null,
+  "received_at": null,
+  "created_at": "2024-03-11T09:05:33Z",
+  "updated_at": "2024-03-11T09:05:33Z"
 }
 ```
 
@@ -71,22 +84,104 @@ Una solicitud correcta devuelve `201 Created` con el objeto del mensaje creado.
   Siempre `outbound` para los mensajes enviados por este endpoint.
 </ResponseField>
 
+<ResponseField name="body" type="string">
+  El texto del mensaje tal como se envió.
+</ResponseField>
+
 <ResponseField name="type" type="string">
-  Tipo de medio del mensaje, según lo indicado en la solicitud. Uno de `text`, `image`, `document`.
+  Tipo de mensaje, según lo indicado en la solicitud. Uno de `text`, `image`, `document`.
 </ResponseField>
 
-<ResponseField name="content" type="string">
-  El contenido del mensaje tal como se envió: cuerpo de texto o URL del archivo multimedia.
+<ResponseField name="media" type="array">
+  Archivos adjuntos al mensaje. Es un arreglo vacío en los mensajes de texto.
 </ResponseField>
 
-<ResponseField name="sent_by" type="string">
-  Siempre `human` para los mensajes enviados por este endpoint, lo que permite distinguirlos de las respuestas generadas por IA dentro del historial de la conversación.
+<ResponseField name="sender" type="string">
+  Siempre `human` para los mensajes enviados por este endpoint, lo que permite distinguirlos de los que genera el agente de IA dentro del historial.
+</ResponseField>
+
+<ResponseField name="ai_agent_id" type="string | null">
+  Siempre `null` en los mensajes enviados por este endpoint.
+</ResponseField>
+
+<ResponseField name="ai_agent_name" type="string | null">
+  Siempre `null` en los mensajes enviados por este endpoint.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Estado de entrega. Nace en `queued` y avanza a `sent`, `delivered` o `failed`.
+</ResponseField>
+
+<ResponseField name="error_code" type="string | null">
+  Identificador del motivo de falla, en `snake_case`. Solo viene con valor cuando `status` es `failed`.
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  Marca de tiempo ISO 8601 del momento en que se entregó el mensaje.
+  Marca de tiempo ISO 8601 del momento en que el mensaje se encoló.
 </ResponseField>
 
-<Warning>
-  Enviar un mensaje con `pause_ai: true` **detiene de inmediato las respuestas automáticas del agente de IA** en esta conversación. El lead no recibe ninguna otra respuesta automatizada hasta que la IA se reanude. Para reanudar el agente de IA, se puede usar el control de reanudación del panel de DeltaLead —abrir la conversación y activar la opción para **reanudar la IA**— o llamar al endpoint de reanudación de la API. Dejar la IA pausada en un día de alto volumen puede derivar en leads perdidos, así que conviene reanudar el agente apenas termina la intervención manual.
-</Warning>
+<Note>
+  `202 Accepted` confirma que DeltaLead aceptó el mensaje, no que el lead lo recibió. El canal puede rechazarlo después —por ejemplo, si la ventana de mensajería de WhatsApp está cerrada—, y en ese caso el mensaje queda en `failed` con un `error_code`. El estado final se consulta releyendo la conversación con [Obtener conversación](/api-reference/conversations/get).
+</Note>
+
+## Derivar la conversación a una persona
+
+`handoff` saca la conversación de manos del agente de IA y la asigna a un vendedor. Mientras la conversación está en `handed_off`, el agente de IA deja de responder: contesta únicamente la persona asignada.
+
+```text
+POST https://platform-api.deltalead.ai/v1/conversations/{id}/handoff
+```
+
+<ParamField body="assignee" type="string">
+  ID de la persona que queda a cargo. Si se omite, la conversación se asigna según las reglas de derivación de la organización.
+</ParamField>
+
+```bash cURL
+curl -X POST https://platform-api.deltalead.ai/v1/conversations/conv_xyz789/handoff \
+  -H "Authorization: Bearer dl_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{"assignee": "user_xyz789"}'
+```
+
+Devuelve `200 OK` con la conversación actualizada, sin el arreglo `messages`.
+
+```json 200 OK
+{
+  "id": "conv_xyz789",
+  "organization_id": "org_xyz789",
+  "lead_id": "lead_abc123",
+  "status": "handed_off",
+  "assignee": "user_xyz789",
+  "unread_count": 0,
+  "last_inbound_at": "2024-03-11T09:04:58Z",
+  "last_message_at": "2024-03-11T09:05:33Z"
+}
+```
+
+## Resolver la conversación
+
+`resolve` cierra la conversación: pasa a `resolved` y deja de aparecer entre los hilos que requieren atención. Un mensaje entrante posterior del lead la reabre en `open`.
+
+```text
+POST https://platform-api.deltalead.ai/v1/conversations/{id}/resolve
+```
+
+```bash cURL
+curl -X POST https://platform-api.deltalead.ai/v1/conversations/conv_xyz789/resolve \
+  -H "Authorization: Bearer dl_live_..."
+```
+
+Devuelve `200 OK` con la conversación actualizada, en el mismo formato que `handoff`.
+
+```json 200 OK
+{
+  "id": "conv_xyz789",
+  "organization_id": "org_xyz789",
+  "lead_id": "lead_abc123",
+  "status": "resolved",
+  "assignee": "user_xyz789",
+  "unread_count": 0,
+  "last_inbound_at": "2024-03-11T09:04:58Z",
+  "last_message_at": "2024-03-11T09:05:33Z"
+}
+```
