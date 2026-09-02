@@ -49,7 +49,7 @@ The body is a JSON object with a single `lead` key. Lead contract v1 requires `l
 </ParamField>
 
 <ParamField body="lead.vehicle_of_interest" type="string">
-  Free-text description of the vehicle the lead asked about, e.g. `Toyota Hilux SRX 2024`. Recorded on the lead and used by the AI summary to match against catalogue stock, so send what the buyer actually wrote rather than an internal stock code.
+  Free-text description of the vehicle the lead asked about, e.g. `Toyota Hilux SRX 2024`. Resolved against your catalogue while the lead is processed. A match is added to the lead's `interested_vehicles`; with no match the value is kept as a note for an advisor to resolve by hand. Send what the buyer actually wrote rather than an internal stock code. Truncated at 200 characters.
 </ParamField>
 
 <ParamField body="lead.notes" type="string">
@@ -57,7 +57,7 @@ The body is a JSON object with a single `lead` key. Lead contract v1 requires `l
 </ParamField>
 
 <ParamField body="lead.metadata" type="object">
-  Arbitrary JSON object stored on the lead as passthrough, merged across deliveries rather than overwritten. Use it for identifiers from your own system that have no home in the contract. Nothing in DeltaLead interprets it and it is never shown to the AI agent. Keys containing `.` or `$` are rejected.
+  Arbitrary JSON object stored on the lead as passthrough, merged across deliveries rather than overwritten. Use it for identifiers from your own system that have no home in the contract. Nothing in DeltaLead interprets it and it is never shown to the AI agent. Keys that start with `$` or contain `.` are silently discarded; the rest of the object is stored and the request returns `200`.
 </ParamField>
 
 <Warning>
@@ -104,7 +104,19 @@ The practical consequence is that a delivery which matches an existing contact s
 | Rate, sustained | 5 requests per second |
 | Rate, burst | 10 requests |
 
-Rate limits apply per route.
+Rate limits apply per route. Separately, the contract fields carry their own content limits:
+
+| Field | Limit | On excess |
+|---|---|---|
+| `lead.notes` | 4,000 characters | truncated |
+| `lead.vehicle_of_interest` | 200 characters | truncated |
+| `metadata` — nesting depth | 4 levels | the branch is dropped |
+| `metadata` — key length | 128 characters | truncated |
+| `metadata` — string value | 2,048 characters | truncated |
+| `metadata` — items per array | 50 | the remainder is dropped |
+| `metadata` — total size | 8 KB | keys are dropped from the end |
+
+Nothing in the response reports truncation, so keep values inside these bounds rather than relying on the platform to tell you.
 
 ## Responses
 
@@ -124,7 +136,6 @@ A failure returns an error envelope, where `detail` identifies the cause:
 |---|---|---|
 | `200` | `ok` | Delivery accepted for processing |
 | `200` | `duplicate` | The `Idempotency-Key` has already been seen |
-| `400` | `invalid_body` | The body could not be read |
 | `400` | `invalid_json` | The body is empty, is not valid JSON, or is not a JSON object |
 | `400` | `missing_required_fields` | Lead contract v1 is not satisfied, including a missing or non-object `lead` |
 | `400` | `payload_too_large` | The body is over 256 KB |

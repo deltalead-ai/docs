@@ -16,7 +16,7 @@ Esta guía cubre la puesta en marcha de DeltaLead, desde una cuenta recién crea
   </Step>
 
   <Step title="Conectar el número de WhatsApp Business">
-    Ir a **Configuración → Canales → WhatsApp** y seguir el asistente guiado para vincular el número de WhatsApp Business mediante la API de Meta Business.
+    Ir a **Organización → Integraciones** y seguir el asistente guiado para vincular el número de WhatsApp Business mediante la API de Meta Business.
 
     Antes de conectar, conviene tener en cuenta estos puntos:
 
@@ -25,12 +25,12 @@ Esta guía cubre la puesta en marcha de DeltaLead, desde una cuenta recién crea
     - Las llamadas VoIP de WhatsApp entrantes están incluidas desde el plan **Growth**. Las llamadas VoIP salientes, desde **Advanced**. La telefonía tradicional está disponible en **Enterprise**.
 
     <Warning>
-      El número de WhatsApp Business no debe seguir activo en la app de WhatsApp Business después de conectarlo a DeltaLead. Tener ambos funcionando en paralelo provoca fallas en la entrega de mensajes.
+      La entrega de mensajes falla mientras el mismo número corre en los dos lados, así que conviene completar el prerequisito de arriba antes de conectar.
     </Warning>
   </Step>
 
   <Step title="Cargar el catálogo de vehículos">
-    Ir a **Catálogo → Importar** y subir el stock. DeltaLead acepta:
+    Ir a **Inventario → Catálogo** y subir el stock. DeltaLead acepta:
 
     - **Fichas técnicas en PDF** — la IA extrae automáticamente nombres de modelos, especificaciones de motor, versiones, precios y disponibilidad.
     - **Planillas** (`.xlsx`, `.csv`) — las columnas se mapean a los campos de DeltaLead en el asistente de importación.
@@ -54,7 +54,7 @@ Esta guía cubre la puesta en marcha de DeltaLead, desde una cuenta recién crea
   </Step>
 
   <Step title="Conectar el CRM o el DMS">
-    Ir a **Configuración → Integraciones** y elegir el CRM o DMS de la lista. DeltaLead ofrece integraciones nativas con:
+    Ir a **Organización → Integraciones** y elegir el CRM o DMS de la lista. DeltaLead ofrece integraciones nativas con:
 
     **Salesforce**, **HubSpot**, **Microsoft Dynamics 365**, **Pipedrive**, **Odoo**, **Bitrix**, **PilotSolution**, **Tecnom** y **Google Sheets**.
 
@@ -74,4 +74,4 @@ Con el agente activo, empieza a responder a cada lead nuevo en menos de 9 segund
 
 Las secuencias de seguimiento corren solas: el agente retoma el contacto con los leads que quedaron en silencio, reactiva los leads dormidos y se detiene automáticamente apenas el lead responde, agenda una visita o se marca como ganado o perdido.
 
-Para monitorear el rendimiento del agente, ir a **Analítica → Embudo** y ver el pipeline completo: leads → conversaciones → leads calificados → citas agendadas → visitas al concesionario → ventas cerradas, desglosado por canal, modelo y vendedor.
+Para monitorear el rendimiento del agente, ir a **Operaciones → Métricas** y ver el pipeline completo: leads → conversaciones → leads calificados → citas agendadas → visitas al concesionario → ventas cerradas, desglosado por canal, modelo y vendedor.

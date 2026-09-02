@@ -16,7 +16,7 @@ This guide walks you through setting up DeltaLead from a brand-new account to an
   </Step>
 
   <Step title="Connect your WhatsApp Business number">
-    Navigate to **Settings → Channels → WhatsApp** and follow the guided wizard to link your WhatsApp Business number via the Meta Business API.
+    Navigate to **Organization → Integrations** and follow the guided wizard to link your WhatsApp Business number via the Meta Business API.
 
     Before you connect, keep these points in mind:
 
@@ -25,12 +25,12 @@ This guide walks you through setting up DeltaLead from a brand-new account to an
     - WhatsApp VoIP calls (inbound) are included from the **Growth** plan. Outbound VoIP calls are included from **Advanced**. Traditional telephony is available on **Enterprise**.
 
     <Warning>
-      Do not keep your WhatsApp Business number active in the WhatsApp Business app after connecting it to DeltaLead. Running both simultaneously will cause message delivery failures.
+      Message delivery fails while the same number runs in both places, so complete the prerequisite above before connecting.
     </Warning>
   </Step>
 
   <Step title="Upload your vehicle catalog">
-    Go to **Catalog → Import** and upload your inventory. DeltaLead accepts:
+    Go to **Inventory → Catalog** and upload your inventory. DeltaLead accepts:
 
     - **PDF technical data sheets** (*fichas técnicas*) — the AI extracts model names, engine specs, trim levels, pricing, and availability automatically.
     - **Spreadsheets** (`.xlsx`, `.csv`) — map your columns to DeltaLead's fields in the import wizard.
@@ -54,7 +54,7 @@ This guide walks you through setting up DeltaLead from a brand-new account to an
   </Step>
 
   <Step title="Connect your CRM or DMS">
-    Go to **Settings → Integrations** and select your CRM or DMS from the list. DeltaLead supports native integrations with:
+    Go to **Organization → Integrations** and select your CRM or DMS from the list. DeltaLead supports native integrations with:
 
     **Salesforce**, **HubSpot**, **Microsoft Dynamics 365**, **Pipedrive**, **Odoo**, **Bitrix**, **PilotSolution**, **Tecnom**, and **Google Sheets**.
 
@@ -74,4 +74,4 @@ Once your agent is active, it begins responding to every new lead in under 9 sec
 
 Follow-up sequences run on autopilot: the agent checks in with leads that have gone quiet, re-engages dormant prospects, and stops automatically the moment a lead responds, books a visit, or gets marked as won or lost.
 
-To monitor your agent's performance, go to **Analytics → Funnel** to see the complete pipeline: leads → conversations → qualified leads → appointments booked → dealership visits → closed sales, broken down by channel, model, and sales rep.
+To monitor your agent's performance, go to **Operations → Metrics** to see the complete pipeline: leads → conversations → qualified leads → appointments booked → dealership visits → closed sales, broken down by channel, model, and sales rep.

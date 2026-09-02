@@ -90,7 +90,7 @@ Conviene implementar **backoff exponencial** en todas las solicitudes que se rei
 
 ## Errores de servidor (500)
 
-Un `500 Internal Server Error` indica una falla transitoria en la infraestructura de DeltaLead. Corresponde reintentar la solicitud con backoff exponencial: la gran mayoría de los errores transitorios se resuelve en pocos segundos. Si un `500` persiste durante más de unos minutos, se puede consultar la [página de estado de DeltaLead](https://status.deltalead.ai) o contactar a soporte.
+Un `500 Internal Server Error` indica una falla transitoria en la infraestructura de DeltaLead. Corresponde reintentar la solicitud con backoff exponencial: la gran mayoría de los errores transitorios se resuelve en pocos segundos. Si un `500` persiste durante más de unos minutos, se puede consultar la [página de estado de DeltaLead](https://deltalead.instatus.com/) o contactar a soporte.
 
 <Tip>
   Conviene registrar siempre el **cuerpo completo de la respuesta de error**, no solo el código de estado HTTP. El campo `error.code` es legible por máquina y estable entre versiones de la API, lo que lo hace apto para reglas de alerta y remediación automática. Por ejemplo, se puede detectar `lead_not_found` y omitir el registro, o capturar `validation_error` y mostrar `error.details` directamente en el panel de un operador.
