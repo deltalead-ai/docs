@@ -1,8 +1,12 @@
 ---
 title: "DeltaLead API Cursor-Based Pagination for List Endpoints"
 sidebarTitle: "Pagination"
-description: "DeltaLead list endpoints use cursor-based pagination. Supply the cursor and limit parameters to step through leads, conversations, and agent records."
+description: "DeltaLead list endpoints use cursor-based pagination. Supply the cursor and limit parameters to step through leads, conversations, and AI agent records."
 ---
+
+<Note>
+  The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
+</Note>
 
 All DeltaLead list endpoints — `GET /leads`, `GET /conversations`, and `GET /agents` — return paginated results using cursor-based pagination. Rather than page numbers, the API returns an opaque `next_cursor` value that encodes your position in the result set. Pass it back as the `cursor` query parameter to fetch the next page. When `has_more` is `false`, you have retrieved all available records.
 
@@ -13,23 +17,20 @@ All DeltaLead list endpoints — `GET /leads`, `GET /conversations`, and `GET /a
 </ParamField>
 
 <ParamField query="cursor" type="string">
-  An opaque cursor string returned in the previous response's `pagination.next_cursor` field. Omit this parameter to start from the beginning of the result set.
+  An opaque cursor string returned in the previous response's `next_cursor` field. Omit this parameter to start from the beginning of the result set.
 </ParamField>
 
 ## Paginated Response Format
 
-Every list endpoint wraps results in a `data` array and includes a `pagination` object:
+Every list endpoint returns results in a `data` array, with both pagination fields at the root level:
 
 ```json
 {
   "data": [
     { "id": "lead_abc123", "..." }
   ],
-  "pagination": {
-    "limit": 20,
-    "next_cursor": "eyJpZCI6ImxlYWRfYWJjMTIzIn0",
-    "has_more": true
-  }
+  "next_cursor": "eyJpZCI6ImxlYWRfYWJjMTIzIn0",
+  "has_more": true
 }
 ```
 
@@ -37,17 +38,15 @@ Every list endpoint wraps results in a `data` array and includes a `pagination` 
   The array of resource objects for the current page.
 </ResponseField>
 
-<ResponseField name="pagination.limit" type="integer">
-  The page size used for this response — mirrors the `limit` you requested.
-</ResponseField>
-
-<ResponseField name="pagination.next_cursor" type="string">
+<ResponseField name="next_cursor" type="string">
   Pass this value as the `cursor` query parameter in your next request to retrieve the following page. This field is `null` when `has_more` is `false`.
 </ResponseField>
 
-<ResponseField name="pagination.has_more" type="boolean">
+<ResponseField name="has_more" type="boolean">
   `true` if additional pages exist beyond this one; `false` when you have reached the end of the result set.
 </ResponseField>
+
+The response does not include a result total. Counting one would require a second query over the same filter on every page, and no listing on the platform does that. To know whether records remain, `has_more` is enough.
 
 ## Iterating All Pages
 
@@ -63,11 +62,13 @@ async function fetchAllLeads(apiKey) {
     url.searchParams.set('limit', '100');
     if (cursor) url.searchParams.set('cursor', cursor);
 
-    const res = await fetch(url, { headers: { 'X-API-Key': apiKey } });
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` }
+    });
     const page = await res.json();
 
     leads.push(...page.data);
-    cursor = page.pagination.has_more ? page.pagination.next_cursor : null;
+    cursor = page.has_more ? page.next_cursor : null;
   } while (cursor);
 
   return leads;

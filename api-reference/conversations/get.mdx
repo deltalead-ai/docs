@@ -1,10 +1,16 @@
 ---
 title: "Obtener un hilo de conversación — API REST de DeltaLead"
 sidebarTitle: "Obtener conversación"
-description: "Obtener una conversación por ID con su historial completo de mensajes, metadatos del canal y el Resumen de IA con las señales clave y las tareas del asesor."
+description: "Obtener una conversación por ID con el hilo completo de mensajes, los archivos adjuntos y la transcripción de los audios recibidos."
 ---
 
-Este endpoint devuelve una conversación puntual a partir de su identificador único, con el hilo completo de mensajes, los metadatos del canal y el resumen generado por IA que DeltaLead produce después de cada interacción. Sirve para incrustar el historial de conversación dentro de los registros del CRM, auditar las respuestas de la IA o mostrarle el contexto completo a un asesor de ventas antes de que tome el relevo del agente de IA.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Devuelve una conversación puntual a partir de su identificador, con el hilo completo de mensajes. Sirve para incrustar el historial dentro de los registros del CRM, auditar las respuestas del agente de IA o mostrarle el contexto completo a un vendedor antes de que tome el relevo.
+
+La conversación referencia al lead por `lead_id`. Los datos de contacto no viajan acá: se obtienen desde [Obtener lead](/api-reference/leads/get), donde viven dentro del objeto `contact`.
 
 ## Endpoint
 
@@ -22,59 +28,95 @@ GET https://platform-api.deltalead.ai/v1/conversations/{id}
 
 ```bash cURL
 curl https://platform-api.deltalead.ai/v1/conversations/conv_xyz789 \
-  -H "X-API-Key: YOUR_API_KEY"
+  -H "Authorization: Bearer dl_live_..."
 ```
 
 ## Respuesta
 
-Una solicitud correcta devuelve `200 OK` con el objeto de la conversación, un arreglo anidado `messages` con el historial completo de mensajes y un campo `ai_summary`.
+Una solicitud correcta devuelve `200 OK` con el objeto de la conversación y un arreglo anidado `messages`, ordenado del mensaje más antiguo al más reciente.
 
 ```json 200 OK
 {
   "id": "conv_xyz789",
+  "organization_id": "org_xyz789",
   "lead_id": "lead_abc123",
-  "channel": "whatsapp",
-  "status": "transferred",
-  "created_at": "2024-03-10T14:22:05Z",
-  "updated_at": "2024-03-11T09:05:33Z",
-  "last_message_at": "2024-03-11T09:05:33Z",
-  "ai_summary": "Lead is highly interested in the Toyota Hilux SRX 2024 in black. Confirmed budget around US$45,000. Requested financing options and a test drive for this week. Conversation transferred to human advisor for follow-up on financing.",
+  "status": "handed_off",
+  "assignee": "user_xyz789",
+  "unread_count": 0,
+  "last_inbound_at": "2024-03-10T14:25:40Z",
+  "last_message_at": "2024-03-10T14:25:48Z",
   "messages": [
     {
       "id": "msg_001",
       "conversation_id": "conv_xyz789",
       "direction": "inbound",
+      "body": "Hola! Vi la Hilux SRX 2024 que tienen publicada, ¿sigue disponible en negro?",
       "type": "text",
-      "content": "Hola! Vi la Hilux SRX 2024 que tienen publicada, ¿sigue disponible en negro?",
-      "sent_by": "lead",
-      "created_at": "2024-03-10T14:22:05Z"
+      "media": [],
+      "sender": "lead",
+      "ai_agent_id": null,
+      "ai_agent_name": null,
+      "status": "delivered",
+      "error_code": null,
+      "received_at": "2024-03-10T14:22:05Z",
+      "created_at": "2024-03-10T14:22:05Z",
+      "updated_at": "2024-03-10T14:22:05Z"
     },
     {
       "id": "msg_002",
       "conversation_id": "conv_xyz789",
       "direction": "outbound",
+      "body": "¡Hola María! 👋 Sí, la Hilux SRX 2024 en negro sigue disponible. ¿Querés que te cuente las opciones de financiación o preferís coordinar un test drive?",
       "type": "text",
-      "content": "¡Hola María! 👋 Sí, la Hilux SRX 2024 en negro sigue disponible. ¿Querés que te cuente las opciones de financiación o preferís coordinar un test drive?",
-      "sent_by": "ai_agent",
-      "created_at": "2024-03-10T14:22:13Z"
+      "media": [],
+      "sender": "ai_agent",
+      "ai_agent_id": "agent_abc123",
+      "ai_agent_name": "Martín de Ventas",
+      "status": "delivered",
+      "error_code": null,
+      "received_at": null,
+      "created_at": "2024-03-10T14:22:13Z",
+      "updated_at": "2024-03-10T14:22:15Z"
     },
     {
       "id": "msg_003",
       "conversation_id": "conv_xyz789",
       "direction": "inbound",
-      "type": "text",
-      "content": "Me interesa la financiación, tengo un presupuesto de unos 45000 dólares.",
-      "sent_by": "lead",
-      "created_at": "2024-03-10T14:25:40Z"
+      "body": "",
+      "type": "audio",
+      "media": [
+        {
+          "id": "media_001",
+          "type": "audio",
+          "url": "https://platform-api.deltalead.ai/v1/media/media_001",
+          "mime_type": "audio/ogg",
+          "transcription": "Me interesa la financiación, tengo un presupuesto de unos 45000 dólares."
+        }
+      ],
+      "sender": "lead",
+      "ai_agent_id": null,
+      "ai_agent_name": null,
+      "status": "delivered",
+      "error_code": null,
+      "received_at": "2024-03-10T14:25:40Z",
+      "created_at": "2024-03-10T14:25:40Z",
+      "updated_at": "2024-03-10T14:25:44Z"
     },
     {
       "id": "msg_004",
       "conversation_id": "conv_xyz789",
       "direction": "outbound",
+      "body": "Perfecto, María. Para darte las mejores opciones de financiación te voy a conectar con uno de nuestros asesores. Te contactan en breve. 🙌",
       "type": "text",
-      "content": "Perfecto, María. Para darte las mejores opciones de financiación te voy a conectar con uno de nuestros asesores. Te contactan en breve. 🙌",
-      "sent_by": "ai_agent",
-      "created_at": "2024-03-10T14:25:48Z"
+      "media": [],
+      "sender": "ai_agent",
+      "ai_agent_id": "agent_abc123",
+      "ai_agent_name": "Martín de Ventas",
+      "status": "delivered",
+      "error_code": null,
+      "received_at": null,
+      "created_at": "2024-03-10T14:25:48Z",
+      "updated_at": "2024-03-10T14:25:50Z"
     }
   ]
 }
@@ -86,24 +128,36 @@ Una solicitud correcta devuelve `200 OK` con el objeto de la conversación, un a
   Identificador único de la conversación, con el prefijo `conv_`.
 </ResponseField>
 
+<ResponseField name="organization_id" type="string">
+  ID de la organización a la que pertenece la conversación.
+</ResponseField>
+
 <ResponseField name="lead_id" type="string">
   ID del lead al que pertenece la conversación.
 </ResponseField>
 
-<ResponseField name="channel" type="string">
-  Canal en el que ocurrió la conversación. Uno de `whatsapp`, `facebook`, `instagram`, `email`, `phone`.
-</ResponseField>
-
 <ResponseField name="status" type="string">
-  Estado actual: `open`, `closed` o `transferred`.
+  Estado actual: `open` (la atiende el agente de IA), `handed_off` (derivada a una persona) o `resolved` (cerrada).
 </ResponseField>
 
-<ResponseField name="ai_summary" type="string">
-  Resumen de la conversación en texto plano, generado por IA. Se actualiza después de cada turno de la IA. Destaca el interés en el vehículo, el presupuesto, las señales de urgencia y las tareas pendientes para el equipo de ventas.
+<ResponseField name="assignee" type="string | null">
+  ID de la persona a cargo de la conversación. Es `null` mientras la atiende el agente de IA.
+</ResponseField>
+
+<ResponseField name="unread_count" type="integer">
+  Cantidad de mensajes entrantes sin leer en el Inbox unificado.
+</ResponseField>
+
+<ResponseField name="last_inbound_at" type="string | null">
+  Marca de tiempo ISO 8601 del último mensaje enviado por el lead.
+</ResponseField>
+
+<ResponseField name="last_message_at" type="string">
+  Marca de tiempo ISO 8601 del mensaje más reciente, en cualquier dirección.
 </ResponseField>
 
 <ResponseField name="messages" type="array">
-  Arreglo ordenado de objetos de mensaje, del más antiguo al más reciente.
+  Arreglo ordenado de mensajes, del más antiguo al más reciente.
 
   <Expandable title="Campos del objeto de mensaje">
     <ResponseField name="id" type="string">
@@ -113,23 +167,58 @@ Una solicitud correcta devuelve `200 OK` con el objeto de la conversación, un a
       ID de la conversación a la que pertenece el mensaje.
     </ResponseField>
     <ResponseField name="direction" type="string">
-      `inbound` para los mensajes enviados por el lead; `outbound` para los mensajes enviados por DeltaLead (agente de IA o asesor humano).
+      `inbound` para los mensajes enviados por el lead; `outbound` para los que envía DeltaLead, sea el agente de IA o una persona.
+    </ResponseField>
+    <ResponseField name="body" type="string">
+      Cuerpo de texto del mensaje. Queda vacío cuando el mensaje solo tiene adjuntos: el contenido está entonces en `media`.
     </ResponseField>
     <ResponseField name="type" type="string">
-      Tipo de medio del mensaje. Uno de `text`, `audio`, `image`, `document`.
+      Tipo de mensaje. Uno de `text`, `audio`, `image`, `document`.
     </ResponseField>
-    <ResponseField name="content" type="string">
-      Cuerpo de texto del mensaje. Para los tipos `audio`, `image` y `document`, este campo contiene una URL al archivo multimedia.
+    <ResponseField name="media" type="array">
+      Archivos adjuntos al mensaje. Es un arreglo vacío en los mensajes de texto.
+
+      <Expandable title="Campos del objeto de media">
+        <ResponseField name="id" type="string">
+          Identificador único del archivo.
+        </ResponseField>
+        <ResponseField name="type" type="string">
+          Tipo del archivo. Uno de `audio`, `image`, `document`.
+        </ResponseField>
+        <ResponseField name="url" type="string">
+          URL de descarga del archivo. Requiere la misma clave de API que el resto de la API.
+        </ResponseField>
+        <ResponseField name="mime_type" type="string">
+          Tipo MIME del archivo, por ejemplo `audio/ogg`.
+        </ResponseField>
+        <ResponseField name="transcription" type="string | null">
+          Transcripción del audio, cuando el archivo es de tipo `audio` y la transcripción ya está lista. Es `null` en el resto de los casos. La transcripción viaja siempre acá, nunca en un campo aparte de la conversación.
+        </ResponseField>
+      </Expandable>
     </ResponseField>
-    <ResponseField name="sent_by" type="string">
-      Quién originó el mensaje. Uno de `ai_agent`, `human`, `lead`.
+    <ResponseField name="sender" type="string">
+      Quién originó el mensaje. Uno de `lead`, `ai_agent`, `human`.
+    </ResponseField>
+    <ResponseField name="ai_agent_id" type="string | null">
+      ID del agente de IA que generó el mensaje. Es `null` cuando `sender` no es `ai_agent`.
+    </ResponseField>
+    <ResponseField name="ai_agent_name" type="string | null">
+      Nombre del agente de IA al momento de enviar el mensaje. Se guarda junto al mensaje para que el historial no cambie si después se renombra el agente.
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Estado de entrega del mensaje. Uno de `queued`, `sent`, `delivered`, `failed`.
+    </ResponseField>
+    <ResponseField name="error_code" type="string | null">
+      Identificador del motivo de falla, en `snake_case`. Solo viene con valor cuando `status` es `failed`.
+    </ResponseField>
+    <ResponseField name="received_at" type="string | null">
+      Marca de tiempo ISO 8601 del momento en que el canal entregó el mensaje a DeltaLead. Es `null` en los mensajes salientes.
     </ResponseField>
     <ResponseField name="created_at" type="string">
-      Marca de tiempo ISO 8601 del momento en que el mensaje se envió o se recibió.
+      Marca de tiempo ISO 8601 de la creación del mensaje.
+    </ResponseField>
+    <ResponseField name="updated_at" type="string">
+      Marca de tiempo ISO 8601 del último cambio en el mensaje, por ejemplo al pasar de `sent` a `delivered` o al completarse una transcripción.
     </ResponseField>
   </Expandable>
 </ResponseField>
-
-<Note>
-  Las conversaciones telefónicas usan un campo `transcript` en lugar de un arreglo `messages`. El `transcript` es un bloque de texto estructurado que se genera a partir de la grabación de la llamada y contiene etiquetas de hablante (por ejemplo, `Agent:` / `Lead:`), marcas de tiempo y el diálogo completo. El resto de los campos de la conversación no cambia.
-</Note>

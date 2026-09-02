@@ -4,13 +4,19 @@ sidebarTitle: "Visión general"
 description: "Los webhooks de DeltaLead envían solicitudes POST en tiempo real a un endpoint HTTPS cuando se crea, califica o asigna un lead, o cuando se agenda una cita."
 ---
 
-Los webhooks de DeltaLead entregan solicitudes HTTP POST al servidor en el mismo momento en que ocurre algo relevante en la cuenta: llega un lead nuevo, un agente de IA califica un lead o se agenda un test drive. En lugar de consultar la API de forma periódica, los sistemas reciben los datos del evento en tiempo real y sin latencia adicional, lo que permite disparar flujos posteriores, actualizar una base de datos propia o avisarle al equipo de ventas en el instante en que aparece un lead caliente.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Los webhooks salientes de DeltaLead entregan solicitudes HTTP POST al servidor del integrador en el mismo momento en que ocurre algo relevante en la cuenta: llega un lead nuevo, un agente de IA califica un lead o se agenda un test drive. En lugar de consultar la API de forma periódica, los sistemas propios reciben los datos del evento en tiempo real y sin latencia adicional, lo que permite disparar flujos posteriores, actualizar una base de datos propia o avisarle al equipo de ventas en el instante en que aparece un lead caliente.
+
+Esta página describe una sola dirección: **DeltaLead envía eventos hacia un endpoint propio**. El sentido inverso —mandar leads desde un sistema externo hacia DeltaLead— lo cubre el [Custom Webhook](/api-reference/webhooks/custom-inbound), que sí está disponible hoy.
 
 ## Registrar un endpoint de webhook
 
 <Steps>
   <Step title="Abrir la configuración de webhooks">
-    En el panel de DeltaLead, ir a **Organización → Integraciones → Custom Webhooks**. Como alternativa, se puede llamar directamente a `POST /v1/webhooks` desde la API.
+    En el panel de DeltaLead, ir a **Organización → Integraciones → Custom Webhooks**, dentro de la categoría **APIs y Webhooks**. Como alternativa, la spec prevé llamar directamente a `POST /v1/webhooks` con una clave bearer (`Authorization: Bearer dl_live_...`).
   </Step>
   <Step title="Indicar la URL del endpoint">
     Se indica la URL HTTPS completa del servidor que va a recibir los eventos. Los endpoints con HTTP simple no se aceptan: DeltaLead exige un certificado TLS válido.
@@ -18,8 +24,10 @@ Los webhooks de DeltaLead entregan solicitudes HTTP POST al servidor en el mismo
   <Step title="Seleccionar los eventos">
     Se eligen los tipos de evento a los que conviene suscribirse. Suscribirse solo a los eventos que la integración necesita reduce el tráfico innecesario hacia el servidor. La [referencia completa de eventos](/api-reference/webhooks/events) enumera todos los tipos disponibles.
   </Step>
-  <Step title="Guardar y copiar el secreto">
-    Al guardar, DeltaLead genera un secreto de firma HMAC-SHA256 para el endpoint. Hay que copiarlo de inmediato: se muestra una sola vez. Conviene guardarlo de forma segura en las variables de entorno de la aplicación y usarlo para verificar cada solicitud entrante.
+  <Step title="Guardar y copiar el secreto de firma">
+    Al guardar, DeltaLead genera un secreto de firma HMAC-SHA256 para el endpoint y lo muestra una sola vez. Ese secreto sirve para verificar cada solicitud entrante y conviene guardarlo en las variables de entorno de la aplicación.
+
+    Este paso todavía no se puede ejecutar. La pantalla **Custom Webhooks** emite hoy claves de entrada (`dl_live_...`), que autentican los envíos hacia DeltaLead y no verifican firmas salientes. Hasta que exista el registro de endpoints salientes, no hay forma de obtener un secreto de firma desde el panel.
   </Step>
 </Steps>
 
@@ -50,33 +58,65 @@ Todo POST de webhook que DeltaLead envía al endpoint comparte la misma estructu
   "organization_id": "org_xyz789",
   "data": {
     "id": "lead_abc123",
-    "name": "María García",
-    "phone": "+5491155551234",
+    "status": "qualified",
     "score": 92,
-    "intent": "purchase_30_days",
-    "vehicle_interest": "Toyota Hilux SRX 2024",
-    "channel": "whatsapp",
-    "status": "qualified"
+    "contact": {
+      "first_name": "María",
+      "last_name": "García",
+      "email": "maria.garcia@example.com",
+      "phone": "+5491155551234"
+    },
+    "channels": ["whatsapp"],
+    "interested_vehicles": ["veh_9f3c21"],
+    "ai_summary_status": "completed"
   }
 }
 ```
 
 ## Verificación de firmas de webhook
 
-DeltaLead firma cada solicitud de webhook para demostrar que el payload salió de su plataforma. La firma viaja en la cabecera de solicitud `X-DeltaLead-Signature` como un digest HMAC-SHA256 codificado en hexadecimal del cuerpo crudo de la solicitud, calculado con el secreto de firma del endpoint.
+DeltaLead firma cada solicitud de webhook para demostrar que el payload salió de su plataforma. Cada entrega lleva dos cabeceras.
 
-La firma debe verificarse siempre antes de procesar el payload de un webhook. Omitir este paso deja el endpoint expuesto a solicitudes falsificadas.
+<ResponseField name="X-DeltaLead-Signature" type="string">
+  Digest HMAC-SHA256 codificado en hexadecimal, calculado con el secreto de firma del endpoint.
+</ResponseField>
+
+<ResponseField name="X-DeltaLead-Timestamp" type="string">
+  Marca de tiempo Unix en segundos del momento del envío. Forma parte del valor firmado.
+</ResponseField>
+
+Lo que se firma no es el cuerpo solo, sino la marca de tiempo, un punto y el cuerpo crudo de la solicitud:
+
+```text
+{X-DeltaLead-Timestamp}.{raw request body}
+```
+
+La verificación tiene dos pasos y ninguno es opcional. Primero se compara la marca de tiempo contra el reloj del servidor y se rechaza toda entrega que se aparte más de **5 minutos**; después se recalcula el HMAC sobre esa misma concatenación. El HMAC solo prueba de dónde salió el payload, no que sea reciente: sin la ventana de tolerancia, una firma capturada sigue siendo válida para siempre y cualquiera que haya visto una entrega puede reproducirla indefinidamente. Cada reintento se firma de nuevo con una marca de tiempo propia, de modo que la ventana no rechaza reintentos aunque lleguen media hora después del primer intento.
 
 <CodeGroup>
 
 ```javascript Node.js
 const crypto = require('crypto');
 
-function verifyWebhook(rawBody, signatureHeader, secret) {
+const TOLERANCE_SECONDS = 300;
+
+function verifyWebhook(rawBody, signatureHeader, timestampHeader, secret) {
+  const timestamp = Number(timestampHeader);
+  if (!Number.isInteger(timestamp)) {
+    return false;
+  }
+  const age = Math.abs(Math.floor(Date.now() / 1000) - timestamp);
+  if (age > TOLERANCE_SECONDS) {
+    return false;
+  }
   const expected = crypto
     .createHmac('sha256', secret)
+    .update(`${timestampHeader}.`)
     .update(rawBody)
     .digest('hex');
+  if (expected.length !== signatureHeader.length) {
+    return false;
+  }
   return crypto.timingSafeEqual(
     Buffer.from(expected),
     Buffer.from(signatureHeader)
@@ -85,21 +125,49 @@ function verifyWebhook(rawBody, signatureHeader, secret) {
 ```
 
 ```python Python
-import hmac
 import hashlib
+import hmac
+import time
 
-def verify_webhook(raw_body: bytes, signature_header: str, secret: str) -> bool:
+TOLERANCE_SECONDS = 300
+
+def verify_webhook(
+    raw_body: bytes,
+    signature_header: str,
+    timestamp_header: str,
+    secret: str,
+) -> bool:
+    try:
+        timestamp = int(timestamp_header)
+    except ValueError:
+        return False
+    if abs(time.time() - timestamp) > TOLERANCE_SECONDS:
+        return False
+    signed_payload = timestamp_header.encode('utf-8') + b'.' + raw_body
     expected = hmac.new(
         secret.encode('utf-8'),
-        raw_body,
+        signed_payload,
         hashlib.sha256
     ).hexdigest()
     return hmac.compare_digest(expected, signature_header)
 ```
 
 ```php PHP
-function verifyWebhook(string $rawBody, string $signatureHeader, string $secret): bool {
-    $expected = hash_hmac('sha256', $rawBody, $secret);
+const TOLERANCE_SECONDS = 300;
+
+function verifyWebhook(
+    string $rawBody,
+    string $signatureHeader,
+    string $timestampHeader,
+    string $secret
+): bool {
+    if (!ctype_digit($timestampHeader)) {
+        return false;
+    }
+    if (abs(time() - (int) $timestampHeader) > TOLERANCE_SECONDS) {
+        return false;
+    }
+    $expected = hash_hmac('sha256', $timestampHeader . '.' . $rawBody, $secret);
     return hash_equals($expected, $signatureHeader);
 }
 ```
@@ -119,12 +187,12 @@ El endpoint debe devolver un código de estado HTTP `2xx` dentro de los **10 seg
     DeltaLead reintenta las entregas fallidas hasta **3 veces** con retroceso exponencial. Los intervalos de reintento son de aproximadamente 1 minuto, 5 minutos y 30 minutos después del fallo inicial.
   </Card>
   <Card title="Idempotencia" icon="shield-check">
-    Como los reintentos pueden generar entregas duplicadas, el manejador debe diseñarse de forma idempotente. El campo `data.id` sirve para descartar los eventos ya procesados.
+    Como los reintentos pueden generar entregas duplicadas, el manejador debe diseñarse de forma idempotente. La combinación de `event` y el identificador del recurso en `data` sirve para descartar los eventos ya procesados.
   </Card>
 </CardGroup>
 
 <Tip>
-  Durante el desarrollo local, una herramienta de túnel como [ngrok](https://ngrok.com) permite exponer el servidor de localhost a internet y recibir eventos reales de webhook de DeltaLead sin necesidad de desplegar en un servidor público.
+  Durante el desarrollo local, una herramienta de túnel como [ngrok](https://ngrok.com) permite exponer el servidor de localhost a internet y recibir eventos de webhook de DeltaLead sin necesidad de desplegar en un servidor público.
 </Tip>
 
 La [referencia de eventos de webhook](/api-reference/webhooks/events) contiene la lista completa de tipos de evento y sus esquemas de payload.

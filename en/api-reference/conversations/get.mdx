@@ -1,10 +1,16 @@
 ---
 title: "Get Conversation Thread — DeltaLead REST API Reference"
 sidebarTitle: "Get Conversation"
-description: "Get a conversation by ID with its full message history, channel metadata, and AI-generated summary of key signals and advisor action items."
+description: "Get a conversation by ID with its full message thread, attached files, and the transcription of any inbound audio messages."
 ---
 
-Fetch a single conversation by its unique identifier to get the complete message thread, channel metadata, and the AI-generated summary that DeltaLead produces after each interaction. Use this endpoint to embed conversation history inside your CRM records, audit AI responses, or display the full context to a sales advisor before they take over from the AI agent.
+<Note>
+  The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
+</Note>
+
+Fetch a single conversation by its identifier, with the complete message thread. Use it to embed conversation history inside your CRM records, audit the AI agent's replies, or show a seller the full context before they take over.
+
+The conversation references the lead through `lead_id`. Contact details do not travel here: fetch them from [Get lead](/en/api-reference/leads/get), where they live inside the `contact` object.
 
 ## Endpoint
 
@@ -12,98 +18,146 @@ Fetch a single conversation by its unique identifier to get the complete message
 GET https://platform-api.deltalead.ai/v1/conversations/{id}
 ```
 
-## Path Parameters
+## Path parameters
 
 <ParamField path="id" type="string" required>
-  The unique identifier of the conversation to retrieve, e.g. `conv_xyz789`. You can obtain conversation IDs from the [List Conversations](/en/api-reference/conversations/list) endpoint or from webhook payloads.
+  The unique identifier of the conversation to retrieve, e.g. `conv_xyz789`. Conversation IDs come from the [List conversations](/en/api-reference/conversations/list) endpoint or from webhook payloads.
 </ParamField>
 
-## Example Request
+## Example request
 
 ```bash cURL
 curl https://platform-api.deltalead.ai/v1/conversations/conv_xyz789 \
-  -H "X-API-Key: YOUR_API_KEY"
+  -H "Authorization: Bearer dl_live_..."
 ```
 
 ## Response
 
-A successful request returns HTTP `200 OK` with the conversation object, a nested `messages` array containing the full message history, and an `ai_summary` field.
+A successful request returns `200 OK` with the conversation object and a nested `messages` array, ordered from the oldest message to the newest.
 
 ```json 200 OK
 {
   "id": "conv_xyz789",
+  "organization_id": "org_xyz789",
   "lead_id": "lead_abc123",
-  "channel": "whatsapp",
-  "status": "transferred",
-  "created_at": "2024-03-10T14:22:05Z",
-  "updated_at": "2024-03-11T09:05:33Z",
-  "last_message_at": "2024-03-11T09:05:33Z",
-  "ai_summary": "Lead is highly interested in the Toyota Hilux SRX 2024 in black. Confirmed budget around US$45,000. Requested financing options and a test drive for this week. Conversation transferred to human advisor for follow-up on financing.",
+  "status": "handed_off",
+  "assignee": "user_xyz789",
+  "unread_count": 0,
+  "last_inbound_at": "2024-03-10T14:25:40Z",
+  "last_message_at": "2024-03-10T14:25:48Z",
   "messages": [
     {
       "id": "msg_001",
       "conversation_id": "conv_xyz789",
       "direction": "inbound",
+      "body": "Hola! Vi la Hilux SRX 2024 que tienen publicada, ¿sigue disponible en negro?",
       "type": "text",
-      "content": "Hola! Vi la Hilux SRX 2024 que tienen publicada, ¿sigue disponible en negro?",
-      "sent_by": "lead",
-      "created_at": "2024-03-10T14:22:05Z"
+      "media": [],
+      "sender": "lead",
+      "ai_agent_id": null,
+      "ai_agent_name": null,
+      "status": "delivered",
+      "error_code": null,
+      "received_at": "2024-03-10T14:22:05Z",
+      "created_at": "2024-03-10T14:22:05Z",
+      "updated_at": "2024-03-10T14:22:05Z"
     },
     {
       "id": "msg_002",
       "conversation_id": "conv_xyz789",
       "direction": "outbound",
+      "body": "¡Hola María! 👋 Sí, la Hilux SRX 2024 en negro sigue disponible. ¿Querés que te cuente las opciones de financiación o preferís coordinar un test drive?",
       "type": "text",
-      "content": "¡Hola María! 👋 Sí, la Hilux SRX 2024 en negro sigue disponible. ¿Querés que te cuente las opciones de financiación o preferís coordinar un test drive?",
-      "sent_by": "ai_agent",
-      "created_at": "2024-03-10T14:22:13Z"
+      "media": [],
+      "sender": "ai_agent",
+      "ai_agent_id": "agent_abc123",
+      "ai_agent_name": "Martín de Ventas",
+      "status": "delivered",
+      "error_code": null,
+      "received_at": null,
+      "created_at": "2024-03-10T14:22:13Z",
+      "updated_at": "2024-03-10T14:22:15Z"
     },
     {
       "id": "msg_003",
       "conversation_id": "conv_xyz789",
       "direction": "inbound",
-      "type": "text",
-      "content": "Me interesa la financiación, tengo un presupuesto de unos 45000 dólares.",
-      "sent_by": "lead",
-      "created_at": "2024-03-10T14:25:40Z"
+      "body": "",
+      "type": "audio",
+      "media": [
+        {
+          "id": "media_001",
+          "type": "audio",
+          "url": "https://platform-api.deltalead.ai/v1/media/media_001",
+          "mime_type": "audio/ogg",
+          "transcription": "Me interesa la financiación, tengo un presupuesto de unos 45000 dólares."
+        }
+      ],
+      "sender": "lead",
+      "ai_agent_id": null,
+      "ai_agent_name": null,
+      "status": "delivered",
+      "error_code": null,
+      "received_at": "2024-03-10T14:25:40Z",
+      "created_at": "2024-03-10T14:25:40Z",
+      "updated_at": "2024-03-10T14:25:44Z"
     },
     {
       "id": "msg_004",
       "conversation_id": "conv_xyz789",
       "direction": "outbound",
+      "body": "Perfecto, María. Para darte las mejores opciones de financiación te voy a conectar con uno de nuestros asesores. Te contactan en breve. 🙌",
       "type": "text",
-      "content": "Perfecto, María. Para darte las mejores opciones de financiación te voy a conectar con uno de nuestros asesores. Te contactan en breve. 🙌",
-      "sent_by": "ai_agent",
-      "created_at": "2024-03-10T14:25:48Z"
+      "media": [],
+      "sender": "ai_agent",
+      "ai_agent_id": "agent_abc123",
+      "ai_agent_name": "Martín de Ventas",
+      "status": "delivered",
+      "error_code": null,
+      "received_at": null,
+      "created_at": "2024-03-10T14:25:48Z",
+      "updated_at": "2024-03-10T14:25:50Z"
     }
   ]
 }
 ```
 
-### Response Fields
+### Response fields
 
 <ResponseField name="id" type="string">
   Unique identifier of the conversation, prefixed with `conv_`.
 </ResponseField>
 
-<ResponseField name="lead_id" type="string">
-  ID of the lead this conversation belongs to.
+<ResponseField name="organization_id" type="string">
+  ID of the organization the conversation belongs to.
 </ResponseField>
 
-<ResponseField name="channel" type="string">
-  Channel on which the conversation occurred. One of `whatsapp`, `facebook`, `instagram`, `email`, `phone`.
+<ResponseField name="lead_id" type="string">
+  ID of the lead the conversation belongs to.
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  Current status: `open`, `closed`, or `transferred`.
+  Current status: `open` (the AI agent is handling it), `handed_off` (handed to a person), or `resolved` (closed).
 </ResponseField>
 
-<ResponseField name="ai_summary" type="string">
-  AI-generated plain-text summary of the conversation. Updated after each AI turn. Highlights vehicle interest, budget, urgency signals, and any action items for the sales team.
+<ResponseField name="assignee" type="string | null">
+  ID of the person in charge of the conversation. `null` while the AI agent is handling it.
+</ResponseField>
+
+<ResponseField name="unread_count" type="integer">
+  Number of unread inbound messages in the unified inbox.
+</ResponseField>
+
+<ResponseField name="last_inbound_at" type="string | null">
+  ISO 8601 timestamp of the last message sent by the lead.
+</ResponseField>
+
+<ResponseField name="last_message_at" type="string">
+  ISO 8601 timestamp of the most recent message, in either direction.
 </ResponseField>
 
 <ResponseField name="messages" type="array">
-  Ordered array of message objects, from oldest to newest.
+  Ordered array of messages, from oldest to newest.
 
   <Expandable title="Message object fields">
     <ResponseField name="id" type="string">
@@ -113,23 +167,58 @@ A successful request returns HTTP `200 OK` with the conversation object, a neste
       ID of the conversation this message belongs to.
     </ResponseField>
     <ResponseField name="direction" type="string">
-      `inbound` for messages sent by the lead; `outbound` for messages sent by DeltaLead (AI agent or human advisor).
+      `inbound` for messages sent by the lead; `outbound` for messages sent by DeltaLead, whether by the AI agent or by a person.
+    </ResponseField>
+    <ResponseField name="body" type="string">
+      Text body of the message. It is empty when the message carries only attachments — the content is then in `media`.
     </ResponseField>
     <ResponseField name="type" type="string">
-      Media type of the message. One of `text`, `audio`, `image`, `document`.
+      Message type. One of `text`, `audio`, `image`, `document`.
     </ResponseField>
-    <ResponseField name="content" type="string">
-      Text body of the message. For `audio`, `image`, and `document` types, this field contains a URL to the media file.
+    <ResponseField name="media" type="array">
+      Files attached to the message. An empty array on text messages.
+
+      <Expandable title="Media object fields">
+        <ResponseField name="id" type="string">
+          Unique identifier of the file.
+        </ResponseField>
+        <ResponseField name="type" type="string">
+          File type. One of `audio`, `image`, `document`.
+        </ResponseField>
+        <ResponseField name="url" type="string">
+          Download URL for the file. It requires the same API key as the rest of the API.
+        </ResponseField>
+        <ResponseField name="mime_type" type="string">
+          MIME type of the file, e.g. `audio/ogg`.
+        </ResponseField>
+        <ResponseField name="transcription" type="string | null">
+          Transcription of the audio, when the file is of type `audio` and the transcription is ready. `null` otherwise. Transcriptions always travel here, never in a separate conversation field.
+        </ResponseField>
+      </Expandable>
     </ResponseField>
-    <ResponseField name="sent_by" type="string">
-      Who originated this message. One of `ai_agent`, `human`, `lead`.
+    <ResponseField name="sender" type="string">
+      Who originated the message. One of `lead`, `ai_agent`, `human`.
+    </ResponseField>
+    <ResponseField name="ai_agent_id" type="string | null">
+      ID of the AI agent that generated the message. `null` when `sender` is not `ai_agent`.
+    </ResponseField>
+    <ResponseField name="ai_agent_name" type="string | null">
+      Name of the AI agent at the time the message was sent. It is stored alongside the message so history does not change if the agent is renamed later.
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Delivery status of the message. One of `queued`, `sent`, `delivered`, `failed`.
+    </ResponseField>
+    <ResponseField name="error_code" type="string | null">
+      Identifier of the failure reason, in `snake_case`. Only populated when `status` is `failed`.
+    </ResponseField>
+    <ResponseField name="received_at" type="string | null">
+      ISO 8601 timestamp of when the channel delivered the message to DeltaLead. `null` on outbound messages.
     </ResponseField>
     <ResponseField name="created_at" type="string">
-      ISO 8601 timestamp of when the message was sent or received.
+      ISO 8601 timestamp of message creation.
+    </ResponseField>
+    <ResponseField name="updated_at" type="string">
+      ISO 8601 timestamp of the last change to the message, such as moving from `sent` to `delivered` or a transcription completing.
     </ResponseField>
   </Expandable>
 </ResponseField>
-
-<Note>
-  Phone conversations use a `transcript` field instead of a `messages` array. The `transcript` is a structured text block generated from the call recording and contains speaker labels (e.g., `Agent:` / `Lead:`), timestamps, and the full dialogue. All other conversation fields remain identical.
-</Note>

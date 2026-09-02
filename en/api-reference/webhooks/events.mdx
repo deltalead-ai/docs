@@ -1,10 +1,14 @@
 ---
 title: "Webhook Event Reference: All DeltaLead Event Types"
 sidebarTitle: "Events"
-description: "Reference for all DeltaLead webhook events — lead lifecycle, conversation, appointment, and agent handoff events with full payload schemas."
+description: "Reference for all DeltaLead webhook events — lead lifecycle, conversation, appointment, and escalation events with full payload schemas."
 ---
 
-This page is the definitive reference for every webhook event DeltaLead can deliver to your endpoint. Events are grouped by domain: lead lifecycle, conversation activity, appointments, and agent handoffs. For each event you will find the trigger condition and a full example payload so you know exactly what to expect in your handler.
+<Note>
+  The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
+</Note>
+
+This page is the definitive reference for every webhook event DeltaLead can deliver to your endpoint. Events are grouped by domain: lead lifecycle, conversation activity, appointments, and escalations to a human. For each event you will find the trigger condition and a full example payload so you know exactly what to expect in your handler.
 
 <Note>
   Subscribe only to the events your integration actually needs. Filtering out irrelevant event types reduces unnecessary POST requests to your server and keeps your handler logic focused.
@@ -13,7 +17,7 @@ This page is the definitive reference for every webhook event DeltaLead can deli
 ## Lead Lifecycle Events
 
 <Accordion title="lead.created — New lead enters DeltaLead">
-  Fired the moment a new lead arrives in DeltaLead from any connected channel — WhatsApp, Meta Ads, MercadoLibre, web form, email, or phone. At creation the lead's score is `0`; qualification happens asynchronously and triggers `lead.qualified` once complete.
+  Fired the moment a new lead arrives in DeltaLead from any connected channel — WhatsApp, MercadoLibre, Typeform, the Custom Webhook, email, or manual entry. At creation the lead's score is `0`; qualification happens asynchronously and triggers `lead.qualified` once complete.
 
   ```json Example payload
   {
@@ -22,12 +26,17 @@ This page is the definitive reference for every webhook event DeltaLead can deli
     "organization_id": "org_xyz789",
     "data": {
       "id": "lead_abc123",
-      "name": "Carlos Rodríguez",
-      "phone": "+5491144441234",
-      "channel": "facebook",
-      "vehicle_interest": "Hilux 2024",
       "status": "new",
       "score": 0,
+      "source": "landing-page",
+      "contact": {
+        "first_name": "Carlos",
+        "last_name": "Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "phone": "+5491144441234"
+      },
+      "channels": ["whatsapp"],
+      "interested_vehicles": ["veh_9f3c21"],
       "created_at": "2024-11-07T10:00:00Z"
     }
   }
@@ -35,7 +44,7 @@ This page is the definitive reference for every webhook event DeltaLead can deli
 </Accordion>
 
 <Accordion title="lead.qualified — AI completes lead qualification">
-  Fired when the AI agent has finished its qualification conversation and assigned a purchase-intent score. The `score` field ranges from `0` to `100`. The `intent` field reflects the AI's assessment of how close the lead is to buying, for example `purchase_30_days` or `researching`.
+  Fired when the AI agent has finished its qualification conversation and assigned a purchase-intent score. The `score` field ranges from `0` to `100`. The summary produced by qualification is reflected in `ai_summary_status`, which turns `completed` once the AI Summary is available on the lead.
 
   ```json Example payload
   {
@@ -44,20 +53,24 @@ This page is the definitive reference for every webhook event DeltaLead can deli
     "organization_id": "org_xyz789",
     "data": {
       "id": "lead_abc123",
-      "name": "Carlos Rodríguez",
-      "phone": "+5491144441234",
-      "score": 87,
-      "intent": "purchase_30_days",
-      "vehicle_interest": "Hilux SRX 2024",
       "status": "qualified",
-      "channel": "facebook"
+      "score": 87,
+      "contact": {
+        "first_name": "Carlos",
+        "last_name": "Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "phone": "+5491144441234"
+      },
+      "channels": ["whatsapp"],
+      "interested_vehicles": ["veh_9f3c21"],
+      "ai_summary_status": "completed"
     }
   }
   ```
 </Accordion>
 
 <Accordion title="lead.updated — Lead status, score, or assignment changes">
-  Fired whenever a lead record is modified after creation. Common triggers include a manual status change by a seller, a score revision after a follow-up conversation, or an update to the vehicle of interest.
+  Fired whenever a lead record is modified after creation. Common triggers include a manual status change by a seller, a score revision after a follow-up conversation, or an update to the vehicles of interest.
 
   ```json Example payload
   {
@@ -66,19 +79,23 @@ This page is the definitive reference for every webhook event DeltaLead can deli
     "organization_id": "org_xyz789",
     "data": {
       "id": "lead_abc123",
-      "name": "Carlos Rodríguez",
-      "phone": "+5491144441234",
+      "status": "contacted",
       "score": 91,
-      "status": "in_progress",
-      "vehicle_interest": "Hilux SRX 2024",
-      "channel": "facebook",
+      "contact": {
+        "first_name": "Carlos",
+        "last_name": "Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "phone": "+5491144441234"
+      },
+      "channels": ["whatsapp"],
+      "interested_vehicles": ["veh_9f3c21"],
       "updated_at": "2024-11-07T11:00:00Z"
     }
   }
   ```
 </Accordion>
 
-<Accordion title="lead.assigned — Lead assigned to a human seller">
+<Accordion title="lead.assigned — Lead assigned to a seller">
   Fired when a qualified lead is assigned to a specific member of your sales team, either automatically by DeltaLead's routing rules or manually by a manager. Use this event to notify the assigned seller via your own systems.
 
   ```json Example payload
@@ -88,17 +105,21 @@ This page is the definitive reference for every webhook event DeltaLead can deli
     "organization_id": "org_xyz789",
     "data": {
       "id": "lead_abc123",
-      "name": "Carlos Rodríguez",
-      "phone": "+5491144441234",
+      "status": "qualified",
       "score": 91,
-      "status": "assigned",
+      "contact": {
+        "first_name": "Carlos",
+        "last_name": "Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "phone": "+5491144441234"
+      },
       "assigned_to": {
         "id": "user_seller001",
         "name": "Laura Méndez",
         "email": "laura.mendez@concesionaria.com"
       },
-      "channel": "facebook",
-      "vehicle_interest": "Hilux SRX 2024"
+      "channels": ["whatsapp"],
+      "interested_vehicles": ["veh_9f3c21"]
     }
   }
   ```
@@ -115,35 +136,34 @@ This page is the definitive reference for every webhook event DeltaLead can deli
     "timestamp": "2024-11-07T10:00:05Z",
     "organization_id": "org_xyz789",
     "data": {
-      "conversation_id": "conv_111aaa",
+      "id": "conv_111aaa",
       "lead_id": "lead_abc123",
-      "lead_name": "Carlos Rodríguez",
-      "channel": "facebook",
-      "agent_id": "agent_abc123",
-      "agent_name": "Martín de Ventas",
-      "started_at": "2024-11-07T10:00:05Z"
+      "status": "open",
+      "assignee": null,
+      "unread_count": 1,
+      "last_inbound_at": "2024-11-07T10:00:05Z"
     }
   }
   ```
 </Accordion>
 
-<Accordion title="conversation.message.received — Inbound message arrives">
-  Fired each time a new inbound message is received from the lead during an active conversation. Subscribe to this event to mirror conversation history in your own CRM or data warehouse in real time.
+<Accordion title="message.received — Inbound message arrives">
+  Fired each time a new inbound message is received from the lead during an active conversation. Subscribe to this event to mirror conversation history in your own CRM or data warehouse in real time. The message text travels in `body`; attachments and audio transcription, when present, travel in `media`.
 
   ```json Example payload
   {
-    "event": "conversation.message.received",
+    "event": "message.received",
     "timestamp": "2024-11-07T10:01:20Z",
     "organization_id": "org_xyz789",
     "data": {
       "conversation_id": "conv_111aaa",
       "lead_id": "lead_abc123",
-      "lead_name": "Carlos Rodríguez",
-      "channel": "facebook",
       "message": {
         "id": "msg_999zzz",
+        "direction": "inbound",
         "body": "¿Tienen la Hilux SRX en stock?",
         "type": "text",
+        "media": [],
         "received_at": "2024-11-07T10:01:20Z"
       }
     }
@@ -163,39 +183,36 @@ This page is the definitive reference for every webhook event DeltaLead can deli
     "organization_id": "org_xyz789",
     "data": {
       "lead_id": "lead_abc123",
-      "lead_name": "Carlos Rodríguez",
+      "conversation_id": "conv_111aaa",
       "appointment_type": "test_drive",
-      "scheduled_at": "2024-11-09T11:00:00Z",
-      "vehicle_interest": "Hilux SRX 2024"
+      "scheduled_at": "2024-11-09T11:00:00Z"
     }
   }
   ```
 </Accordion>
 
-## Agent Events
+## Escalation Events
 
-<Accordion title="agent.handoff — AI transfers conversation to a human">
-  Fired when an AI agent determines that a conversation requires human intervention and initiates a handoff. This occurs when one of the agent's configured `handoff_triggers` is detected — for example, a lead asking to negotiate pricing or inquire about financing terms. The receiving seller gets full conversation context.
+<Accordion title="escalation.created — AI transfers conversation to a human">
+  Fired when an AI agent determines that a conversation requires human intervention and escalates it. This occurs when one of the agent's configured business rules is met — for example, a lead asking to negotiate pricing or inquire about financing terms. The receiving seller gets full conversation context.
 
   ```json Example payload
   {
-    "event": "agent.handoff",
+    "event": "escalation.created",
     "timestamp": "2024-11-07T10:15:00Z",
     "organization_id": "org_xyz789",
     "data": {
       "conversation_id": "conv_111aaa",
       "lead_id": "lead_abc123",
-      "lead_name": "Carlos Rodríguez",
-      "agent_id": "agent_abc123",
-      "agent_name": "Martín de Ventas",
-      "trigger": "financing",
-      "channel": "facebook",
+      "ai_agent_id": "agent_abc123",
+      "ai_agent_name": "Martín de Ventas",
+      "reason": "financing",
       "assigned_to": {
         "id": "user_seller001",
         "name": "Laura Méndez",
         "email": "laura.mendez@concesionaria.com"
       },
-      "handoff_at": "2024-11-07T10:15:00Z"
+      "escalated_at": "2024-11-07T10:15:00Z"
     }
   }
   ```

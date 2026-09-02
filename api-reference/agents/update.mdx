@@ -1,10 +1,14 @@
 ---
-title: "PATCH /v1/agents/{id} — actualizar la configuración del agente"
+title: "PATCH /v1/agents/{id} — actualizar un agente de IA"
 sidebarTitle: "Actualizar agente"
-description: "PATCH /v1/agents/{id} actualiza parcialmente el nombre, el idioma, el estado, el tono, los disparadores de derivación o la cadencia de seguimiento de un agente."
+description: "PATCH /v1/agents/{id} actualiza parcialmente el idioma, el tono, la extensión de los mensajes y las reglas de negocio y de calificación de un agente de IA."
 ---
 
-Permite actualizar la configuración de un agente de IA existente sin reemplazar el registro completo. Se envían únicamente los campos que se quieren cambiar: DeltaLead aplica una actualización parcial y deja intacto todo campo no especificado. Este endpoint sirve para ajustar el comportamiento de un agente con el tiempo, adaptarlo a un mercado nuevo o modificar su cadencia de seguimiento a medida que evoluciona el proceso de ventas.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Actualiza la configuración de un agente de IA existente sin reemplazar el registro completo. Se envían únicamente los campos que se quieren cambiar: DeltaLead aplica una actualización parcial y deja intacto todo campo no especificado. Sirve para ajustar cómo conversa el agente de IA con el tiempo, adaptarlo a un mercado nuevo o incorporar una regla comercial que antes no existía.
 
 ## Endpoint
 
@@ -15,96 +19,85 @@ PATCH https://platform-api.deltalead.ai/v1/agents/{id}
 ## Parámetros de ruta
 
 <ParamField path="id" type="string" required>
-  Identificador único del agente que se quiere actualizar, por ejemplo `agent_abc123`.
+  Identificador único del agente de IA que se quiere actualizar, por ejemplo `agent_abc123`.
 </ParamField>
 
 ## Cuerpo de la solicitud
 
-Todos los campos del cuerpo de la solicitud son opcionales. Se incluyen solo los campos que se quieren cambiar.
-
-<ParamField body="name" type="string">
-  Nuevo nombre visible del agente.
-</ParamField>
-
-<ParamField body="status" type="string">
-  Nuevo estado del agente. Valores aceptados: `active`, `inactive`.
-</ParamField>
+Todos los campos son opcionales. Se incluyen solo los que se quieren cambiar.
 
 <ParamField body="language" type="string">
-  Configuración regional de idioma para las conversaciones del agente. Valores aceptados: `es-AR`, `es-MX`, `es-CR`, `es-CO`, `pt-BR`, `en-US`.
+  Clave de locale con la que conversa el agente de IA. Valores aceptados: `es_AR`, `es_MX`, `es_CR`, `es_CO`, `pt_BR`, `en_US`.
 </ParamField>
 
-<ParamField body="configuration.tone" type="string">
-  Tono conversacional que usa el agente. Valores aceptados: `formal`, `friendly`, `professional`.
+<ParamField body="tone_of_voice" type="string">
+  Tono conversacional. Valores aceptados: `formal`, `friendly`, `professional`.
 </ParamField>
 
-<ParamField body="configuration.handoff_triggers" type="array">
-  Reemplaza la lista completa de frases disparadoras de derivación. El agente transfiere la conversación a un vendedor humano cada vez que aparece uno de estos temas.
+<ParamField body="text_size" type="string">
+  Extensión de los mensajes que redacta el agente de IA. Valores aceptados: `short`, `medium`, `long`.
 </ParamField>
 
-<ParamField body="configuration.follow_up_cadence.max_follow_ups" type="integer">
-  Cantidad máxima de mensajes de seguimiento que el agente envía por lead.
+<ParamField body="business_rules" type="string">
+  Reglas de negocio del agente de IA: límites de descuento, condiciones de financiación, plazos de entrega. Reemplaza el texto completo, no lo agrega al existente.
 </ParamField>
 
-<ParamField body="configuration.follow_up_cadence.interval_days" type="integer">
-  Cantidad de días de espera entre cada mensaje de seguimiento.
+<ParamField body="lead_qualification_rules" type="string">
+  Reglas de calificación del agente de IA. Reemplaza el texto completo, no lo agrega al existente.
 </ParamField>
+
+<Note>
+  `name`, `type` y `assigned_phone_value` no se editan por API: se definen al crear el agente de IA y al asignarle un número desde el panel. `version`, `created_at` y `updated_at` los mantiene la plataforma.
+</Note>
 
 ## Solicitud de ejemplo
 
-La siguiente solicitud adapta el agente a México y ajusta su cadencia de seguimiento a tres mensajes separados por dos días.
+La siguiente solicitud adapta el agente de IA a México, lo pasa a un tono profesional y acorta sus mensajes.
 
 ```bash cURL
 curl -X PATCH https://platform-api.deltalead.ai/v1/agents/agent_abc123 \
-  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Authorization: Bearer dl_live_..." \
   -H "Content-Type: application/json" \
   -d '{
-    "language": "es-MX",
-    "configuration": {
-      "follow_up_cadence": {
-        "max_follow_ups": 3,
-        "interval_days": 2
-      }
-    }
+    "language": "es_MX",
+    "tone_of_voice": "professional",
+    "text_size": "short"
   }'
 ```
 
 ## Respuesta
 
-Una solicitud correcta devuelve el objeto completo del agente ya actualizado.
+Una solicitud correcta devuelve `200 OK` con el objeto completo del agente de IA ya actualizado y el campo `version` incrementado.
 
 ```json 200 OK
 {
   "id": "agent_abc123",
   "organization_id": "org_xyz789",
   "name": "Martín de Ventas",
-  "status": "active",
-  "language": "es-MX",
-  "channels": ["whatsapp", "instagram"],
+  "type": "sales",
+  "language": "es_MX",
+  "tone_of_voice": "professional",
+  "text_size": "short",
+  "assigned_phone_value": "+5491123456789",
+  "version": 8,
+  "business_rules": "No ofrecer descuentos mayores al 5% sin aprobación. Financiación hasta 60 cuotas.",
+  "lead_qualification_rules": "Calificar cuando el lead confirma modelo, presupuesto y plazo de compra.",
   "created_at": "2024-01-15T10:00:00Z",
-  "updated_at": "2024-11-07T17:45:00Z",
-  "configuration": {
-    "tone": "friendly",
-    "handoff_triggers": [
-      "pricing negotiation",
-      "financing",
-      "trade-in valuation"
-    ],
-    "allowed_topics": [
-      "vehicle availability",
-      "pricing",
-      "test drive scheduling",
-      "financing options"
-    ],
-    "follow_up_cadence": {
-      "max_follow_ups": 3,
-      "interval_days": 2,
-      "channel": "whatsapp"
-    }
-  }
+  "updated_at": "2024-11-07T17:45:00Z"
+}
+```
+
+## Respuestas de error
+
+Cuando el ID no corresponde a ningún agente de IA de la organización, la API devuelve `404 Not Found`.
+
+```json 404 Not Found
+{
+  "status": "error",
+  "detail": "agent_not_found"
 }
 ```
 
 <Warning>
-  Cambiar el `language` de un agente **activo** tiene efecto en la **próxima conversación nueva** que inicie el agente. Las conversaciones que ya están en curso continúan en el idioma anterior hasta que se cierran o se derivan a un vendedor humano.
+  Los cambios rigen para los mensajes que el agente de IA genera a partir de ese momento, también en las conversaciones ya abiertas. Un cambio de `language` o de `business_rules` en pleno horario comercial se nota en la respuesta siguiente: conviene revisar antes qué conversaciones están activas.
 </Warning>

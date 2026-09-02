@@ -1,10 +1,16 @@
 ---
 title: "Listar conversaciones de leads — API REST de DeltaLead"
 sidebarTitle: "Listar conversaciones"
-description: "Obtener conversaciones de leads paginadas. Filtrar por ID de lead, canal o estado para ver hilos abiertos, auditar la IA o llevar el historial al CRM."
+description: "Obtener conversaciones paginadas. Filtrar por lead, estado o persona asignada para revisar hilos abiertos, auditar al agente de IA o llevar el historial al CRM."
 ---
 
-Permite recuperar todas las conversaciones que DeltaLead registra en cada canal conectado: WhatsApp, Facebook, Instagram, email y teléfono. Cada conversación se vincula a un lead y refleja el estado actual del intercambio: abierta, cerrada o transferida a un asesor humano. Al filtrar por ID de lead se obtiene el historial de conversación de un contacto puntual; al filtrar por estado se pueden monitorear todos los hilos abiertos que requieren atención.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Devuelve las conversaciones de la organización, de la actividad más reciente a la más antigua. Cada conversación pertenece a un lead y agrupa todo el intercambio con esa persona. Al filtrar por `lead_id` se obtienen los hilos de un contacto puntual; al filtrar por `status` se monitorean los hilos abiertos o los que ya están en manos de un vendedor.
+
+Los objetos de esta lista no incluyen el arreglo `messages`. Para el hilo completo se usa [Obtener conversación](/api-reference/conversations/get).
 
 ## Endpoint
 
@@ -19,108 +25,106 @@ GET https://platform-api.deltalead.ai/v1/conversations
 </ParamField>
 
 <ParamField query="cursor" type="string">
-  Cursor de paginación opaco, tomado del campo `pagination.next_cursor` de la respuesta anterior. Si se omite, la lectura empieza por la primera página.
+  Cursor de paginación opaco, tomado del campo `next_cursor` de la respuesta anterior. Si se omite, la lectura empieza por la primera página. El cursor no se parsea ni se construye a mano.
 </ParamField>
 
 <ParamField query="lead_id" type="string">
-  Limita las conversaciones a un lead determinado. Se pasa un ID de lead como `lead_abc123` para recuperar todos los hilos de conversación de ese contacto.
-</ParamField>
-
-<ParamField query="channel" type="string">
-  Filtra por el canal en el que transcurre la conversación. Valores aceptados: `whatsapp`, `facebook`, `instagram`, `email`, `phone`.
+  Limita las conversaciones a un lead determinado. Se pasa un ID de lead como `lead_abc123`.
 </ParamField>
 
 <ParamField query="status" type="string">
-  Filtra por estado de la conversación. Valores aceptados: `open`, `closed`, `transferred`.
+  Filtra por estado de la conversación. Valores aceptados: `open`, `handed_off`, `resolved`.
+</ParamField>
+
+<ParamField query="assignee" type="string">
+  Limita las conversaciones a las asignadas a una persona determinada, por su ID de usuario.
 </ParamField>
 
 ## Solicitud de ejemplo
 
 ```bash cURL
 curl 'https://platform-api.deltalead.ai/v1/conversations?lead_id=lead_abc123&status=open' \
-  -H "X-API-Key: YOUR_API_KEY"
+  -H "Authorization: Bearer dl_live_..."
 ```
 
 ## Respuesta
 
-Una solicitud correcta devuelve `200 OK` con un arreglo `data` de objetos de conversación y un objeto `pagination`.
+Una solicitud correcta devuelve `200 OK` con un arreglo `data` de conversaciones y los campos de paginación `next_cursor` y `has_more` en el nivel raíz.
 
-```json Example response
+```json 200 OK
 {
   "data": [
     {
       "id": "conv_xyz789",
+      "organization_id": "org_xyz789",
       "lead_id": "lead_abc123",
-      "channel": "whatsapp",
       "status": "open",
-      "created_at": "2024-03-10T14:22:05Z",
-      "updated_at": "2024-03-11T09:05:33Z",
+      "assignee": null,
+      "unread_count": 2,
+      "last_inbound_at": "2024-03-11T09:04:58Z",
       "last_message_at": "2024-03-11T09:05:33Z"
     },
     {
       "id": "conv_mno321",
-      "lead_id": "lead_abc123",
-      "channel": "phone",
-      "status": "closed",
-      "created_at": "2024-03-09T11:00:00Z",
-      "updated_at": "2024-03-09T11:08:42Z",
-      "last_message_at": "2024-03-09T11:08:42Z"
+      "organization_id": "org_xyz789",
+      "lead_id": "lead_def456",
+      "status": "handed_off",
+      "assignee": "user_xyz789",
+      "unread_count": 0,
+      "last_inbound_at": "2024-03-09T11:08:42Z",
+      "last_message_at": "2024-03-09T11:12:10Z"
     }
   ],
-  "pagination": {
-    "total": 2,
-    "limit": 20,
-    "has_more": false,
-    "next_cursor": null
-  }
+  "next_cursor": null,
+  "has_more": false
 }
 ```
 
 ### Campos de la respuesta
 
 <ResponseField name="data" type="array">
-  Arreglo de objetos de conversación que coinciden con los filtros aplicados.
+  Arreglo de conversaciones que coinciden con los filtros aplicados.
 </ResponseField>
 
 <ResponseField name="data[].id" type="string">
   Identificador único de la conversación, con el prefijo `conv_`.
 </ResponseField>
 
-<ResponseField name="data[].lead_id" type="string">
-  ID del lead al que pertenece la conversación.
+<ResponseField name="data[].organization_id" type="string">
+  ID de la organización a la que pertenece la conversación.
 </ResponseField>
 
-<ResponseField name="data[].channel" type="string">
-  Canal en el que transcurre la conversación. Uno de `whatsapp`, `facebook`, `instagram`, `email`, `phone`.
+<ResponseField name="data[].lead_id" type="string">
+  ID del lead al que pertenece la conversación. Los datos de contacto se obtienen desde [Obtener lead](/api-reference/leads/get), donde viven dentro de `contact`.
 </ResponseField>
 
 <ResponseField name="data[].status" type="string">
   Estado actual de la conversación. Uno de:
-  - `open` — conversación activa, con un agente de IA o una persona interviniendo
-  - `closed` — conversación finalizada, no se esperan más mensajes
-  - `transferred` — derivada del agente de IA a un asesor de ventas humano
+  - `open` — la atiende el agente de IA
+  - `handed_off` — derivada a una persona, que es quien responde
+  - `resolved` — cerrada, no se esperan más mensajes
 </ResponseField>
 
-<ResponseField name="data[].created_at" type="string">
-  Marca de tiempo ISO 8601 del momento en que se abrió la conversación.
+<ResponseField name="data[].assignee" type="string | null">
+  ID de la persona a cargo de la conversación. Es `null` mientras la conversación la atiende el agente de IA.
 </ResponseField>
 
-<ResponseField name="data[].updated_at" type="string">
-  Marca de tiempo ISO 8601 del cambio más reciente en el registro de la conversación.
+<ResponseField name="data[].unread_count" type="integer">
+  Cantidad de mensajes entrantes sin leer en el Inbox unificado.
+</ResponseField>
+
+<ResponseField name="data[].last_inbound_at" type="string | null">
+  Marca de tiempo ISO 8601 del último mensaje enviado por el lead. Es `null` si el lead todavía no respondió.
 </ResponseField>
 
 <ResponseField name="data[].last_message_at" type="string">
-  Marca de tiempo ISO 8601 del mensaje o evento más reciente de esta conversación.
+  Marca de tiempo ISO 8601 del mensaje más reciente de la conversación, en cualquier dirección.
 </ResponseField>
 
-<ResponseField name="pagination.total" type="integer">
-  Cantidad total de conversaciones que coinciden con los filtros aplicados.
-</ResponseField>
-
-<ResponseField name="pagination.has_more" type="boolean">
-  `true` si existen páginas adicionales.
-</ResponseField>
-
-<ResponseField name="pagination.next_cursor" type="string | null">
+<ResponseField name="next_cursor" type="string | null">
   Este valor se pasa como `cursor` para obtener la página siguiente. Es `null` cuando `has_more` es `false`.
+</ResponseField>
+
+<ResponseField name="has_more" type="boolean">
+  `true` si existen páginas adicionales.
 </ResponseField>

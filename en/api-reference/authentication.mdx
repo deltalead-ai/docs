@@ -1,46 +1,81 @@
 ---
-title: "DeltaLead API Authentication: X-API-Key Header Guide"
+title: "DeltaLead API Authentication: Authorization Bearer Guide"
 sidebarTitle: "Authentication"
-description: "Authenticate DeltaLead API requests by passing your API key in the X-API-Key header. Keys are created and managed in your dashboard settings."
+description: "Authenticate DeltaLead API requests with a dl_live_ or dl_sandbox_ key sent as a Bearer token in the Authorization header."
 ---
 
-Every request to the DeltaLead API must include a valid API key in the `X-API-Key` request header. Requests that omit the header or supply an invalid key are rejected with a `401 Unauthorized` response before any processing occurs.
+<Note>
+  The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
+</Note>
 
-## Getting Your API Key
+Every request to the DeltaLead API is authenticated with an API key sent as a Bearer token in the `Authorization` header. Requests that omit the header or supply an invalid key are rejected with a `401 Unauthorized` response before any processing occurs.
 
-Follow these steps to generate a new API key from your DeltaLead dashboard:
+```text
+Authorization: Bearer dl_live_...
+```
+
+This is the same key model used by the [Custom Webhook](/en/api-reference/webhooks/custom-inbound) — one issuance, rotation, and revocation story for the whole platform.
+
+## Live and Sandbox Modes
+
+The key prefix determines the mode, and nothing else in the request does: there is no header, parameter, or alternate host that changes it.
+
+| Prefix | Mode | What it does |
+|---|---|---|
+| `dl_live_` | live | Operates on your account's real data |
+| `dl_sandbox_` | sandbox | Operates on test data, isolated from production |
+
+Sending a sandbox key from a production environment is a silent failure as far as the API is concerned: the request is valid and returns `200`, but it writes to the wrong place. Inject the key from an environment variable rather than hardcoding it.
+
+## Managing API Keys
+
+Keys are managed under **Organization → Integrations → APIs and Webhooks → Custom Webhooks**. The screen is available on every plan — no plan enables or limits API keys.
 
 <Steps>
-  <Step title="Open Settings">
-    Log in to your DeltaLead account and open **Organization → Integrations** in the left sidebar.
+  <Step title="Open the keys screen">
+    Log in to your DeltaLead account and open **Organization → Integrations** in the left sidebar. In the catalog, the category is **APIs and Webhooks** and the item is **Custom Webhooks**.
   </Step>
-  <Step title="Go to API Keys">
-    Select the **API Keys** section. You will see a list of any keys you have already created, along with their creation date and last-used timestamp.
+  <Step title="Choose the mode">
+    The screen splits keys into two sections: **Production API keys** and **Sandbox API keys**. Each key is listed with its name, identifier, status, and expiry.
   </Step>
-  <Step title="Generate a New Key">
-    Click **Generate New Key**, optionally give the key a descriptive label (for example, `Production – Zapier` or `Staging – testing`), and confirm. The full key value is displayed **only once** — copy it immediately and store it securely.
+  <Step title="Create the key">
+    Creating a key means setting a descriptive name (for example, `Production – Zapier`) and an expiry: between 1 and 365 days, or no expiry. The full value is displayed **only once** — copy it immediately and store it securely. A lost key is not recoverable; it is rotated.
   </Step>
 </Steps>
 
+### Statuses
+
+| Status | Meaning |
+|---|---|
+| **Active** | The key authenticates requests normally |
+| **Expired** | The term set at creation has elapsed and the key no longer authenticates |
+| **Revoked** | The key was taken down manually and no longer authenticates; revocation is immediate and cannot be undone |
+
+### Per-Key Actions
+
+- **Rename** — changes the display name. It does not affect the key value or in-flight traffic.
+- **Rotate** — issues a new value for the same entry. This is the operation to use after a leak, or as periodic hygiene.
+- **Revoke** — permanently invalidates the key. Requests using it start returning `401`.
+
 <Warning>
-  Your API key grants full access to your DeltaLead account. Never commit it to source code, paste it into chat messages, or store it in plain text. Use environment variables or a dedicated secrets manager (such as AWS Secrets Manager, HashiCorp Vault, or Doppler) to inject the key at runtime. If a key is compromised, revoke it immediately from **Organización → Integraciones → Custom Webhooks** and generate a replacement.
+  An API key grants full access to your account's API resources. Never commit it to source code, paste it into chat messages, or store it in plain text. Use environment variables or a dedicated secrets manager (such as AWS Secrets Manager, HashiCorp Vault, or Doppler) to inject it at runtime. If a key is compromised, rotate or revoke it immediately from **Organization → Integrations → Custom Webhooks**.
 </Warning>
 
 ## Sending Your API Key
 
-Pass your API key in the `X-API-Key` header on every request. The examples below show the same `GET /leads` call in three common environments.
+The key travels in the `Authorization` header on every request. The examples below show the same `GET /leads` call in three common environments.
 
 <CodeGroup>
 
 ```bash cURL
 curl https://platform-api.deltalead.ai/v1/leads \
-  -H "X-API-Key: dlk_live_abc123xyz"
+  -H "Authorization: Bearer dl_live_abc123xyz"
 ```
 
 ```javascript Node.js
 const response = await fetch('https://platform-api.deltalead.ai/v1/leads', {
   headers: {
-    'X-API-Key': process.env.DELTALEAD_API_KEY
+    Authorization: `Bearer ${process.env.DELTALEAD_API_KEY}`
   }
 });
 const data = await response.json();
@@ -52,16 +87,12 @@ import requests
 
 response = requests.get(
     'https://platform-api.deltalead.ai/v1/leads',
-    headers={'X-API-Key': os.environ['DELTALEAD_API_KEY']}
+    headers={'Authorization': f"Bearer {os.environ['DELTALEAD_API_KEY']}"}
 )
 leads = response.json()
 ```
 
 </CodeGroup>
-
-## Key Scopes
-
-Keys created through the dashboard have **full access** to all API resources associated with your account — leads, conversations, agents, webhooks, and account configuration. Scope-restricted keys (read-only, webhook-only, etc.) are available on the Enterprise plan. Contact your account manager to enable granular key permissions.
 
 ## Authentication Errors
 
@@ -69,11 +100,11 @@ The API returns the following HTTP status codes for authentication failures:
 
 | Status | Cause |
 |---|---|
-| `401 Unauthorized` | The `X-API-Key` header is missing, malformed, or contains an invalid key |
-| `403 Forbidden` | The key is valid but the associated account is suspended, or the requested operation requires a higher-tier plan |
+| `401 Unauthorized` | The `Authorization` header is missing or malformed, or the key is invalid, expired, or revoked |
+| `403 Forbidden` | The key is valid but the associated account is suspended |
 
-A `403` on a specific endpoint typically means the feature is not included in your current plan (Growth, Advanced, or Enterprise). Review the [plans page](https://www.deltalead.ai/es-ar/precios) or contact support to upgrade.
+The body shape of these responses is described in the [Errors reference](/en/api-reference/errors).
 
 <Tip>
-  Create separate API keys for your development and production environments — for example, `Staging – integration tests` and `Production – live sync`. This way you can revoke a compromised staging key without disrupting production traffic. Rotate keys periodically as part of your security hygiene, even if they have not been exposed.
+  Keep one key per environment and per integration: a `dl_sandbox_` key for automated tests, and one `dl_live_` key for each system that consumes the API. That way you can rotate a compromised integration's key without disrupting the others. A bounded expiry — 90 days, for example — turns rotation into routine rather than incident response.
 </Tip>

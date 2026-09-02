@@ -1,10 +1,14 @@
 ---
 title: "Listar y filtrar leads — endpoint de la API REST de DeltaLead"
 sidebarTitle: "Listar leads"
-description: "Recuperar leads por estado, intención, canal o score de IA, y paginar con cursor para recorrer todo el pipeline y sincronizar registros con la integración."
+description: "Recuperar leads por estado, canal, score, vehículo de interés, texto libre o rango de fechas, y paginar con cursor para recorrer todo el pipeline."
 ---
 
-Este endpoint recupera en una sola respuesta paginada todos los leads captados en los canales conectados: WhatsApp, Meta Ads, MercadoLibre, formularios web, llamadas y email. Los parámetros de consulta que siguen permiten acotar los resultados por estado de calificación, intención de compra, canal de origen, rango de score de IA o fecha de creación, para aislar exactamente el segmento del pipeline que necesita la integración.
+<Note>
+  La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
+</Note>
+
+Este endpoint devuelve los leads de la organización en una respuesta paginada por cursor. Los parámetros de consulta acotan el resultado por estado, canal, rango de score, vehículo del catálogo, texto libre o fecha de creación, para aislar el segmento del pipeline que necesita la integración.
 
 ## Endpoint
 
@@ -15,23 +19,19 @@ GET https://platform-api.deltalead.ai/v1/leads
 ## Parámetros de consulta
 
 <ParamField query="limit" type="integer" default="20">
-  Cantidad máxima de leads a devolver por página. Acepta valores entre `1` y `100`.
+  Cantidad máxima de leads por página. Entero entre `1` y `100`.
 </ParamField>
 
 <ParamField query="cursor" type="string">
-  Cursor de paginación opaco devuelto en el campo `pagination.next_cursor` de la respuesta anterior. Se omite este parámetro para empezar por la primera página.
+  Cursor de paginación devuelto en `next_cursor` por la respuesta anterior. Se omite para empezar por la primera página. El valor es opaco: no se parsea ni se construye.
 </ParamField>
 
 <ParamField query="status" type="string">
-  Filtra los leads por su estado actual. Valores aceptados: `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
-</ParamField>
-
-<ParamField query="intent" type="string">
-  Filtra los leads por la intención de compra detectada por la IA. Valores aceptados: `purchase_30_days`, `purchase_90_days`, `browsing`, `unknown`.
+  Filtra por estado actual del lead. Valores aceptados: `new`, `contacted`, `qualified`, `appointment`, `proposal`, `incubating`, `won`, `lost`.
 </ParamField>
 
 <ParamField query="channel" type="string">
-  Filtra los leads por el canal a través del cual ingresaron por primera vez a DeltaLead. Valores aceptados: `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
+  Devuelve los leads que acumularon este canal. Valores aceptados: `whatsapp`, `mercadolibre`, `typeform`, `custom`, `manual`, `email`.
 </ParamField>
 
 <ParamField query="score_min" type="integer">
@@ -42,152 +42,106 @@ GET https://platform-api.deltalead.ai/v1/leads
   Devuelve solo los leads con un score menor o igual a este valor. Rango: `0`–`100`.
 </ParamField>
 
+<ParamField query="interested_vehicle_ids" type="string">
+  Lista de IDs de vehículos del catálogo separados por coma. Devuelve los leads interesados en al menos uno de ellos.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Texto libre sobre los datos de contacto: nombre, apellido, email y teléfono.
+</ParamField>
+
 <ParamField query="created_after" type="string">
-  Devuelve solo los leads creados en esta marca de tiempo o después. Debe ser una cadena de fecha y hora ISO 8601, p. ej. `2024-01-15T00:00:00Z`.
+  Devuelve solo los leads creados en esta marca de tiempo o después. Cadena de fecha y hora ISO 8601, por ejemplo `2024-01-15T00:00:00Z`.
 </ParamField>
 
 <ParamField query="created_before" type="string">
-  Devuelve solo los leads creados en esta marca de tiempo o antes. Debe ser una cadena de fecha y hora ISO 8601, p. ej. `2024-01-31T23:59:59Z`.
+  Devuelve solo los leads creados en esta marca de tiempo o antes. Cadena de fecha y hora ISO 8601, por ejemplo `2024-01-31T23:59:59Z`.
 </ParamField>
 
 ## Ejemplo de solicitud
 
 ```bash cURL
-curl 'https://platform-api.deltalead.ai/v1/leads?status=qualified&intent=purchase_30_days&limit=20' \
-  -H "X-API-Key: YOUR_API_KEY"
+curl 'https://platform-api.deltalead.ai/v1/leads?status=qualified&channel=whatsapp&score_min=70&limit=20' \
+  -H "Authorization: Bearer dl_live_YOUR_KEY"
 ```
 
 ## Respuesta
 
-Una solicitud exitosa devuelve HTTP `200 OK` con un objeto JSON que contiene un arreglo `data` de objetos lead y un objeto `pagination` para la navegación por cursor.
+Una solicitud exitosa devuelve HTTP `200 OK` con el arreglo `data` y los dos campos de paginación en el nivel raíz.
 
-```json Example response
+```json 200 OK
 {
   "data": [
     {
       "id": "lead_abc123",
-      "name": "María García",
-      "phone": "+5491155551234",
-      "email": "maria@example.com",
-      "channel": "whatsapp",
-      "vehicle_interest": "Toyota Hilux SRX 2024",
-      "score": 87,
-      "intent": "purchase_30_days",
+      "organization_id": "org_00112233",
       "status": "qualified",
+      "source": "landing-page",
+      "score": 87,
+      "contact": {
+        "first_name": "María",
+        "last_name": "García",
+        "email": "maria@example.com",
+        "phone": "+5491155551234",
+        "display_name": "María García"
+      },
+      "channels": ["whatsapp", "custom"],
+      "interested_vehicles": ["veh_9f2c41"],
+      "tags": ["financiacion"],
       "assigned_to": "user_xyz789",
-      "created_at": "2024-03-10T14:22:00Z",
-      "updated_at": "2024-03-11T09:05:33Z",
+      "notes": [],
+      "ai_summary": "Consulta por una Hilux SRX 2024 con financiación a 36 cuotas. Pidió que la contacten por la tarde.",
+      "ai_summary_status": "completed",
       "last_activity_at": "2024-03-11T09:05:33Z",
-      "organization_id": "org_00112233"
+      "created_at": "2024-03-10T14:22:00Z",
+      "updated_at": "2024-03-11T09:05:33Z"
     },
     {
       "id": "lead_def456",
-      "name": "Carlos Méndez",
-      "phone": "+5215512345678",
-      "email": null,
-      "channel": "mercadolibre",
-      "vehicle_interest": "Ford Ranger XLS 2023",
-      "score": 74,
-      "intent": "purchase_30_days",
-      "status": "qualified",
+      "organization_id": "org_00112233",
+      "status": "new",
+      "source": "mercadolibre",
+      "score": 0,
+      "contact": {
+        "first_name": "Carlos",
+        "last_name": "Méndez",
+        "email": null,
+        "phone": "+5215512345678",
+        "display_name": "Carlos Méndez"
+      },
+      "channels": ["mercadolibre"],
+      "interested_vehicles": [],
+      "tags": [],
       "assigned_to": null,
-      "created_at": "2024-03-10T16:48:10Z",
-      "updated_at": "2024-03-10T17:01:55Z",
+      "notes": [],
+      "ai_summary": null,
+      "ai_summary_status": "not_requested",
       "last_activity_at": "2024-03-10T17:01:55Z",
-      "organization_id": "org_00112233"
+      "created_at": "2024-03-10T16:48:10Z",
+      "updated_at": "2024-03-10T17:01:55Z"
     }
   ],
-  "pagination": {
-    "total": 148,
-    "limit": 20,
-    "has_more": true,
-    "next_cursor": "cursor_eyJpZCI6ImxlYWRfZGVmNDU2In0"
-  }
+  "next_cursor": "cursor_eyJpZCI6ImxlYWRfZGVmNDU2In0",
+  "has_more": true
 }
 ```
 
 ### Campos de la respuesta
 
 <ResponseField name="data" type="array">
-  Arreglo de objetos lead que coinciden con los filtros aplicados. La descripción completa de cada campo está en [Obtener lead](/api-reference/leads/get).
+  Leads que coinciden con los filtros aplicados, del más reciente al más antiguo. Cada elemento tiene la misma forma que devuelve [Obtener lead](/api-reference/leads/get), con una diferencia: acá `interested_vehicles` es un arreglo de IDs del catálogo, sin los datos del vehículo.
 </ResponseField>
 
-<ResponseField name="data[].id" type="string">
-  Identificador único del lead, con el prefijo `lead_`.
+<ResponseField name="next_cursor" type="string | null">
+  Este valor se pasa como parámetro `cursor` para obtener la página siguiente. Es `null` cuando `has_more` es `false`.
 </ResponseField>
 
-<ResponseField name="data[].name" type="string">
-  Nombre completo del lead tal como se captó desde el canal de origen.
-</ResponseField>
-
-<ResponseField name="data[].phone" type="string">
-  Número de teléfono del lead en formato E.164, p. ej. `+5491155551234`.
-</ResponseField>
-
-<ResponseField name="data[].email" type="string | null">
-  Dirección de email del lead. `null` si no se proporcionó.
-</ResponseField>
-
-<ResponseField name="data[].channel" type="string">
-  Canal por el que el lead contactó por primera vez al concesionario. Uno de `whatsapp`, `facebook`, `instagram`, `mercadolibre`, `web_form`, `email`, `phone`.
-</ResponseField>
-
-<ResponseField name="data[].vehicle_interest" type="string | null">
-  Modelo o descripción del vehículo por el que el lead manifestó interés. `null` si todavía no se identificó.
-</ResponseField>
-
-<ResponseField name="data[].score" type="integer">
-  Score de calidad del lead generado por IA, de `0` (frío) a `100` (altamente calificado).
-</ResponseField>
-
-<ResponseField name="data[].intent" type="string">
-  Intención de compra detectada. Una de `purchase_30_days`, `purchase_90_days`, `browsing`, `unknown`.
-</ResponseField>
-
-<ResponseField name="data[].status" type="string">
-  Estado actual del lead dentro de su ciclo de vida. Uno de `new`, `in_conversation`, `qualified`, `assigned`, `closed`, `lost`.
-</ResponseField>
-
-<ResponseField name="data[].assigned_to" type="string | null">
-  ID de usuario del asesor de ventas al que está asignado el lead. `null` si no está asignado.
-</ResponseField>
-
-<ResponseField name="data[].created_at" type="string">
-  Marca de tiempo ISO 8601 del momento en que se captó el lead.
-</ResponseField>
-
-<ResponseField name="data[].updated_at" type="string">
-  Marca de tiempo ISO 8601 de la actualización de campo más reciente.
-</ResponseField>
-
-<ResponseField name="data[].last_activity_at" type="string">
-  Marca de tiempo ISO 8601 del último mensaje, llamada o interacción registrada para este lead.
-</ResponseField>
-
-<ResponseField name="data[].organization_id" type="string">
-  Identificador único de la organización de DeltaLead (concesionario) propietaria de este lead.
-</ResponseField>
-
-<ResponseField name="pagination" type="object">
-  Metadatos de la paginación por cursor.
-</ResponseField>
-
-<ResponseField name="pagination.total" type="integer">
-  Cantidad total de leads que coinciden con los filtros aplicados (en todas las páginas).
-</ResponseField>
-
-<ResponseField name="pagination.limit" type="integer">
-  Cantidad de resultados devueltos en esta página.
-</ResponseField>
-
-<ResponseField name="pagination.has_more" type="boolean">
+<ResponseField name="has_more" type="boolean">
   `true` si existen páginas adicionales de resultados.
 </ResponseField>
 
-<ResponseField name="pagination.next_cursor" type="string | null">
-  Este valor se pasa como parámetro de consulta `cursor` para obtener la página siguiente. Es `null` cuando `has_more` es `false`.
-</ResponseField>
+La respuesta no incluye un total: contarlo exige una segunda consulta sobre el mismo filtro en cada página. Para recorrer todo el resultado, se pagina hasta que `has_more` sea `false`.
 
 <Tip>
-  Para armar un pipeline de sincronización eficiente, conviene combinar `created_after` con un cursor almacenado. Se hace una primera consulta con `created_after` en la marca de tiempo de la última sincronización y luego se pagina con `next_cursor` hasta que `has_more` sea `false`.
+  Para una sincronización incremental, conviene combinar `created_after` con un cursor almacenado: una primera consulta con `created_after` en la marca de tiempo de la última sincronización y después `next_cursor` hasta agotar el resultado.
 </Tip>
