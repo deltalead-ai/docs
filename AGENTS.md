@@ -45,9 +45,14 @@ and must be updated in the same commit, or the two sources silently diverge.
 
 ### Coverage
 
-Both locales cover all 38 pages. Mintlify has no language fallback — a URL with no file behind it
+Both locales cover all 29 navigated pages. Mintlify has no language fallback — a URL with no file behind it
 returns 404, never the other language — so parity is not optional once a page is in either
 navigation.
+
+Pages for endpoints that are drafted but not yet served are parked as `*.draft.mdx`, which
+`.mintignore` excludes from the build. Both locale halves are renamed together, so parity holds for
+drafts too. Publishing one means renaming both halves back and adding both nav entries — never
+before the route answers on `platform-api-dev`.
 
 The Spanish navigation is generated from the English structure rather than maintained by hand; only
 tab and group labels are translated. Keep it that way, so the two trees cannot drift in shape.
@@ -60,7 +65,7 @@ a wildcard redirect `/es/:slug*` → `/:slug*` in `docs.json`. Do not remove it.
 Spanish pages use impersonal and infinitive constructions. No `tú`, no `vos`, no `usted`, no
 `tu`/`tus`, no imperatives addressed to a person.
 
-- ✅ `Para crear una clave, ir a Configuración → Integraciones.`
+- ✅ `Para crear una clave, ir a Organización → Integraciones.`
 - ✅ `La clave se muestra una sola vez.` · `Una clave perdida no se recupera: se rota.`
 - ❌ `Creá una clave` (voseo) · `Cree una clave` (usted) · `Crea tu clave` (tuteo)
 
