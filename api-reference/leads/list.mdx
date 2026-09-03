@@ -1,14 +1,14 @@
 ---
 title: "Listar y filtrar leads — endpoint de la API REST de DeltaLead"
 sidebarTitle: "Listar leads"
-description: "Recuperar leads por estado, canal, score, vehículo de interés, texto libre o rango de fechas, y paginar con cursor para recorrer todo el pipeline."
+description: "Recuperar leads por estado, canal o rango de última actividad, y paginar con cursor para recorrer todo el pipeline."
 ---
 
 <Note>
   La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
 </Note>
 
-Este endpoint devuelve los leads de la organización en una respuesta paginada por cursor. Los parámetros de consulta acotan el resultado por estado, canal, rango de score, vehículo del catálogo, texto libre o fecha de creación, para aislar el segmento del pipeline que necesita la integración.
+Este endpoint devuelve los leads de la organización en una respuesta paginada por cursor. Los parámetros de consulta acotan el resultado por estado, canal y rango de última actividad, para aislar el segmento del pipeline que necesita la integración.
 
 ## Endpoint
 
@@ -18,50 +18,36 @@ GET https://platform-api.deltalead.ai/v1/leads
 
 ## Parámetros de consulta
 
-<ParamField query="limit" type="integer" default="20">
-  Cantidad máxima de leads por página. Entero entre `1` y `100`.
+<ParamField query="status" type="string">
+  Filtra por estado actual del lead. El conjunto es cerrado: `new`, `contacted`, `qualified`, `appointment`, `proposal`, `incubating`, `won`, `lost`. Un valor fuera de esa lista devuelve `422`, no un resultado vacío.
+</ParamField>
+
+<ParamField query="channel" type="string">
+  Devuelve los leads que acumularon este canal. El conjunto es cerrado: `typeform`, `mercadolibre`, `whatsapp`, `custom`, `manual`, `odoo`. Un valor fuera de esa lista devuelve `422`, no un resultado vacío.
+</ParamField>
+
+<ParamField query="last_activity_after" type="string">
+  Devuelve solo los leads cuya `last_activity_at` sea igual o posterior a esta marca de tiempo. El límite es inclusivo. Cadena de fecha y hora ISO 8601, por ejemplo `2024-01-15T00:00:00Z`. Filtra por última actividad, no por fecha de creación.
+</ParamField>
+
+<ParamField query="last_activity_before" type="string">
+  Devuelve solo los leads cuya `last_activity_at` sea igual o anterior a esta marca de tiempo. El límite es inclusivo. Cadena de fecha y hora ISO 8601, por ejemplo `2024-01-31T23:59:59Z`. Filtra por última actividad, no por fecha de creación.
 </ParamField>
 
 <ParamField query="cursor" type="string">
   Cursor de paginación devuelto en `next_cursor` por la respuesta anterior. Se omite para empezar por la primera página. El valor es opaco: no se parsea ni se construye.
 </ParamField>
 
-<ParamField query="status" type="string">
-  Filtra por estado actual del lead. Valores aceptados: `new`, `contacted`, `qualified`, `appointment`, `proposal`, `incubating`, `won`, `lost`.
+<ParamField query="limit" type="integer" default="20">
+  Cantidad máxima de leads por página. Entero entre `1` y `100`.
 </ParamField>
 
-<ParamField query="channel" type="string">
-  Devuelve los leads que acumularon este canal. Valores aceptados: `whatsapp`, `mercadolibre`, `typeform`, `custom`, `manual`, `email`.
-</ParamField>
-
-<ParamField query="score_min" type="integer">
-  Devuelve solo los leads con un score mayor o igual a este valor. Rango: `0`–`100`.
-</ParamField>
-
-<ParamField query="score_max" type="integer">
-  Devuelve solo los leads con un score menor o igual a este valor. Rango: `0`–`100`.
-</ParamField>
-
-<ParamField query="interested_vehicle_ids" type="string">
-  Lista de IDs de vehículos del catálogo separados por coma. Devuelve los leads interesados en al menos uno de ellos.
-</ParamField>
-
-<ParamField query="search" type="string">
-  Texto libre sobre los datos de contacto: nombre, apellido, email y teléfono.
-</ParamField>
-
-<ParamField query="created_after" type="string">
-  Devuelve solo los leads creados en esta marca de tiempo o después. Cadena de fecha y hora ISO 8601, por ejemplo `2024-01-15T00:00:00Z`.
-</ParamField>
-
-<ParamField query="created_before" type="string">
-  Devuelve solo los leads creados en esta marca de tiempo o antes. Cadena de fecha y hora ISO 8601, por ejemplo `2024-01-31T23:59:59Z`.
-</ParamField>
+No hay filtros por score, por vehículo del catálogo ni por texto libre: los seis parámetros de arriba son los únicos que acepta el endpoint.
 
 ## Ejemplo de solicitud
 
 ```bash cURL
-curl 'https://platform-api.deltalead.ai/v1/leads?status=qualified&channel=whatsapp&score_min=70&limit=20' \
+curl 'https://platform-api.deltalead.ai/v1/leads?status=qualified&channel=whatsapp&last_activity_after=2024-03-01T00:00:00Z&limit=20' \
   -H "Authorization: Bearer dl_live_YOUR_KEY"
 ```
 
@@ -92,9 +78,14 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el arreglo `data` y los dos cam
       "notes": [],
       "ai_summary": "Consulta por una Hilux SRX 2024 con financiación a 36 cuotas. Pidió que la contacten por la tarde.",
       "ai_summary_status": "completed",
+      "metadata": {
+        "crm_id": "CRM-88213",
+        "utm_campaign": "hilux-marzo"
+      },
       "last_activity_at": "2024-03-11T09:05:33Z",
       "created_at": "2024-03-10T14:22:00Z",
-      "updated_at": "2024-03-11T09:05:33Z"
+      "updated_at": "2024-03-11T09:05:33Z",
+      "expire_at": null
     },
     {
       "id": "lead_def456",
@@ -116,9 +107,11 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el arreglo `data` y los dos cam
       "notes": [],
       "ai_summary": null,
       "ai_summary_status": "not_requested",
+      "metadata": {},
       "last_activity_at": "2024-03-10T17:01:55Z",
       "created_at": "2024-03-10T16:48:10Z",
-      "updated_at": "2024-03-10T17:01:55Z"
+      "updated_at": "2024-03-10T17:01:55Z",
+      "expire_at": null
     }
   ],
   "next_cursor": "cursor_eyJpZCI6ImxlYWRfZGVmNDU2In0",
@@ -129,7 +122,7 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el arreglo `data` y los dos cam
 ### Campos de la respuesta
 
 <ResponseField name="data" type="array">
-  Leads que coinciden con los filtros aplicados, del más reciente al más antiguo. Cada elemento tiene la misma forma que devuelve [Obtener lead](/api-reference/leads/get), con una diferencia: acá `interested_vehicles` es un arreglo de IDs del catálogo, sin los datos del vehículo.
+  Leads que coinciden con los filtros aplicados, del más reciente al más antiguo. Cada elemento tiene exactamente la misma forma que devuelve [Obtener lead](/api-reference/leads/get), campo por campo.
 </ResponseField>
 
 <ResponseField name="next_cursor" type="string | null">
@@ -143,5 +136,5 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el arreglo `data` y los dos cam
 La respuesta no incluye un total: contarlo exige una segunda consulta sobre el mismo filtro en cada página. Para recorrer todo el resultado, se pagina hasta que `has_more` sea `false`.
 
 <Tip>
-  Para una sincronización incremental, conviene combinar `created_after` con un cursor almacenado: una primera consulta con `created_after` en la marca de tiempo de la última sincronización y después `next_cursor` hasta agotar el resultado.
+  Para una sincronización incremental, conviene combinar `last_activity_after` con un cursor almacenado: una primera consulta con `last_activity_after` en la marca de tiempo de la última sincronización y después `next_cursor` hasta agotar el resultado. Al filtrar por última actividad y no por creación, la sincronización también levanta los leads antiguos que volvieron a moverse.
 </Tip>

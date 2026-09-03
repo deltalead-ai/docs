@@ -1,14 +1,14 @@
 ---
 title: "Paginación por cursor en los endpoints de listado de DeltaLead"
 sidebarTitle: "Paginación"
-description: "Los endpoints de listado de DeltaLead paginan por cursor: los parámetros cursor y limit permiten recorrer leads, conversaciones y agentes de IA página por página."
+description: "Los endpoints de listado de DeltaLead paginan por cursor: los parámetros cursor y limit permiten recorrer los leads página por página."
 ---
 
 <Note>
   La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
 </Note>
 
-Todos los endpoints de listado de DeltaLead —`GET /leads`, `GET /conversations` y `GET /agents`— devuelven resultados paginados mediante paginación por cursor. En lugar de números de página, la API devuelve un valor opaco `next_cursor` que codifica la posición dentro del conjunto de resultados. Ese valor se reenvía como parámetro de consulta `cursor` para obtener la página siguiente. Cuando `has_more` es `false`, ya se recuperaron todos los registros disponibles.
+El endpoint de listado de DeltaLead, `GET /leads`, devuelve resultados paginados mediante paginación por cursor. En lugar de números de página, la API devuelve un valor opaco `next_cursor` que codifica la posición dentro del conjunto de resultados. Ese valor se reenvía como parámetro de consulta `cursor` para obtener la página siguiente. Cuando `has_more` es `false`, ya se recuperaron todos los registros disponibles.
 
 ## Parámetros de paginación
 

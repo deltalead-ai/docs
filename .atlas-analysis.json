@@ -77,25 +77,7 @@
                 "group": "Leads",
                 "pages": [
                   "api-reference/leads/list",
-                  "api-reference/leads/get",
-                  "api-reference/leads/create",
-                  "api-reference/leads/update"
-                ]
-              },
-              {
-                "group": "Conversaciones",
-                "pages": [
-                  "api-reference/conversations/list",
-                  "api-reference/conversations/get",
-                  "api-reference/conversations/send-message"
-                ]
-              },
-              {
-                "group": "Agentes",
-                "pages": [
-                  "api-reference/agents/list",
-                  "api-reference/agents/get",
-                  "api-reference/agents/update"
+                  "api-reference/leads/get"
                 ]
               },
               {
@@ -180,25 +162,7 @@
                 "group": "Leads",
                 "pages": [
                   "en/api-reference/leads/list",
-                  "en/api-reference/leads/get",
-                  "en/api-reference/leads/create",
-                  "en/api-reference/leads/update"
-                ]
-              },
-              {
-                "group": "Conversations",
-                "pages": [
-                  "en/api-reference/conversations/list",
-                  "en/api-reference/conversations/get",
-                  "en/api-reference/conversations/send-message"
-                ]
-              },
-              {
-                "group": "Agents",
-                "pages": [
-                  "en/api-reference/agents/list",
-                  "en/api-reference/agents/get",
-                  "en/api-reference/agents/update"
+                  "en/api-reference/leads/get"
                 ]
               },
               {
@@ -231,15 +195,6 @@
   "publicApiSurface": [
     "GET /v1/leads — List leads with filters",
     "GET /v1/leads/{id} — Retrieve a lead",
-    "POST /v1/leads — Create a lead",
-    "PATCH /v1/leads/{id} — Update a lead",
-    "GET /v1/conversations — List conversations",
-    "GET /v1/conversations/{id} — Retrieve a conversation",
-    "POST /v1/conversations/{id}/messages — Send a message",
-    "GET /v1/agents — List AI agents",
-    "GET /v1/agents/{id} — Retrieve an agent",
-    "PATCH /v1/agents/{id} — Update agent configuration",
-    "POST /v1/webhooks — Register a webhook endpoint",
     "Webhook events: lead.created, lead.qualified, lead.updated, conversation.started, message.received, appointment.scheduled"
   ]
 }

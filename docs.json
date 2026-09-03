@@ -93,25 +93,7 @@
                 "group": "Leads",
                 "pages": [
                   "api-reference/leads/list",
-                  "api-reference/leads/get",
-                  "api-reference/leads/create",
-                  "api-reference/leads/update"
-                ]
-              },
-              {
-                "group": "Conversaciones",
-                "pages": [
-                  "api-reference/conversations/list",
-                  "api-reference/conversations/get",
-                  "api-reference/conversations/send-message"
-                ]
-              },
-              {
-                "group": "Agentes",
-                "pages": [
-                  "api-reference/agents/list",
-                  "api-reference/agents/get",
-                  "api-reference/agents/update"
+                  "api-reference/leads/get"
                 ]
               },
               {
@@ -196,25 +178,7 @@
                 "group": "Leads",
                 "pages": [
                   "en/api-reference/leads/list",
-                  "en/api-reference/leads/get",
-                  "en/api-reference/leads/create",
-                  "en/api-reference/leads/update"
-                ]
-              },
-              {
-                "group": "Conversations",
-                "pages": [
-                  "en/api-reference/conversations/list",
-                  "en/api-reference/conversations/get",
-                  "en/api-reference/conversations/send-message"
-                ]
-              },
-              {
-                "group": "Agents",
-                "pages": [
-                  "en/api-reference/agents/list",
-                  "en/api-reference/agents/get",
-                  "en/api-reference/agents/update"
+                  "en/api-reference/leads/get"
                 ]
               },
               {
