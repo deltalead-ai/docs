@@ -72,9 +72,9 @@ Send an optional `Idempotency-Key` request header to make retries safe:
 Idempotency-Key: 8f14e45f-ea67-4f6a-b3c1-9c1e2d0b7a52
 ```
 
-A delivery carrying a key already seen for your account returns `200 {"status": "duplicate"}` and creates nothing.
+A delivery carrying a key already seen for that account and mode returns `200 {"status": "duplicate"}` and creates nothing.
 
-Idempotency keys are scoped to the **account**, not to the key mode. A value burned with a sandbox key suppresses the same value arriving later with a live key, so do not carry test values over when switching modes.
+Idempotency keys are scoped to the **(account, mode)** pair. The two modes keep separate ledgers, so a value burned with a sandbox key does not suppress the same value arriving later with a live key — test values are safe to carry over when you go live.
 
 <Warning>
   Without an `Idempotency-Key`, the endpoint does not detect repeats. Every delivery is accepted and returns `{"status": "ok"}`, including one that is byte-identical to the delivery before it. Send the header on any request your client might retry — it is the only way to get a repeat reported back to you rather than silently accepted.
@@ -135,7 +135,7 @@ A failure returns an error envelope, where `detail` identifies the cause:
 | Status | `status` / `detail` | When |
 |---|---|---|
 | `200` | `ok` | Delivery accepted for processing |
-| `200` | `duplicate` | The `Idempotency-Key` has already been seen |
+| `200` | `duplicate` | The `Idempotency-Key` has already been seen for that account and mode |
 | `400` | `invalid_json` | The body is empty, is not valid JSON, or is not a JSON object |
 | `400` | `missing_required_fields` | Lead contract v1 is not satisfied, including a missing or non-object `lead` |
 | `400` | `payload_too_large` | The body is over 256 KB |
