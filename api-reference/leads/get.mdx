@@ -1,7 +1,7 @@
 ---
 title: "Obtener un lead por ID — endpoint de la API REST de DeltaLead"
 sidebarTitle: "Obtener lead"
-description: "Recuperar todos los datos de un lead por ID: contacto, estado, score, canales, vehículos de interés, notas, Resumen de IA y marcas de tiempo."
+description: "Recuperar todos los datos de un lead por ID: contacto, estado, score, canales, vehículos de interés, notas, Resumen de IA, metadata y marcas de tiempo."
 ---
 
 <Note>
@@ -31,7 +31,7 @@ curl https://platform-api.deltalead.ai/v1/leads/lead_abc123 \
 
 ## Respuesta
 
-Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
+Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo. Es la misma forma que devuelve cada elemento de [Listar leads](/api-reference/leads/list).
 
 ```json 200 OK
 {
@@ -48,12 +48,7 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
     "display_name": "María García"
   },
   "channels": ["whatsapp", "custom"],
-  "interested_vehicles": [
-    {
-      "id": "veh_9f2c41",
-      "name": "Toyota Hilux SRX 2024"
-    }
-  ],
+  "interested_vehicles": ["veh_9f2c41"],
   "tags": ["financiacion"],
   "assigned_to": "user_xyz789",
   "notes": [
@@ -68,9 +63,14 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
   ],
   "ai_summary": "Consulta por una Hilux SRX 2024 con financiación a 36 cuotas. Pidió que la contacten por la tarde.",
   "ai_summary_status": "completed",
+  "metadata": {
+    "crm_id": "CRM-88213",
+    "utm_campaign": "hilux-marzo"
+  },
   "last_activity_at": "2024-03-11T09:05:33Z",
   "created_at": "2024-03-10T14:22:00Z",
-  "updated_at": "2024-03-11T09:05:33Z"
+  "updated_at": "2024-03-11T09:05:33Z",
+  "expire_at": null
 }
 ```
 
@@ -88,16 +88,16 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
   Estado actual dentro del pipeline. Uno de `new`, `contacted`, `qualified`, `appointment`, `proposal`, `incubating`, `won`, `lost`.
 </ResponseField>
 
-<ResponseField name="source" type="string | null">
-  Etiqueta de origen informada por el sistema que generó el lead, por ejemplo `landing-page`. Es texto libre y no reemplaza a `channels`.
+<ResponseField name="source" type="string">
+  Etiqueta de origen informada por el sistema que generó el lead, por ejemplo `landing-page`. Es texto libre, siempre viene presente y no reemplaza a `channels`.
 </ResponseField>
 
 <ResponseField name="score" type="integer">
-  Score de calificación, entero de `0` a `100`.
+  Score de calificación asignado por DeltaLead. Un lead sin calificar tiene `0`.
 </ResponseField>
 
-<ResponseField name="contact" type="object">
-  Datos de contacto de la persona. El nombre, el email y el teléfono viven acá, nunca en el nivel raíz del lead.
+<ResponseField name="contact" type="object | null">
+  Datos de contacto de la persona. El nombre, el email y el teléfono viven acá, nunca en el nivel raíz del lead. Es `null` en un lead que todavía no tiene ningún dato de contacto asociado.
 </ResponseField>
 
 <ResponseField name="contact.first_name" type="string | null">
@@ -121,19 +121,11 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
 </ResponseField>
 
 <ResponseField name="channels" type="array of string">
-  Canales por los que el lead se comunicó. Es un arreglo porque un lead los acumula. Valores posibles: `whatsapp`, `mercadolibre`, `typeform`, `custom`, `manual`, `email`.
+  Canales por los que el lead se comunicó. Es un arreglo porque un lead los acumula. Valores posibles: `typeform`, `mercadolibre`, `whatsapp`, `custom`, `manual`, `odoo`.
 </ResponseField>
 
-<ResponseField name="interested_vehicles" type="array of object">
-  Vehículos del catálogo por los que el lead consultó. En el detalle vienen enriquecidos con los datos del vehículo; en las escrituras y en [Listar leads](/api-reference/leads/list) son solo IDs.
-</ResponseField>
-
-<ResponseField name="interested_vehicles[].id" type="string">
-  Identificador del vehículo en el catálogo.
-</ResponseField>
-
-<ResponseField name="interested_vehicles[].name" type="string">
-  Nombre del vehículo tal como figura en el catálogo.
+<ResponseField name="interested_vehicles" type="array of string">
+  IDs de los vehículos del catálogo por los que el lead consultó. Son solo identificadores: para los datos del vehículo hay que resolverlos contra el catálogo. La forma es idéntica en [Listar leads](/api-reference/leads/list).
 </ResponseField>
 
 <ResponseField name="tags" type="array of string">
@@ -156,20 +148,20 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
   Texto de la nota.
 </ResponseField>
 
-<ResponseField name="notes[].author_id" type="string | null">
-  ID de la persona que escribió la nota. `null` cuando la generó una integración.
+<ResponseField name="notes[].author_id" type="string">
+  ID de la persona o del proceso que escribió la nota.
 </ResponseField>
 
 <ResponseField name="notes[].source" type="string">
-  Origen de la nota: `manual` cuando la escribió una persona o llegó por la API, o el canal que la produjo.
+  Origen de la nota. Uno de `manual`, `typeform`, `legacy`, `ai_agent`, `custom_webhook`.
 </ResponseField>
 
 <ResponseField name="notes[].created_at" type="string">
   Marca de tiempo ISO 8601 de creación de la nota.
 </ResponseField>
 
-<ResponseField name="notes[].updated_at" type="string">
-  Marca de tiempo ISO 8601 de la última edición de la nota.
+<ResponseField name="notes[].updated_at" type="string | null">
+  Marca de tiempo ISO 8601 de la última edición de la nota. Es `null` si la nota nunca se editó.
 </ResponseField>
 
 <ResponseField name="ai_summary" type="string | null">
@@ -180,8 +172,12 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
   Estado del Resumen de IA. Uno de `not_requested`, `pending`, `completed`, `failed`.
 </ResponseField>
 
-<ResponseField name="last_activity_at" type="string">
-  Marca de tiempo ISO 8601 de la última interacción registrada para este lead.
+<ResponseField name="metadata" type="object">
+  El objeto `metadata` que la integración envió en [Custom Webhook](/api-reference/webhooks/custom-inbound), promovido al nivel raíz del lead y devuelto tal cual. Es el campo que permite confirmar que el payload propio viajó completo y volver a asociar el lead con el registro del sistema de origen. Es `{}` en un lead que no llegó con metadata.
+</ResponseField>
+
+<ResponseField name="last_activity_at" type="string | null">
+  Marca de tiempo ISO 8601 de la última interacción registrada para este lead. Es `null` en un lead que todavía no registró ninguna. Es el campo sobre el que filtran `last_activity_after` y `last_activity_before`.
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -190,6 +186,10 @@ Una solicitud exitosa devuelve HTTP `200 OK` con el objeto lead completo.
 
 <ResponseField name="updated_at" type="string">
   Marca de tiempo ISO 8601 del cambio más reciente en cualquier campo del lead.
+</ResponseField>
+
+<ResponseField name="expire_at" type="string | null">
+  Marca de tiempo ISO 8601 en la que el lead se borra solo. Es siempre `null` en un lead live: los leads live no expiran. En un lead creado con una clave `dl_sandbox_` lleva la fecha de purga automática, así que un lead de sandbox que desaparece está cumpliendo el contrato documentado, no perdiéndose.
 </ResponseField>
 
 ## Errores

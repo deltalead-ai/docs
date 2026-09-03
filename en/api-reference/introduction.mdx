@@ -1,14 +1,16 @@
 ---
-title: "DeltaLead REST API: Manage Leads and Agents Programmatically"
+title: "DeltaLead REST API: Read Leads Programmatically"
 sidebarTitle: "Introduction"
-description: "The DeltaLead REST API lets you create and manage leads, conversations, and AI agents. All endpoints accept JSON and return JSON over HTTPS."
+description: "The DeltaLead REST API lets you list leads and retrieve one in full. All endpoints return JSON over HTTPS."
 ---
 
 <Note>
   The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
 </Note>
 
-The DeltaLead REST API gives you programmatic access to leads, conversations, AI agents, and webhook configuration. Use it to build custom integrations, automate workflows, or sync with systems not covered by native integrations — such as a proprietary DMS, an internal data warehouse, or a bespoke CRM.
+The DeltaLead REST API gives you programmatic read access to your organization’s leads. Use it to build custom integrations, feed your own reporting, or sync with systems not covered by native integrations — such as a proprietary DMS, an internal data warehouse, or a bespoke CRM.
+
+To push a lead into DeltaLead from your own system, use the [Custom Webhook](/en/api-reference/webhooks/custom-inbound), not this API.
 
 ## Base URL
 
@@ -27,32 +29,17 @@ curl https://platform-api.deltalead.ai/v1/leads \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-## Request Format
+## Response Format
 
-All request and response bodies use JSON. When sending data in `POST` or `PATCH` requests, include the `Content-Type: application/json` header so the API can parse the request body correctly.
+All responses use JSON. The API is read-only at this stage — every available endpoint is a `GET`, so you never need to send a `Content-Type` header.
 
-```bash
-curl -X POST https://platform-api.deltalead.ai/v1/leads \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"contact": {"first_name": "Martín", "last_name": "Sosa", "phone": "+5491122334455"}}'
-```
-
-Person details always travel inside the nested `contact` object. At least one of `first_name` or `last_name` is required, and at least one of `email` or `phone`.
-
-`GET` and `DELETE` requests do not require a `Content-Type` header.
+Person details always travel inside the nested `contact` object, never at the root of the lead.
 
 ## Available Resources
 
 <CardGroup cols={2}>
   <Card title="Leads" icon="user" href="/en/api-reference/leads/list">
-    Create, retrieve, update, and delete lead records. Filter by status, channel, score, and more.
-  </Card>
-  <Card title="Conversations" icon="comments" href="/en/api-reference/conversations/list">
-    Access the full message history for any lead across all channels — WhatsApp, email, calls, and web forms.
-  </Card>
-  <Card title="AI Agents" icon="robot" href="/en/api-reference/agents/list">
-    List and configure your AI agents, including language, tone, business rules, and lead qualification rules.
+    List leads and retrieve one in full. Filter by status, channel, and last-activity range.
   </Card>
   <Card title="Webhooks" icon="webhook" href="/en/api-reference/webhooks/overview">
     Subscribe to real-time events such as new leads, status changes, and conversation milestones.

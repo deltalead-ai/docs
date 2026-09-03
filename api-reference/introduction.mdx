@@ -1,14 +1,16 @@
 ---
-title: "API REST de DeltaLead: gestionar leads y agentes por código"
+title: "API REST de DeltaLead: leer leads por código"
 sidebarTitle: "Introducción"
-description: "La API REST de DeltaLead permite crear y gestionar leads, conversaciones y agentes de IA mediante endpoints que aceptan y devuelven JSON sobre HTTPS."
+description: "La API REST de DeltaLead permite listar leads y recuperar el detalle de uno mediante endpoints que devuelven JSON sobre HTTPS."
 ---
 
 <Note>
   La API REST está en acceso anticipado y se habilita por cuenta a pedido. Las claves de API no se emiten todavía desde el panel. Para solicitar acceso, contactar al ejecutivo de cuenta.
 </Note>
 
-La API REST de DeltaLead da acceso programático a leads, conversaciones, agentes de IA y configuración de webhooks. Sirve para construir integraciones a medida, automatizar flujos de trabajo o sincronizar con sistemas que las integraciones nativas no cubren: un DMS propietario, un data warehouse interno o un CRM hecho a medida.
+La API REST de DeltaLead da acceso programático de lectura a los leads de la organización. Sirve para construir integraciones a medida, alimentar reportes propios o sincronizar con sistemas que las integraciones nativas no cubren: un DMS propietario, un data warehouse interno o un CRM hecho a medida.
+
+Para que un lead entre a DeltaLead desde un sistema propio se usa el [Custom Webhook](/api-reference/webhooks/custom-inbound), no esta API.
 
 ## URL base
 
@@ -27,32 +29,17 @@ curl https://platform-api.deltalead.ai/v1/leads \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-## Formato de las solicitudes
+## Formato de las respuestas
 
-Todos los cuerpos de solicitud y respuesta usan JSON. Al enviar datos en solicitudes `POST` o `PATCH`, hay que incluir la cabecera `Content-Type: application/json` para que la API pueda interpretar el cuerpo correctamente.
+Todas las respuestas usan JSON. La API es de solo lectura en esta etapa: los endpoints disponibles son `GET`, así que no hace falta enviar `Content-Type` en ninguna solicitud.
 
-```bash
-curl -X POST https://platform-api.deltalead.ai/v1/leads \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"contact": {"first_name": "Martín", "last_name": "Sosa", "phone": "+5491122334455"}}'
-```
-
-Los datos de la persona viajan siempre dentro del objeto anidado `contact`. Se requiere al menos uno de `first_name` o `last_name`, y al menos uno de `email` o `phone`.
-
-Las solicitudes `GET` y `DELETE` no requieren la cabecera `Content-Type`.
+Los datos de la persona viajan siempre dentro del objeto anidado `contact`, nunca en el nivel raíz del lead.
 
 ## Recursos disponibles
 
 <CardGroup cols={2}>
   <Card title="Leads" icon="user" href="/api-reference/leads/list">
-    Crear, consultar, actualizar y eliminar registros de leads. Filtrar por estado, canal, score y más.
-  </Card>
-  <Card title="Conversaciones" icon="comments" href="/api-reference/conversations/list">
-    Acceder al historial completo de mensajes de cualquier lead en todos los canales: WhatsApp, email, llamadas y formularios web.
-  </Card>
-  <Card title="Agentes de IA" icon="robot" href="/api-reference/agents/list">
-    Listar y configurar los agentes de IA, incluidos idioma, tono, reglas de negocio y reglas de calificación.
+    Listar leads y recuperar el detalle de uno. Filtrar por estado, canal y rango de última actividad.
   </Card>
   <Card title="Webhooks" icon="webhook" href="/api-reference/webhooks/overview">
     Suscribirse a eventos en tiempo real como nuevos leads, cambios de estado e hitos de una conversación.

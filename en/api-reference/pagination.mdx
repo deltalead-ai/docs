@@ -1,14 +1,14 @@
 ---
 title: "DeltaLead API Cursor-Based Pagination for List Endpoints"
 sidebarTitle: "Pagination"
-description: "DeltaLead list endpoints use cursor-based pagination. Supply the cursor and limit parameters to step through leads, conversations, and AI agent records."
+description: "DeltaLead list endpoints use cursor-based pagination. Supply the cursor and limit parameters to step through your lead records."
 ---
 
 <Note>
   The REST API is in early access and is enabled per account on request. API keys are not yet issued from the dashboard. To request access, contact your account executive.
 </Note>
 
-All DeltaLead list endpoints — `GET /leads`, `GET /conversations`, and `GET /agents` — return paginated results using cursor-based pagination. Rather than page numbers, the API returns an opaque `next_cursor` value that encodes your position in the result set. Pass it back as the `cursor` query parameter to fetch the next page. When `has_more` is `false`, you have retrieved all available records.
+The DeltaLead list endpoint, `GET /leads`, returns paginated results using cursor-based pagination. Rather than page numbers, the API returns an opaque `next_cursor` value that encodes your position in the result set. Pass it back as the `cursor` query parameter to fetch the next page. When `has_more` is `false`, you have retrieved all available records.
 
 ## Pagination Parameters
 
