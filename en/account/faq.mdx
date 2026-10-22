@@ -1,7 +1,7 @@
 ---
 title: "DeltaLead FAQ: Plans, Billing, Calls, and Integrations"
 sidebarTitle: "FAQ"
-description: "Answers to common questions about DeltaLead's AI agents, WhatsApp calling, MAC billing, CRM integrations, data ownership, and cancellation policy."
+description: "Answers to common questions about DeltaLead's AI agents, WhatsApp calling, active-lead billing, Meta costs, CRM integrations, data ownership, and cancellation policy."
 ---
 
 The questions below cover what dealerships ask most often before going live with DeltaLead — from how the AI handles calls and avoids making up prices, to how billing works, what happens to your data if you cancel, and which CRMs you can connect today.
@@ -34,11 +34,11 @@ The questions below cover what dealerships ask most often before going live with
 
 <AccordionGroup>
   <Accordion title="How do WhatsApp calls work?">
-    DeltaLead supports two types of calls. **WhatsApp VoIP calls** ring inside the same chat the lead already has open with your dealership — there is no unknown number, no separate app, and no cost to the lead. Inbound WhatsApp calls are available from the Growth plan onward; outbound WhatsApp calls are available from Advanced onward. **Traditional telephony** (inbound and outbound landline calls) is available on Enterprise. A call can also be initiated from within a chat — the AI asks the lead if they would like a quick call, and if they agree, the call is placed automatically.
+    DeltaLead supports two types of calls. **WhatsApp VoIP calls** ring inside the same chat the lead already has open with your dealership — there is no unknown number, no separate app, and no cost to the lead. WhatsApp calls handled by your sellers are available from the Starter plan onward; AI voice agents are available from Advanced onward. **Traditional telephony** (inbound and outbound landline calls) is available on Enterprise. With voice agents, a call can also be initiated from within a chat — the AI asks the lead if they would like a quick call, and if they agree, the call is placed automatically.
   </Accordion>
 
   <Accordion title="Is there a per-minute or per-call charge?">
-    No. DeltaLead does not charge per minute or per call. Calls count within your Monthly Active Client (MAC) volume — a lead you called six times counts the same as a lead you called once. Call volume is dimensioned together with your operation during onboarding.
+    DeltaLead does not charge per minute or per call. WhatsApp calls are billed by Meta directly to your Meta Business account, with no DeltaLead markup: customer-initiated calls are free under Meta's rules, and business-initiated calls may carry a Meta charge. Traditional telephony calls on the Enterprise plan are governed by your contract.
   </Accordion>
 
   <Accordion title="Do I need a new WhatsApp number?">
@@ -46,19 +46,19 @@ The questions below cover what dealerships ask most often before going live with
   </Accordion>
 
   <Accordion title="Are Meta and WhatsApp messaging costs included?">
-    Yes. DeltaLead covers Meta conversation costs within your plan price through its credit line. There is no per-message markup and no separate Meta invoice. Covered items include: customer-initiated conversations, business-initiated conversations, templates in all categories (including marketing), follow-up messages, and WhatsApp calls. Your invoice is a single predictable amount every month.
+    No. DeltaLead uses Meta's official WhatsApp Cloud API, and Meta bills messages, templates (marketing, utility, and authentication), and WhatsApp calls directly to your Meta Business account, at Meta's rates and with no DeltaLead markup. DeltaLead charges nothing per message, per template, or per minute. You need your own Meta Business account with a payment method set up in Meta. See current rates in [Meta's WhatsApp Business pricing documentation](https://developers.facebook.com/docs/whatsapp/pricing).
   </Accordion>
 </AccordionGroup>
 
 ## Billing & Plans
 
 <AccordionGroup>
-  <Accordion title="What counts as a Monthly Active Client (MAC)?">
-    A MAC is any lead with at least one activity during the calendar month — a message, a call, an automatic follow-up, or any action by a seller in the platform. A lead counts once per month regardless of how much activity occurs: a lead that received an opening message, seven follow-ups, two calls, and twenty back-and-forth messages is one MAC, the same as a lead you exchanged two messages with. Leads that had no activity in a given month cost nothing.
+  <Accordion title="What counts as an active lead?">
+    An active lead is any lead with at least one activity during the calendar month — a message, a call, an automatic follow-up, or any action by a seller in the platform. A lead counts once per month regardless of how much activity occurs: a lead that received an opening message, seven follow-ups, two calls, and twenty back-and-forth messages is one active lead, the same as a lead you exchanged two messages with. Leads with no activity in a given month don't count. Growth and Advanced are priced by bands of active leads per month (up to 10,000); Starter has unlimited leads, and above 10,000 Enterprise applies. Prices are on the [pricing page](https://www.deltalead.ai/es-ar/precios/delta-crm/).
   </Accordion>
 
-  <Accordion title="What if I exceed my plan's included volume?">
-    Nothing is blocked and your operation is never interrupted. You simply pay for the overage: **US$12 per 10 additional MACs on Growth** and **US$15 per 10 additional MACs on Advanced**. This means you can size your plan for your typical monthly volume and only pay for spikes — like a promotional event — when they actually happen. If overage becomes consistent across multiple months, it makes sense to move to the next tier.
+  <Accordion title="What if I exceed my lead band?">
+    Nothing is blocked and your operation is never interrupted. Additional active leads are billed as overage per block of 100 leads, at a rate that depends on your plan (see the [pricing page](https://www.deltalead.ai/es-ar/precios/delta-crm/)). This means you can size your band for your typical monthly volume and only pay for spikes — like a promotional event — when they actually happen. If overage becomes consistent across multiple months, it makes sense to move up a band.
   </Accordion>
 
   <Accordion title="Is there a free trial?">
@@ -82,7 +82,7 @@ The questions below cover what dealerships ask most often before going live with
   </Accordion>
 
   <Accordion title="What happens to my data if I cancel?">
-    Export and deletion timelines are defined in your contract. In all cases you receive a window to export everything — leads, conversations, transcripts, and reports — and DeltaLead assists with the migration. Approved message templates and conversation history are yours to take. If you were using a phone number owned by DeltaLead (rented), that number stays with DeltaLead; if the number is yours, you take it with you.
+    Export and deletion timelines are defined in your contract. In all cases you receive a window to export everything — leads, conversations, transcripts, and reports — and DeltaLead assists with the migration. Approved message templates and conversation history are yours to take. Your WhatsApp number is always yours, registered on your own WhatsApp Business Account, and you take it with you.
   </Accordion>
 </AccordionGroup>
 
@@ -90,7 +90,7 @@ The questions below cover what dealerships ask most often before going live with
 
 <AccordionGroup>
   <Accordion title="Does it integrate with my CRM?">
-    Yes. DeltaLead has native integrations with **Salesforce, HubSpot, Dynamics 365, Pipedrive, Odoo, Bitrix, PilotSolution, Tecnom, and Google Sheets**. If you use a proprietary or less common system, the technical team builds the integration during onboarding. You also have full access to the REST API and webhooks to build any custom connection yourself.
+    Yes. DeltaLead has native integrations with **Salesforce, HubSpot, Dynamics 365, Pipedrive, Odoo, Bitrix, PilotSolution, Tecnom, and Google Sheets**. If you use a proprietary or less common system, the technical team builds the integration during onboarding. From the Growth plan, you also have full access to the REST API and webhooks to build any custom connection yourself.
   </Accordion>
 
   <Accordion title="Do I need to change my DMS?">

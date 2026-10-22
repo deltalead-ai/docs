@@ -84,7 +84,7 @@ sees on screen: `Leads`, `Calificación`, `Canal`, `Fuente`, `Estado`, `Carro in
 **Keep in English** — established house usage, inflected as Spanish nouns (*un lead*, *los leads*,
 *leads calificados*): `lead`, `webhook`, `score`, `Inbox unificado`, `test drive`, `onboarding`,
 `API`, `CRM`, `DMS`, `pipeline`, `stock`, `sandbox`, `live`, `endpoint`, `payload`,
-`Custom Webhook`, and the plan names `Growth` / `Advanced` / `Enterprise`.
+`Custom Webhook`, and the plan names `Starter` / `Growth` / `Advanced` / `Enterprise`.
 
 **Never use** — zero occurrences in company copy: `prospecto`, `cliente potencial`, `puntaje`,
 `tablero de control`, `dashboard`, `bandeja de entrada`, and the bare English `AI` (always `IA`).
